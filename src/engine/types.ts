@@ -1,7 +1,7 @@
 /**
  * Общие типы данных движка игры «День из жизни банка».
  * Этот файл задаёт «чертёж» всех данных: как устроены роли, уровни сложности,
- * предметы инвентаря, комнаты-точки (world.json), интерактивные объекты и сохранение.
+ * предметы инвентаря, комнаты-точки (world.json), квесты, метрики и сохранение.
  */
 
 /** Профиль уровня сложности из content/difficulty.json */
@@ -25,6 +25,57 @@ export interface DifficultyConfig {
   profiles: DifficultyProfile[];
 }
 
+/**
+ * Значения флагов мира (worldState): булевы (да/нет), числа или строки.
+ */
+export type WorldFlagValue = boolean | number | string;
+export type WorldState = Record<string, WorldFlagValue>;
+
+/** Описание одной шкалы (метрики) профессии в файле роли */
+export interface RoleMetricDef {
+  id: string;
+  label: string;
+  min: number;
+  max: number;
+  initial: number;
+  tone: 'dangerUp' | 'goodUp';
+  applySuspicionMultiplier?: boolean;
+  failAt?: {
+    operator: '>=' | '<=';
+    value: number;
+    title: string;
+    message: string;
+  };
+}
+
+/** Состояние задачи в журнале игрока */
+export type QuestStatus = 'hidden' | 'active' | 'completed' | 'failed';
+
+/** Описание одной задачи (квеста) в файле роли */
+export interface QuestDef {
+  id: string;
+  order: number;
+  title: string;
+  description: string;
+  hint: string;
+  optional?: boolean;
+  initialStatus: 'hidden' | 'active';
+  activateWhen?: Record<string, WorldFlagValue>;
+  completeWhen?: Record<string, WorldFlagValue>;
+  failWhen?: Record<string, WorldFlagValue>;
+}
+
+/** Событие рабочего дня, срабатывающее по игровому времени и флагам */
+export interface DayEventDef {
+  id: string;
+  triggerMinute: number;
+  requireFlags?: Record<string, WorldFlagValue>;
+  setFlags?: Record<string, WorldFlagValue>;
+  metricChanges?: Record<string, number>;
+  notificationTitle: string;
+  notificationText: string;
+}
+
 /** Описание профессии (роли) из content/roles/*.json */
 export interface RoleConfig {
   id: string;
@@ -35,7 +86,13 @@ export interface RoleConfig {
   durationEstimate: string;
   primaryMetricLabel: string;
   startPoint: string;
-  initialMetrics: Record<string, number>;
+  startTimeMinutes: number;
+  introDialogId?: string;
+  introDoneFlag?: string;
+  startingItems?: string[];
+  metrics: RoleMetricDef[];
+  quests: QuestDef[];
+  dayEvents?: DayEventDef[];
 }
 
 /** Предмет инвентаря из content/items.json */
@@ -44,13 +101,6 @@ export interface ItemDefinition {
   name: string;
   description: string;
 }
-
-/**
- * Флаги общего мира (worldState).
- * Они сохраняются между прохождениями: действия пентестера меняют смену менеджера и наоборот.
- */
-export type WorldFlagValue = boolean | number | string;
-export type WorldState = Record<string, WorldFlagValue>;
 
 /** Условие доступности перехода или зоны по флагам мира / предметам */
 export interface TransitionCondition {
@@ -72,9 +122,12 @@ export interface HotspotAction {
   resultText: string;
   giveItemId?: string;
   requireItemId?: string;
+  requireFlags?: Record<string, WorldFlagValue>;
   lockedText?: string;
   setFlags?: Record<string, WorldFlagValue>;
+  metricChanges?: Record<string, number>;
   targetPointId?: string;
+  dialogId?: string;
 }
 
 /** Кликабельная зона (интерактивный объект), заданная в процентах от размера картинки комнаты */
@@ -148,6 +201,40 @@ export interface WorldConfig {
   points: WorldPoint[];
 }
 
+/** Один вариант ответа игрока в ветвящемся диалоге */
+export interface DialogChoice {
+  id: string;
+  text: string;
+  nextNodeId?: string;
+  requireFlags?: Record<string, WorldFlagValue>;
+  requireItemId?: string;
+  giveItemId?: string;
+  setFlags?: Record<string, WorldFlagValue>;
+  metricChanges?: Record<string, number>;
+  feedbackText?: string;
+}
+
+/** Один узел (реплика NPC и варианты ответа) из content/dialogs.json */
+export interface DialogNode {
+  id: string;
+  text: string;
+  choices: DialogChoice[];
+}
+
+/** Полное дерево одного диалога с персонажем */
+export interface DialogDefinition {
+  id: string;
+  npcId?: string;
+  speakerName: string;
+  speakerRole: string;
+  startNodeId: string;
+  nodes: Record<string, DialogNode>;
+}
+
+export interface DialogsConfig {
+  dialogs: DialogDefinition[];
+}
+
 /** Набор всех текстов интерфейса из content/ui.json */
 export interface UiTexts {
   appTitle: string;
@@ -191,15 +278,33 @@ export interface UiTexts {
     mapConnectedHint: string;
     mapFarHint: string;
     inventoryButton: string;
-    inventoryTitle: string;
-    inventoryCloseButton: string;
+    tasksButton: string;
+    journalTitle: string;
+    journalTasksTab: string;
+    journalInventoryTab: string;
+    journalCloseButton: string;
     inventoryEmpty: string;
     inventoryCountLabel: string;
+    tasksEmpty: string;
+    taskStatusLabels: Record<QuestStatus, string>;
+    taskOptionalLabel: string;
+    hudCurrentGoalLabel: string;
+    hudAllGoalsDoneLabel: string;
+    hudHintShowButton: string;
+    hudHintHideButton: string;
+    hudHintLabel: string;
+    hudTimeLabel: string;
+    hudCheckpointButton: string;
+    failRestartCheckpointButton: string;
+    failRestartShiftButton: string;
+    failBackToMenuButton: string;
     kindLabels: Record<HotspotKind, string>;
     actionLabels: Record<InteractableType, string>;
     actionMenuClose: string;
     inspectActionHint: string;
     lockedDefaultMessage: string;
+    dialogCloseButton: string;
+    dialogChoicesHint: string;
   };
   errors: {
     contentLoadTitle: string;
@@ -213,6 +318,17 @@ export interface RoleProgress {
   completedAt?: string;
 }
 
+/** Контрольная точка смены (для отката при провале или ошибке) */
+export interface ShiftCheckpoint {
+  currentPointId: string;
+  worldState: WorldState;
+  inventory: string[];
+  metrics: Record<string, number>;
+  questStatuses: Record<string, QuestStatus>;
+  elapsedGameMinutes: number;
+  triggeredEventIds: string[];
+}
+
 /** Полное сохранение игрока в localStorage */
 export interface GameSaveState {
   version: number;
@@ -222,6 +338,11 @@ export interface GameSaveState {
   currentPointId: string;
   worldState: WorldState;
   inventory: string[];
+  metrics: Record<string, number>;
+  questStatuses: Record<string, QuestStatus>;
+  elapsedGameMinutes: number;
+  triggeredEventIds: string[];
+  checkpoint?: ShiftCheckpoint;
   rolesProgress: Record<string, RoleProgress>;
   updatedAt: string;
 }
@@ -233,4 +354,5 @@ export interface LoadedGameContent {
   roles: RoleConfig[];
   items: ItemDefinition[];
   world: WorldConfig;
+  dialogs: DialogsConfig;
 }

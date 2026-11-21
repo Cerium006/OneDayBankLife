@@ -26,7 +26,7 @@ export default function App() {
     applyThemeCssVariables();
   }, []);
 
-  // Загружаем и проверяем все JSON-файлы контента (включая items.json и world.json) при старте
+  // Загружаем и проверяем все JSON-файлы контента (роли, квесты, метрики, предметы, мир)
   const contentResult = useMemo(() => {
     try {
       return { data: loadAndValidateContent(), error: null as string | null };
@@ -38,8 +38,9 @@ export default function App() {
 
   // Читаем последнее сохранение из localStorage (если игрок уже заходил раньше)
   const [savedState, setSavedState] = useState<GameSaveState | null>(() => {
+    const roles = contentResult.data?.roles ?? [];
     const fallbackPointId = contentResult.data?.world.points[0]?.id ?? 'entrance';
-    return loadSaveState(fallbackPointId);
+    return loadSaveState(roles, fallbackPointId);
   });
   const [screen, setScreen] = useState<ScreenMode>('menu');
 
@@ -71,7 +72,7 @@ export default function App() {
 
   const content = contentResult.data;
 
-  // Запуск новой смены: находим стартовую комнату роли, сохраняем профиль и открываем экран комнаты
+  // Запуск новой смены: создаём сохранение со стартовыми метриками и квестами выбранной роли
   function handleStartNewGame(params: {
     nickname: string;
     roleId: string;
@@ -82,14 +83,30 @@ export default function App() {
 
     const nextSave = createNewSaveState({
       nickname: params.nickname,
-      roleId: params.roleId,
+      role: chosenRole,
       difficultyId: params.difficultyId,
-      startPointId: chosenRole.startPoint,
       previousSave: savedState,
     });
     saveGameState(nextSave);
     setSavedState(nextSave);
     setScreen('room');
+  }
+
+  // Полный перезапуск текущей смены с нуля (кнопка на экране провала)
+  function handleRestartCurrentShift() {
+    if (!savedState) {
+      return;
+    }
+    const chosenRole =
+      content.roles.find((r) => r.id === savedState.activeRoleId) ?? content.roles[0];
+    const nextSave = createNewSaveState({
+      nickname: savedState.nickname,
+      role: chosenRole,
+      difficultyId: savedState.difficultyId,
+      previousSave: savedState,
+    });
+    saveGameState(nextSave);
+    setSavedState(nextSave);
   }
 
   // Продолжение сохранённой смены: открываем комнату, в которой игрок остановился
@@ -100,7 +117,7 @@ export default function App() {
     setScreen('room');
   }
 
-  // Универсальное обновление состояния игры (новая комната, подобранный предмет или изменённый флаг мира)
+  // Универсальное обновление состояния игры (новая комната, предмет, флаг мира, квест или метрика)
   function handleSaveUpdate(nextSave: GameSaveState) {
     saveGameState(nextSave);
     setSavedState(nextSave);
@@ -112,7 +129,7 @@ export default function App() {
     setSavedState(null);
   }
 
-  // Если открыта игровая комната — передаём в неё предметы, мир и обработчик сохранения
+  // Если открыта игровая комната — передаём в неё предметы, мир, роль и обработчики
   if (screen === 'room' && savedState) {
     const activeRole =
       content.roles.find((r) => r.id === savedState.activeRoleId) ?? content.roles[0];
@@ -126,11 +143,13 @@ export default function App() {
         ui={content.ui}
         world={content.world}
         items={content.items}
+        dialogs={content.dialogs.dialogs}
         currentPoint={currentPoint}
         saveState={savedState}
         role={activeRole}
         difficulty={activeDifficulty}
         onSaveUpdate={handleSaveUpdate}
+        onRestartShift={handleRestartCurrentShift}
         onBackToMenu={() => setScreen('menu')}
       />
     );

@@ -1,22 +1,29 @@
 {
   "npcs": [
     {
+      "id": "kira",
+      "name": "Кира",
+      "roleTitle": "Куратор пентеста",
+      "pointId": "entrance",
+      "description": "Руководитель проверки безопасности. На связи по телефону."
+    },
+    {
       "id": "guard_viktor",
-      "name": "Охранник Виктор",
+      "name": "Виктор Палыч",
       "roleTitle": "Служба охраны",
       "pointId": "entrance",
       "description": "Следит за турникетом на входе и проверяет пропуска посетителей."
     },
     {
       "id": "admin_marina",
-      "name": "Администратор Марина",
-      "roleTitle": "Стойка информации",
-      "pointId": "entrance",
-      "description": "Встречает клиентов в холле и выдаёт временные гостевые бейджи."
+      "name": "Марина Ковалёва",
+      "roleTitle": "Администратор зала",
+      "pointId": "hall",
+      "description": "Встречает посетителей в операционном зале и выдаёт гостевые бейджи."
     },
     {
       "id": "client_elderly",
-      "name": "Пожилая клиентка",
+      "name": "Нина Петровна",
       "roleTitle": "Посетительница",
       "pointId": "hall",
       "description": "Держит телефон у уха и выглядит взволнованной."
@@ -30,7 +37,7 @@
     },
     {
       "id": "client_suit",
-      "name": "Человек в костюме",
+      "name": "Посетитель в костюме",
       "roleTitle": "Подозрительный посетитель",
       "pointId": "hall",
       "description": "Осматривается по сторонам и наблюдает за дверью в служебный офис."
@@ -40,14 +47,35 @@
       "name": "Кассир Олег",
       "roleTitle": "Клиентский отдел",
       "pointId": "counter",
-      "description": "Работает за окном обслуживания и сверяет документы клиентов."
+      "description": "Работает за соседним окном обслуживания, поддерживает новичков."
+    },
+    {
+      "id": "client_danya",
+      "name": "Анна Сергеевна",
+      "roleTitle": "Первый клиент",
+      "pointId": "counter",
+      "description": "Торопится перевести деньги маме на лекарства."
+    },
+    {
+      "id": "client_orlov",
+      "name": "Господин Орлов",
+      "roleTitle": "Третий клиент",
+      "pointId": "counter",
+      "description": "Уверенный мужчина, представляющийся сотрудником надзорного органа."
+    },
+    {
+      "id": "client_lena",
+      "name": "Лена",
+      "roleTitle": "Четвёртый клиент",
+      "pointId": "counter",
+      "description": "Расстроенная клиентка, перешедшая по подозрительной ссылке из письма."
     },
     {
       "id": "director_anna",
-      "name": "Директор Анна Сергеевна",
-      "roleTitle": "Руководитель отделения",
+      "name": "Дарья Фокс",
+      "roleTitle": "Директор отделения",
       "pointId": "office",
-      "description": "Контролирует работу офиса и подписывает договор на проверку безопасности."
+      "description": "Контролирует работу отделения и проверяет соблюдение регламентов безопасности."
     },
     {
       "id": "sysadmin_igor",
@@ -68,13 +96,19 @@
         {
           "direction": "right",
           "targetPointId": "hall",
-          "label": "Операционный зал"
+          "label": "Операционный зал",
+          "condition": {
+            "requiredFlag": {
+              "entranceCleared": true
+            },
+            "lockedMessage": "Проход в зал закрыт: поговорите с охранником Виктором Палычем у турникета (подсказка — на плане отделения слева)."
+          }
         }
       ],
       "hotspots": [
         {
           "id": "hs_info_board",
-          "label": "План отделения",
+          "label": "План отделения и список сотрудников",
           "kind": "object",
           "interactType": "inspect",
           "x": 32.5,
@@ -84,7 +118,11 @@
           "actions": [
             {
               "type": "inspect",
-              "resultText": "Схема этажа: операционный зал прямо, за ним офис сотрудников, переговорная и серверная за дверью по бейджу."
+              "setFlags": {
+                "reconInfoFound": true,
+                "marinaNameKnown": true
+              },
+              "resultText": "Схема этажа: за дверью операционный зал, далее офис и серверная. На табличке указано: «Администратор зала — Марина Ковалёва»."
             }
           ]
         },
@@ -98,6 +136,12 @@
           "y": 38,
           "width": 17,
           "height": 26,
+          "condition": {
+            "requiredFlag": {
+              "entranceCleared": true
+            },
+            "lockedMessage": "Проход в зал закрыт: договоритесь с охранником Виктором Палычем у турникета."
+          },
           "actions": [
             {
               "type": "inspect",
@@ -122,13 +166,28 @@
           "actions": [
             {
               "type": "inspect",
-              "resultText": "Зона входа в клиентский зал. В офис сотрудников пускают только по пропуску."
+              "resultText": "Зона входа в клиентский зал. Охранник следит, чтобы посторонние не проходили без цели."
+            },
+            {
+              "type": "use",
+              "label": "Проскочить без отметки",
+              "requireFlags": {
+                "activeRole": "pentester"
+              },
+              "setFlags": {
+                "guardFooled": true,
+                "entranceCleared": true
+              },
+              "metricChanges": {
+                "suspicion": 35
+              },
+              "resultText": "Вы быстро прошли мимо контроля без регистрации! Проход открыт, но уровень подозрения вырос."
             }
           ]
         },
         {
           "id": "hs_guard_viktor",
-          "label": "Охранник Виктор",
+          "label": "Виктор Палыч (охрана)",
           "kind": "npc",
           "interactType": "talk",
           "npcId": "guard_viktor",
@@ -139,32 +198,33 @@
           "actions": [
             {
               "type": "inspect",
-              "resultText": "Пост службы охраны у колонны. Отсюда хорошо просматривается весь холл."
+              "resultText": "Пост службы охраны у колонны. Виктор Палыч внимательно встречает каждого входящего."
             },
             {
               "type": "talk",
-              "resultText": "Виктор: «Добрый день! Если нужно в служебные помещения — оформляйте пропуск у администратора или предъявите бейдж»."
+              "dialogId": "viktor_guard",
+              "resultText": "Разговор с Виктором Палычем."
             }
           ]
         },
         {
-          "id": "hs_admin_marina",
-          "label": "Администратор Марина",
+          "id": "hs_entrance_phone",
+          "label": "Телефон (связь с Кирой)",
           "kind": "npc",
           "interactType": "talk",
-          "npcId": "admin_marina",
-          "x": 60,
-          "y": 61,
-          "width": 34,
-          "height": 28,
+          "npcId": "kira",
+          "x": 66,
+          "y": 64,
+          "width": 24,
+          "height": 23,
+          "visibleWhen": {
+            "activeRole": "pentester"
+          },
           "actions": [
             {
-              "type": "inspect",
-              "resultText": "Стойка регистрации в холле. Здесь встречают гостей и записывают посетителей."
-            },
-            {
               "type": "talk",
-              "resultText": "Марина: «Здравствуйте! Проходите в зал, окна приёма работают. Сисадмин Игорь сейчас в офисе за операционным залом»."
+              "dialogId": "kira_intro",
+              "resultText": "Переписка с куратором Кирой."
             }
           ]
         }
@@ -233,7 +293,13 @@
             },
             {
               "type": "talk",
-              "resultText": "Клиентка: «Мне позвонили и сказали срочно перевести сбережения… Хорошо, что скоро подойдёт моя очередь к менеджеру!»"
+              "setFlags": {
+                "hallClientsChecked": true
+              },
+              "metricChanges": {
+                "trust": 10
+              },
+              "resultText": "Клиентка: «Мне позвонили и сказали срочно перевести сбережения… Хорошо, что скоро подойдёт моя очередь к менеджеру!» (+10% к доверию клиентов)."
             }
           ]
         },
@@ -255,6 +321,28 @@
             {
               "type": "talk",
               "resultText": "Парень: «Хочу перевыпустить карту. Очередь сегодня движется быстро»."
+            }
+          ]
+        },
+        {
+          "id": "hs_admin_marina",
+          "label": "Марина Ковалёва (администратор)",
+          "kind": "npc",
+          "interactType": "talk",
+          "npcId": "admin_marina",
+          "x": 57,
+          "y": 46,
+          "width": 10,
+          "height": 22,
+          "actions": [
+            {
+              "type": "inspect",
+              "resultText": "Администратор зала Марина Ковалёва вежливо отвечает посетителям, но явно торопится."
+            },
+            {
+              "type": "talk",
+              "dialogId": "marina_admin",
+              "resultText": "Разговор с Мариной Ковалёвой."
             }
           ]
         },
@@ -292,17 +380,21 @@
           "actions": [
             {
               "type": "inspect",
-              "resultText": "Терминал электронной очереди и самообслуживания у правой стены."
+              "resultText": "Терминал электронной очереди и служебный журнал заявок у правой стены."
             },
             {
               "type": "use",
-              "resultText": "Терминал выдал талон с номером А-104 и памяткой по безопасности."
+              "setFlags": {
+                "ticketNumberKnown": true,
+                "reconScheduleFound": true
+              },
+              "resultText": "На служебной вкладке терминала видно: «Открыта ИТ-заявка № 4471 (Игорь, ИТ-отдел)». Номер заявки запомнен!"
             }
           ]
         },
         {
           "id": "hs_client_suit",
-          "label": "Человек в костюме",
+          "label": "Посетитель в костюме",
           "kind": "npc",
           "interactType": "talk",
           "npcId": "client_suit",
@@ -317,7 +409,13 @@
             },
             {
               "type": "talk",
-              "resultText": "Незнакомец уклоняется от взгляда: «Я просто жду знакомого, не обращайте внимания»."
+              "setFlags": {
+                "hallClientsChecked": true
+              },
+              "metricChanges": {
+                "security": 5
+              },
+              "resultText": "Незнакомец уклоняется от взгляда: «Я просто жду знакомого, не обращайте внимания». Вы запомнили подозрительного посетителя (+5% к безопасности)."
             }
           ]
         }
@@ -327,7 +425,7 @@
       "id": "counter",
       "title": "Окно обслуживания",
       "subtitle": "Рабочее место клиентского менеджера",
-      "background": "/rooms/counter.svg",
+      "background": "/rooms/counter.jpg",
       "mapCoords": { "x": 38, "y": 20 },
       "exits": [
         {
@@ -340,10 +438,10 @@
         {
           "id": "layer_counter_sticky",
           "image": "/rooms/layer-sticky.svg",
-          "x": 51,
+          "x": 55.5,
           "y": 39,
-          "width": 7,
-          "height": 9,
+          "width": 5.5,
+          "height": 8,
           "visibleWhen": {
             "stickyPasswordLeft": true
           }
@@ -351,10 +449,10 @@
         {
           "id": "layer_counter_usb",
           "image": "/rooms/layer-usb.svg",
-          "x": 42,
-          "y": 64,
-          "width": 9,
-          "height": 9,
+          "x": 33,
+          "y": 63,
+          "width": 7,
+          "height": 7,
           "visibleWhen": {
             "usbPlanted": true
           }
@@ -367,18 +465,133 @@
           "kind": "npc",
           "interactType": "talk",
           "npcId": "cashier_oleg",
-          "x": 16,
-          "y": 30,
-          "width": 14,
+          "x": 2,
+          "y": 28,
+          "width": 15,
           "height": 48,
           "actions": [
             {
               "type": "inspect",
-              "resultText": "Коллега за соседним рабочим местом сверяет паспортные данные."
+              "resultText": "Коллега Олег за соседним рабочим местом — всегда готов подсказать новичку."
             },
             {
               "type": "talk",
-              "resultText": "Олег: «Если клиент спешит и говорит про звонок из службы безопасности — обязательно проверяй историю операций»."
+              "dialogId": "oleg_cashier",
+              "resultText": "Разговор с Олегом."
+            }
+          ]
+        },
+        {
+          "id": "hs_counter_client_1",
+          "label": "Клиент 1: Анна Сергеевна",
+          "kind": "npc",
+          "interactType": "talk",
+          "npcId": "client_danya",
+          "x": 19,
+          "y": 26,
+          "width": 17,
+          "height": 46,
+          "visibleWhen": {
+            "activeRole": "manager",
+            "clientDanyaServed": false
+          },
+          "actions": [
+            {
+              "type": "talk",
+              "dialogId": "danya_client",
+              "resultText": "Обслуживание первого клиента."
+            }
+          ]
+        },
+        {
+          "id": "hs_counter_client_2",
+          "label": "Клиент 2: Нина Петровна",
+          "kind": "npc",
+          "interactType": "talk",
+          "npcId": "client_elderly",
+          "x": 19,
+          "y": 26,
+          "width": 17,
+          "height": 46,
+          "visibleWhen": {
+            "activeRole": "manager",
+            "clientDanyaServed": true,
+            "clientNinaServed": false
+          },
+          "actions": [
+            {
+              "type": "talk",
+              "dialogId": "nina_client",
+              "resultText": "Обслуживание второго клиента."
+            }
+          ]
+        },
+        {
+          "id": "hs_counter_client_3",
+          "label": "Клиент 3: Господин Орлов",
+          "kind": "npc",
+          "interactType": "talk",
+          "npcId": "client_orlov",
+          "x": 19,
+          "y": 26,
+          "width": 17,
+          "height": 46,
+          "visibleWhen": {
+            "activeRole": "manager",
+            "clientNinaServed": true,
+            "clientOrlovServed": false
+          },
+          "actions": [
+            {
+              "type": "talk",
+              "dialogId": "orlov_client",
+              "resultText": "Обслуживание третьего клиента."
+            }
+          ]
+        },
+        {
+          "id": "hs_counter_client_4",
+          "label": "Клиент 4: Лена",
+          "kind": "npc",
+          "interactType": "talk",
+          "npcId": "client_lena",
+          "x": 19,
+          "y": 26,
+          "width": 17,
+          "height": 46,
+          "visibleWhen": {
+            "activeRole": "manager",
+            "clientOrlovServed": true,
+            "clientLenaServed": false
+          },
+          "actions": [
+            {
+              "type": "talk",
+              "dialogId": "lena_client",
+              "resultText": "Обслуживание четвёртого клиента."
+            }
+          ]
+        },
+        {
+          "id": "hs_counter_client_5",
+          "label": "Клиент 5: Дарья Фокс",
+          "kind": "npc",
+          "interactType": "talk",
+          "npcId": "director_anna",
+          "x": 19,
+          "y": 26,
+          "width": 17,
+          "height": 46,
+          "visibleWhen": {
+            "activeRole": "manager",
+            "clientLenaServed": true,
+            "clientAnnaServed": false
+          },
+          "actions": [
+            {
+              "type": "talk",
+              "dialogId": "anna_client",
+              "resultText": "Проверка от директора Дарьи Фокс."
             }
           ]
         },
@@ -387,14 +600,17 @@
           "label": "Монитор менеджера",
           "kind": "object",
           "interactType": "inspect",
-          "x": 35,
+          "x": 39,
           "y": 36,
-          "width": 22,
-          "height": 27,
+          "width": 23,
+          "height": 26,
           "actions": [
             {
               "type": "inspect",
-              "resultText": "На экране открыта внутренняя почта банка и карточка клиента."
+              "setFlags": {
+                "monitorChecked": true
+              },
+              "resultText": "На экране открыта внутренняя почта банка и карточка клиента. Рабочее место проверено."
             }
           ]
         },
@@ -403,10 +619,10 @@
           "label": "Стикер с паролем",
           "kind": "object",
           "interactType": "inspect",
-          "x": 51,
+          "x": 55.5,
           "y": 39,
-          "width": 7,
-          "height": 9,
+          "width": 5.5,
+          "height": 8,
           "visibleWhen": {
             "stickyPasswordLeft": true
           },
@@ -414,6 +630,19 @@
             {
               "type": "inspect",
               "resultText": "Кто-то оставил стикер с паролем прямо на мониторе! В смене менеджера это серьёзное нарушение."
+            },
+            {
+              "type": "pickup",
+              "label": "Убрать стикер",
+              "giveItemId": "sticky_note",
+              "setFlags": {
+                "stickyRemoved": true,
+                "stickyPasswordLeft": false
+              },
+              "metricChanges": {
+                "security": 15
+              },
+              "resultText": "Вы сняли стикер с паролем с монитора и убрали уязвимость (+15% к безопасности)."
             }
           ]
         },
@@ -422,10 +651,10 @@
           "label": "Забытая флешка",
           "kind": "object",
           "interactType": "inspect",
-          "x": 42,
-          "y": 64,
-          "width": 9,
-          "height": 9,
+          "x": 33,
+          "y": 63,
+          "width": 7,
+          "height": 7,
           "visibleWhen": {
             "usbPlanted": true
           },
@@ -433,6 +662,29 @@
             {
               "type": "inspect",
               "resultText": "Неизвестная флешка на краю стола. Подключать её к рабочему компьютеру строго запрещено!"
+            },
+            {
+              "type": "use",
+              "label": "Сообщить в ИБ",
+              "setFlags": {
+                "usbReported": true,
+                "usbPlanted": false
+              },
+              "metricChanges": {
+                "security": 15
+              },
+              "resultText": "Вы передали неизвестную флешку в службу безопасности, не вставляя её в компьютер (+15% к безопасности)."
+            },
+            {
+              "type": "use",
+              "label": "Подключить флешку к ПК",
+              "setFlags": {
+                "usbPlanted": false
+              },
+              "metricChanges": {
+                "security": -45
+              },
+              "resultText": "Опасная ошибка! На флешке сработал тестовый скрипт безопасности — уровень безопасности резко снизился (-45%)."
             }
           ]
         },
@@ -441,14 +693,29 @@
           "label": "Лоток с документами",
           "kind": "object",
           "interactType": "inspect",
-          "x": 60,
-          "y": 56,
-          "width": 16,
-          "height": 18,
+          "x": 64,
+          "y": 51,
+          "width": 17,
+          "height": 21,
           "actions": [
             {
               "type": "inspect",
               "resultText": "Стопка заявок на переводы и памятка по выявлению социальной инженерии."
+            },
+            {
+              "type": "use",
+              "label": "Оставить учебную флешку",
+              "requireFlags": {
+                "activeRole": "pentester"
+              },
+              "setFlags": {
+                "usbPlanted": true,
+                "usbReported": false
+              },
+              "metricChanges": {
+                "suspicion": 20
+              },
+              "resultText": "Вы оставили учебную флешку на краю стола для проверки бдительности менеджера в следующей смене."
             }
           ]
         },
@@ -457,10 +724,10 @@
           "label": "Сканер карт и паспортов",
           "kind": "object",
           "interactType": "use",
-          "x": 78,
-          "y": 52,
-          "width": 13,
-          "height": 20,
+          "x": 82.5,
+          "y": 54,
+          "width": 9.5,
+          "height": 19,
           "actions": [
             {
               "type": "inspect",
@@ -541,7 +808,11 @@
           "actions": [
             {
               "type": "inspect",
-              "resultText": "Возле рабочего компьютера лежит распечатка графика обедов: сисадмин Игорь уходит в 13:00."
+              "setFlags": {
+                "reconScheduleFound": true,
+                "ticketNumberKnown": true
+              },
+              "resultText": "Возле системного блока лежит распечатка: «ИТ-заявка № 4471 от Игоря (обед у ИТ в 13:00)»."
             }
           ]
         },
@@ -588,7 +859,23 @@
               "setFlags": {
                 "stickyPasswordFound": true
               },
-              "resultText": "На жёлтом стикере записан пароль от гостевой сети и терминала: «Bank2026!». Находка зафиксирована (stickyPasswordFound = true)."
+              "resultText": "На жёлтом стикере записан пароль от гостевой сети и терминала: «Bank2026!». Находка зафиксирована в журнале задач."
+            },
+            {
+              "type": "use",
+              "label": "Оставить копию у окна обслуживания",
+              "requireFlags": {
+                "activeRole": "pentester"
+              },
+              "setFlags": {
+                "stickyPasswordFound": true,
+                "stickyPasswordLeft": true,
+                "stickyRemoved": false
+              },
+              "metricChanges": {
+                "suspicion": 15
+              },
+              "resultText": "Вы прикрепили контрольный стикер с паролем в зоне обслуживания — это увидят в смене менеджера."
             }
           ]
         },
@@ -610,7 +897,7 @@
         },
         {
           "id": "hs_director_anna",
-          "label": "Директор Анна Сергеевна",
+          "label": "Директор Дарья Фокс",
           "kind": "npc",
           "interactType": "talk",
           "npcId": "director_anna",
@@ -625,7 +912,8 @@
             },
             {
               "type": "talk",
-              "resultText": "Анна Сергеевна: «Проверьте офис и переговорную. Если найдёте забытые пароли или пропуска без присмотра — обязательно отметьте в отчёте»."
+              "dialogId": "anna_director_brief",
+              "resultText": "Разговор с директором Дарьей Фокс."
             }
           ]
         },
@@ -668,7 +956,8 @@
             },
             {
               "type": "talk",
-              "resultText": "Игорь: «Привет! Дверь в серверную в коридоре закрыта на магнитный замок — без бейджа туда не попасть»."
+              "dialogId": "igor_sysadmin",
+              "resultText": "Разговор с сисадмином Игорем."
             }
           ]
         },
@@ -758,7 +1047,14 @@
             },
             {
               "type": "use",
-              "resultText": "На панели отображается имя сети BankGuest — проверка пароля Wi-Fi будет доступна на шаге квестов."
+              "setFlags": {
+                "wifiChecked": true,
+                "wifiWeak": true
+              },
+              "metricChanges": {
+                "suspicion": 10
+              },
+              "resultText": "На панели сети BankGuest обнаружено устаревшее шифрование. Проверка Wi-Fi отмечена в задачах!"
             }
           ]
         }
@@ -826,6 +1122,9 @@
               "type": "use",
               "requireItemId": "badge",
               "targetPointId": "server_room",
+              "setFlags": {
+                "serverEntered": true
+              },
               "lockedText": "Дверь в серверную закрыта: нужен «Бейдж сотрудника» в инвентаре (проверьте стол в офисе).",
               "resultText": "Вы приложили бейдж к считывателю — замок щёлкнул, дверь в серверную открыта!"
             }
@@ -849,6 +1148,9 @@
               "type": "use",
               "requireItemId": "badge",
               "targetPointId": "server_room",
+              "setFlags": {
+                "serverEntered": true
+              },
               "lockedText": "Картридер мигнул красным: в инвентаре нет бейджа сотрудника.",
               "resultText": "Картридер пикнул зелёным по вашему бейджу и открыл проход в серверную!"
             }
@@ -902,7 +1204,10 @@
             },
             {
               "type": "use",
-              "resultText": "Терминал готов к проверке доступа (мини-задание серверной подключится в следующем шаге)."
+              "setFlags": {
+                "reportDelivered": true
+              },
+              "resultText": "Вы подключились к терминалу серверной и зафиксировали результаты проверки безопасности в отчёте!"
             }
           ]
         }

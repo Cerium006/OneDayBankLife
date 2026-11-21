@@ -3,16 +3,20 @@
  * Работает только с данными из JSON и флагами мира — не содержит названий конкретных квестов.
  */
 
+import { applyMetricChanges, syncQuestsAndCheckpoint } from './questEngine';
 import type {
+  DifficultyProfile,
   GameSaveState,
   HotspotAction,
+  QuestDef,
+  RoleConfig,
   TransitionCondition,
   WorldConfig,
   WorldHotspot,
   WorldPoint,
   WorldState,
 } from './types';
-import { matchesFlags, setFlags } from './worldFlags';
+import { matchesFlags, setFlag, setFlags } from './worldFlags';
 
 export { matchesFlags } from './worldFlags';
 
@@ -39,11 +43,11 @@ export function isHotspotVisible(
 /**
  * Возвращает список действий (Осмотреть / Взять / Использовать / Поговорить),
  * которые сейчас доступны для данного объекта.
- * Действие «Взять» автоматически скрывается, если предмет уже есть в инвентаре (нельзя взять дважды).
  */
 export function getAvailableActions(
   hotspot: WorldHotspot,
   inventory: string[],
+  worldState: WorldState,
 ): HotspotAction[] {
   const configured = hotspot.actions ?? [];
 
@@ -52,11 +56,13 @@ export function getAvailableActions(
       if (action.type === 'pickup' && action.giveItemId && inventory.includes(action.giveItemId)) {
         return false;
       }
+      if (action.requireFlags && !matchesFlags(action.requireFlags, worldState)) {
+        return false;
+      }
       return true;
     });
   }
 
-  // Запасной вариант, если у зоны не прописан массив actions в JSON
   if (hotspot.description) {
     return [
       {
@@ -76,60 +82,97 @@ export interface ActionExecutionResult {
   message: string;
   isLocked: boolean;
   movedToPointId?: string;
+  newlyCompletedQuests: QuestDef[];
+  newlyActivatedQuests: QuestDef[];
 }
 
 /**
  * Выполняет выбранное действие (Осмотреть / Взять / Использовать / Поговорить):
- * - проверяет, нужен ли предмет из инвентаря;
- * - при подборе добавляет предмет ровно один раз;
- * - обновляет флаги мира через worldFlags;
- * - при необходимости переводит игрока в другую комнату.
+ * - проверяет предмет из инвентаря;
+ * - выдаёт предмет ровно один раз;
+ * - обновляет флаги мира (worldState) и метрики роли;
+ * - пересчитывает квесты и при выполнении задачи обновляет чекпоинт.
  */
 export function executeHotspotAction(params: {
+  hotspot?: WorldHotspot;
   action: HotspotAction;
   saveState: GameSaveState;
+  role: RoleConfig;
+  difficulty: DifficultyProfile;
   defaultLockedMessage: string;
 }): ActionExecutionResult {
-  const { action, saveState, defaultLockedMessage } = params;
+  const { hotspot, action, saveState, role, difficulty, defaultLockedMessage } = params;
 
-  // 1. Проверяем требование к предмету (например, для двери в серверную нужен бейдж)
+  if (action.targetPointId && hotspot?.condition) {
+    const access = checkTransitionAccess(
+      hotspot.condition,
+      saveState.worldState,
+      saveState.inventory,
+      defaultLockedMessage,
+    );
+    if (!access.allowed) {
+      return {
+        nextSave: saveState,
+        message: access.reason ?? defaultLockedMessage,
+        isLocked: true,
+        newlyCompletedQuests: [],
+        newlyActivatedQuests: [],
+      };
+    }
+  }
+
   if (action.requireItemId && !saveState.inventory.includes(action.requireItemId)) {
     return {
       nextSave: saveState,
       message: action.lockedText ?? defaultLockedMessage,
       isLocked: true,
+      newlyCompletedQuests: [],
+      newlyActivatedQuests: [],
     };
   }
 
   let nextInventory = saveState.inventory;
   let nextWorldState = saveState.worldState;
+  let nextMetrics = saveState.metrics;
   let nextPointId = saveState.currentPointId;
 
-  // 2. Если действие выдаёт предмет — добавляем только если его ещё нет в инвентаре
   if (action.giveItemId && !nextInventory.includes(action.giveItemId)) {
     nextInventory = [...nextInventory, action.giveItemId];
   }
 
-  // 3. Обновляем флаги мира, если они указаны в действии
   if (action.setFlags) {
     nextWorldState = setFlags(nextWorldState, action.setFlags);
   }
 
-  // 4. Если действие открывает переход в другую комнату — обновляем текущую точку
-  if (action.targetPointId) {
-    nextPointId = action.targetPointId;
+  if (action.metricChanges) {
+    nextMetrics = applyMetricChanges(role, nextMetrics, action.metricChanges, difficulty);
   }
 
+  if (action.targetPointId) {
+    nextPointId = action.targetPointId;
+    nextWorldState = setFlag(nextWorldState, `visited_${action.targetPointId}`, true);
+  }
+
+  const intermediateSave: GameSaveState = {
+    ...saveState,
+    currentPointId: nextPointId,
+    inventory: nextInventory,
+    worldState: nextWorldState,
+    metrics: nextMetrics,
+  };
+
+  const { nextSave, newlyCompleted, newlyActivated } = syncQuestsAndCheckpoint(
+    role,
+    intermediateSave,
+  );
+
   return {
-    nextSave: {
-      ...saveState,
-      currentPointId: nextPointId,
-      inventory: nextInventory,
-      worldState: nextWorldState,
-    },
+    nextSave,
     message: action.resultText,
     isLocked: false,
     movedToPointId: action.targetPointId,
+    newlyCompletedQuests: newlyCompleted,
+    newlyActivatedQuests: newlyActivated,
   };
 }
 

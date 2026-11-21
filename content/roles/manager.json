@@ -3,12 +3,131 @@
   "order": 2,
   "title": "Клиентский менеджер",
   "shortSummary": "Обслуживает посетителей и защищает их от мошенников",
-  "description": "Дневная смена за окном обслуживания. Нужно проверять документы, замечать телефонных мошенников и социальную инженерию, а также следы утренней проверки.",
+  "description": "Дневная смена за окном обслуживания с коллегой Олегом и директором Дарьей Фокс. Проверяй паспорта, останавливай телефонных мошенников, лже-проверяющих и фишинг, а также замечай следы утренней проверки.",
   "durationEstimate": "5–10 минут",
   "primaryMetricLabel": "Шкалы «Доверие клиентов» и «Безопасность»",
   "startPoint": "counter",
-  "initialMetrics": {
-    "trust": 70,
-    "security": 80
-  }
+  "startTimeMinutes": 780,
+  "introDialogId": "anna_director_brief",
+  "introDoneFlag": "managerBriefed",
+  "metrics": [
+    {
+      "id": "trust",
+      "label": "Доверие клиентов",
+      "min": 0,
+      "max": 100,
+      "initial": 70,
+      "tone": "goodUp",
+      "failAt": {
+        "operator": "<=",
+        "value": 0,
+        "title": "Потеря доверия клиентов!",
+        "message": "Шкала «Доверие клиентов» опустилась до 0%. Посетители отказались от обслуживания в вашем окне."
+      }
+    },
+    {
+      "id": "security",
+      "label": "Безопасность",
+      "min": 0,
+      "max": 100,
+      "initial": 80,
+      "tone": "goodUp",
+      "failAt": {
+        "operator": "<=",
+        "value": 0,
+        "title": "Критическое нарушение безопасности!",
+        "message": "Шкала «Безопасность» упала до 0%. Служба информационной безопасности экстренно заблокировала рабочее место."
+      }
+    }
+  ],
+  "quests": [
+    {
+      "id": "q_mgr_workplace",
+      "order": 1,
+      "title": "Проверить рабочее место перед сменой",
+      "description": "Осмотри монитор менеджера в окне обслуживания и убедись, что система готова к приёму клиентов.",
+      "hint": "Нажми на монитор менеджера в центре экрана и выбери «Осмотреть».",
+      "initialStatus": "active",
+      "completeWhen": {
+        "monitorChecked": true
+      }
+    },
+    {
+      "id": "q_mgr_clients",
+      "order": 2,
+      "title": "Принять всех 5 клиентов по правилам банка",
+      "description": "Обслужи очередь у окна слева от монитора: Анну Сергеевну, Нину Петровну, господина Орлова, Лену и проверку от Дарьи Фокс.",
+      "hint": "Нажимай на активного клиента за стеклянной перегородкой слева от монитора и выбирай «Поговорить». Всегда проверяй документы и подтверждай просьбы по второму каналу связи.",
+      "initialStatus": "active",
+      "completeWhen": {
+        "clientDanyaServed": true,
+        "clientNinaServed": true,
+        "clientOrlovServed": true,
+        "clientLenaServed": true,
+        "clientAnnaServed": true
+      }
+    },
+    {
+      "id": "q_mgr_sticky",
+      "order": 3,
+      "title": "Убрать оставленный стикер с паролем",
+      "description": "На мониторе заметен жёлтый стикер с паролем! Это грубое нарушение регламента — сними его.",
+      "hint": "Нажми на жёлтый стикер на правом краю монитора и выбери действие «Убрать стикер».",
+      "optional": true,
+      "initialStatus": "hidden",
+      "activateWhen": {
+        "stickyPasswordLeft": true
+      },
+      "completeWhen": {
+        "stickyRemoved": true
+      }
+    },
+    {
+      "id": "q_mgr_usb",
+      "order": 4,
+      "title": "Сообщить в ИБ о чужой флешке",
+      "description": "На краю стола лежит неизвестная флешка. Не подключай её к компьютеру — передай находку в отдел безопасности.",
+      "hint": "Нажми на флешку слева от клавиатуры и выбери «Сообщить в ИБ».",
+      "optional": true,
+      "initialStatus": "hidden",
+      "activateWhen": {
+        "usbPlanted": true
+      },
+      "completeWhen": {
+        "usbReported": true
+      }
+    },
+    {
+      "id": "q_mgr_hall",
+      "order": 5,
+      "title": "Оценить обстановку в операционном зале",
+      "description": "Спустись в операционный зал или разбери подозрительные ситуации с посетителями.",
+      "hint": "Обслужи Нину Петровну / Орлова или спустись в «Операционный зал» и поговори с посетителями.",
+      "initialStatus": "active",
+      "completeWhen": {
+        "hallClientsChecked": true
+      }
+    }
+  ],
+  "dayEvents": [
+    {
+      "id": "ev_mgr_shift_open",
+      "triggerMinute": 3,
+      "notificationTitle": "Начало дневного приёма",
+      "notificationText": "У окна обслуживания выстроилась очередь из клиентов — будьте внимательны к спешке и звонкам «следователей»."
+    },
+    {
+      "id": "ev_mgr_sticky_incident",
+      "triggerMinute": 8,
+      "requireFlags": {
+        "stickyPasswordLeft": true,
+        "stickyRemoved": false
+      },
+      "metricChanges": {
+        "security": -15
+      },
+      "notificationTitle": "Утечка пароля со стикера",
+      "notificationText": "Посетитель заметил открытый стикер с паролем на мониторе (-15% к безопасности)."
+    }
+  ]
 }

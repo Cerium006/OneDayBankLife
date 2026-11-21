@@ -1,0 +1,649 @@
+{
+  "dialogs": [
+    {
+      "id": "kira_intro",
+      "npcId": "kira",
+      "speakerName": "Кира",
+      "speakerRole": "Куратор пентеста",
+      "startNodeId": "kira_1",
+      "nodes": {
+        "kira_1": {
+          "id": "kira_1",
+          "text": "Привет, {ник}. Сегодня проверяем банк «Центр-Инвест». Разрешение письменное есть, но охрана о нём не знает. Дойди до серверной, ничего не ломая. Вечером жду отчёт.",
+          "choices": [
+            {
+              "id": "kira_1_accept",
+              "text": "Принято",
+              "setFlags": {
+                "kiraBriefed": true
+              },
+              "feedbackText": "Кира: удачи на проверке! Письменное разрешение лежит в твоём инвентаре (Tab)."
+            },
+            {
+              "id": "kira_1_caught",
+              "text": "А если меня поймают?",
+              "nextNodeId": "kira_2"
+            }
+          ]
+        },
+        "kira_2": {
+          "id": "kira_2",
+          "text": "Тогда честно скажи, кто ты, и покажи разрешение. Попадёшься на обмане — значит, нашёл слабое место. Это тоже результат.",
+          "choices": [
+            {
+              "id": "kira_2_ok",
+              "text": "Понял",
+              "setFlags": {
+                "kiraBriefed": true
+              },
+              "feedbackText": "Задача ясна: проверь холл, пройди охрану и доберись до серверной."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "viktor_guard",
+      "npcId": "guard_viktor",
+      "speakerName": "Виктор Палыч",
+      "speakerRole": "Служба охраны",
+      "startNodeId": "viktor_1",
+      "nodes": {
+        "viktor_1": {
+          "id": "viktor_1",
+          "text": "Доброе утро! Пропуск или записаны на приём?",
+          "choices": [
+            {
+              "id": "viktor_1_courier",
+              "text": "Я курьер, принёс документы",
+              "nextNodeId": "viktor_2a"
+            },
+            {
+              "id": "viktor_1_repair",
+              "text": "Я из сервисной службы, чиню кондиционеры",
+              "nextNodeId": "viktor_2b"
+            },
+            {
+              "id": "viktor_1_truth",
+              "text": "Я проверяю безопасность банка",
+              "nextNodeId": "viktor_2c"
+            }
+          ]
+        },
+        "viktor_2a": {
+          "id": "viktor_2a",
+          "text": "Курьер? Обычно курьеры звонят заранее. Кому именно?",
+          "choices": [
+            {
+              "id": "viktor_2a_marina",
+              "text": "Марине Ковалёвой, она ждёт",
+              "requireFlags": {
+                "marinaNameKnown": true
+              },
+              "nextNodeId": "viktor_3"
+            },
+            {
+              "id": "viktor_2a_unknown",
+              "text": "Не помню, кому-то в зале",
+              "metricChanges": {
+                "suspicion": 25
+              },
+              "nextNodeId": "viktor_1"
+            }
+          ]
+        },
+        "viktor_2a_alt": {
+          "id": "viktor_2a_alt",
+          "text": "Марина? Что-то не припомню. Ладно, спрошу у неё.",
+          "choices": [
+            {
+              "id": "viktor_2a_alt_thanks",
+              "text": "Спасибо",
+              "nextNodeId": "viktor_3"
+            }
+          ]
+        },
+        "viktor_2b": {
+          "id": "viktor_2b",
+          "text": "Кондиционеры? Заявок на сегодня не видел.",
+          "choices": [
+            {
+              "id": "viktor_2b_call",
+              "text": "Тогда позвоните в отдел, там подтвердят",
+              "metricChanges": {
+                "suspicion": 25
+              },
+              "nextNodeId": "viktor_2b_alt"
+            },
+            {
+              "id": "viktor_2b_later",
+              "text": "Ладно, зайду позже",
+              "feedbackText": "Разговор окончен, но проход в зал пока закрыт. Поищи имя сотрудника на плане отделения."
+            }
+          ]
+        },
+        "viktor_2b_alt": {
+          "id": "viktor_2b_alt",
+          "text": "Отдел — это хорошо. Только обед у них до двух.",
+          "choices": [
+            {
+              "id": "viktor_2b_alt_wait",
+              "text": "Подожду",
+              "metricChanges": {
+                "suspicion": 10
+              },
+              "nextNodeId": "viktor_1"
+            }
+          ]
+        },
+        "viktor_2c": {
+          "id": "viktor_2c",
+          "text": "Проверка? Мне никто не говорил. Подождите, позвоню Дарье Фокс.",
+          "choices": [
+            {
+              "id": "viktor_2c_permit",
+              "text": "Конечно, вот разрешение",
+              "requireItemId": "permit",
+              "metricChanges": {
+                "suspicion": 30
+              },
+              "setFlags": {
+                "permitShown": true
+              },
+              "feedbackText": "Охранник сверил разрешение, но подозрение выросло (+30%). Можно попробовать другую легенду чуть позже."
+            }
+          ]
+        },
+        "viktor_3": {
+          "id": "viktor_3",
+          "text": "А, Марина, да, про курьера говорила. Проходите, вторая дверь налево. И распишитесь на обороте.",
+          "choices": [
+            {
+              "id": "viktor_3_thanks",
+              "text": "Спасибо!",
+              "giveItemId": "hall_access",
+              "setFlags": {
+                "guardFooled": true,
+                "entranceCleared": true
+              },
+              "feedbackText": "Вы получили «Доступ в зал»! Проход в операционный зал открыт без лишнего шума."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "marina_admin",
+      "npcId": "admin_marina",
+      "speakerName": "Марина Ковалёва",
+      "speakerRole": "Администратор зала",
+      "startNodeId": "marina_1",
+      "nodes": {
+        "marina_1": {
+          "id": "marina_1",
+          "text": "Здравствуйте! Вам помочь? Я немного тороплюсь.",
+          "choices": [
+            {
+              "id": "marina_1_ticket",
+              "text": "Меня прислал Игорь из ИТ по заявке 4471",
+              "requireFlags": {
+                "ticketNumberKnown": true
+              },
+              "nextNodeId": "marina_2"
+            },
+            {
+              "id": "marina_1_browse",
+              "text": "Просто осматриваюсь",
+              "metricChanges": {
+                "suspicion": 10
+              },
+              "feedbackText": "Марина насторожилась (подозрение +10%). Попробуйте узнать номер заявки в терминале зала или в офисе."
+            }
+          ]
+        },
+        "marina_2": {
+          "id": "marina_2",
+          "text": "Ой, да, заявка есть. Вот гостевой бейдж, только верните до обеда!",
+          "choices": [
+            {
+              "id": "marina_2_sure",
+              "text": "Обязательно",
+              "giveItemId": "badge",
+              "setFlags": {
+                "badgePickedUp": true
+              },
+              "feedbackText": "Марина выдала вам «Бейдж сотрудника»! Теперь можно открыть серверную в коридоре."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "igor_sysadmin",
+      "npcId": "sysadmin_igor",
+      "speakerName": "Игорь",
+      "speakerRole": "Системный администратор",
+      "startNodeId": "igor_1",
+      "nodes": {
+        "igor_1": {
+          "id": "igor_1",
+          "text": "Слушай, там у кого-то на мониторе стикер с паролем. Я говорил, что защита идеальна, но не для стикеров.",
+          "choices": [
+            {
+              "id": "igor_1_remove",
+              "text": "Сейчас уберу",
+              "setFlags": {
+                "stickyNoticed": true,
+                "stickyPasswordFound": true
+              },
+              "metricChanges": {
+                "security": 10
+              },
+              "feedbackText": "Вы отметили стикер с паролем и помогли Игорю навести порядок."
+            },
+            {
+              "id": "igor_1_ignore",
+              "text": "Это не мой стол",
+              "setFlags": {
+                "stickyPasswordFound": true
+              },
+              "metricChanges": {
+                "security": -5
+              },
+              "feedbackText": "Игорь недовольно покачал головой — забытый стикер остался угрозой."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "anna_director_brief",
+      "npcId": "director_anna",
+      "speakerName": "Дарья Фокс",
+      "speakerRole": "Директор отделения",
+      "startNodeId": "anna_1",
+      "nodes": {
+        "anna_1": {
+          "id": "anna_1",
+          "text": "Доброе утро, {ник}! Сегодня много клиентов. Если что-то кажется странным, сначала остановись, потом решай.",
+          "choices": [
+            {
+              "id": "anna_1_ok",
+              "text": "Понятно",
+              "setFlags": {
+                "managerBriefed": true
+              },
+              "feedbackText": "Смена началась! Осмотрите монитор рабочего места и принимайте клиентов у окна слева."
+            },
+            {
+              "id": "anna_1_unsure",
+              "text": "А если не уверен?",
+              "nextNodeId": "anna_2"
+            }
+          ]
+        },
+        "anna_2": {
+          "id": "anna_2",
+          "text": "Тогда передай в службу безопасности. Это нормальная работа, а не слабость.",
+          "choices": [
+            {
+              "id": "anna_2_good",
+              "text": "Хорошо",
+              "setFlags": {
+                "managerBriefed": true
+              },
+              "feedbackText": "Инструктаж пройден! Проверьте рабочее место и встречайте первого клиента."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "oleg_cashier",
+      "npcId": "cashier_oleg",
+      "speakerName": "Олег",
+      "speakerRole": "Кассир-напарник",
+      "startNodeId": "oleg_1",
+      "nodes": {
+        "oleg_1": {
+          "id": "oleg_1",
+          "text": "Привет, {ник}! Если клиент торопит и просит обойти формальности — не ведись. Всегда проверяй паспорт, подтверждай сумму и звони по известным номерам.",
+          "choices": [
+            {
+              "id": "oleg_1_ok",
+              "text": "Принято, буду внимателен!",
+              "feedbackText": "Олег подмигнул: «Удачи за окном!»"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "danya_client",
+      "npcId": "client_danya",
+      "speakerName": "Анна Сергеевна",
+      "speakerRole": "Первый клиент",
+      "startNodeId": "danya_1",
+      "nodes": {
+        "danya_1": {
+          "id": "danya_1",
+          "text": "Привет! Мне надо маме денег перевести, она ждёт. Быстрее можно?",
+          "choices": [
+            {
+              "id": "danya_1_check",
+              "text": "Проверю паспорт и подтвердим сумму",
+              "nextNodeId": "danya_2"
+            },
+            {
+              "id": "danya_1_skip",
+              "text": "Сейчас всё сделаем без формальностей",
+              "nextNodeId": "danya_3"
+            }
+          ]
+        },
+        "danya_2": {
+          "id": "danya_2",
+          "text": "А, паспорт. Держите. Сумма — пять тысяч, ей на лекарства.",
+          "choices": [
+            {
+              "id": "danya_2_done",
+              "text": "Готово, перевод ушёл",
+              "metricChanges": {
+                "trust": 5
+              },
+              "setFlags": {
+                "clientDanyaServed": true
+              },
+              "feedbackText": "Анна Сергеевна поблагодарила за аккуратность (+5% к доверию). Подошёл следующий клиент."
+            }
+          ]
+        },
+        "danya_3": {
+          "id": "danya_3",
+          "text": "Круто! Только... а зачем паспорт? Я же просто перевожу.",
+          "choices": [
+            {
+              "id": "danya_3_rules",
+              "text": "По правилам банка проверяем каждого",
+              "nextNodeId": "danya_2"
+            },
+            {
+              "id": "danya_3_without",
+              "text": "Ладно, в этот раз без",
+              "metricChanges": {
+                "trust": -10
+              },
+              "setFlags": {
+                "clientDanyaServed": true,
+                "clientDanyaMistake": true
+              },
+              "feedbackText": "Олег тихо шепнул: «Без паспорта переводить нельзя даже близким — это риск и минус к доверию (-10%)»."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "nina_client",
+      "npcId": "client_elderly",
+      "speakerName": "Нина Петровна",
+      "speakerRole": "Второй клиент",
+      "startNodeId": "nina_1",
+      "nodes": {
+        "nina_1": {
+          "id": "nina_1",
+          "text": "Милочка, мне нужно снять триста тысяч, срочно! Внук в аварии, ему нужно на лечение. Мне звонил следователь.",
+          "choices": [
+            {
+              "id": "nina_1_give",
+              "text": "Выдаю деньги",
+              "metricChanges": {
+                "security": -40
+              },
+              "setFlags": {
+                "clientNinaServed": true,
+                "clientNinaMistake": true
+              },
+              "feedbackText": "Ошибка! Деньги ушли телефонным мошенникам (-40% к безопасности)."
+            },
+            {
+              "id": "nina_1_call",
+              "text": "Давайте сначала позвоним внуку, вместе",
+              "nextNodeId": "nina_2"
+            },
+            {
+              "id": "nina_1_sec",
+              "text": "Это может быть мошенничество, я передам в безопасность",
+              "setFlags": {
+                "ninaSecurityBranch": true
+              },
+              "nextNodeId": "nina_1_alt"
+            }
+          ]
+        },
+        "nina_1_alt": {
+          "id": "nina_1_alt",
+          "text": "В безопасность? А это не страшно?",
+          "choices": [
+            {
+              "id": "nina_1_alt_ok",
+              "text": "Нет, это обычная проверка",
+              "metricChanges": {
+                "trust": 5
+              },
+              "nextNodeId": "nina_2"
+            }
+          ]
+        },
+        "nina_2": {
+          "id": "nina_2",
+          "text": "Но он же просил молчать... Хорошо, я позвоню. Ой, трубку не берёт... Может, правда это обман?",
+          "choices": [
+            {
+              "id": "nina_2_contacts",
+              "text": "Давайте позвоним по его номеру из контактов",
+              "metricChanges": {
+                "trust": 10
+              },
+              "nextNodeId": "nina_3"
+            }
+          ]
+        },
+        "nina_3": {
+          "id": "nina_3",
+          "text": "Он дома, всё хорошо! Какой кошмар. Спасибо вам, дорогая.",
+          "choices": [
+            {
+              "id": "nina_3_done",
+              "text": "Мы передадим сведения в безопасность",
+              "metricChanges": {
+                "security": 20
+              },
+              "setFlags": {
+                "fraudStopped": true,
+                "clientNinaServed": true,
+                "hallClientsChecked": true
+              },
+              "feedbackText": "Мошенничество остановлено, сбережения Нины Петровны спасены (+20% к безопасности)!"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "orlov_client",
+      "npcId": "client_orlov",
+      "speakerName": "Господин Орлов",
+      "speakerRole": "Третий клиент",
+      "startNodeId": "orlov_1",
+      "nodes": {
+        "orlov_1": {
+          "id": "orlov_1",
+          "text": "Я из надзорного органа, мне нужен доступ за стойку. Время дорого.",
+          "choices": [
+            {
+              "id": "orlov_1_pass",
+              "text": "Проходите",
+              "metricChanges": {
+                "security": -30
+              },
+              "setFlags": {
+                "clientOrlovServed": true,
+                "clientOrlovMistake": true
+              },
+              "feedbackText": "Опасная ошибка! Нельзя пускать посторонних за стойку без документов и звонка руководству (-30% к безопасности)."
+            },
+            {
+              "id": "orlov_1_check",
+              "text": "Покажите удостоверение, я позвоню директору",
+              "nextNodeId": "orlov_2"
+            }
+          ]
+        },
+        "orlov_2": {
+          "id": "orlov_2",
+          "text": "Хм. Удостоверение дома забыл. Не будем тратить время.",
+          "choices": [
+            {
+              "id": "orlov_2_guard",
+              "text": "Охрана проводит вас к выходу",
+              "metricChanges": {
+                "security": 15
+              },
+              "setFlags": {
+                "fraudStopped": true,
+                "clientOrlovServed": true,
+                "hallClientsChecked": true
+              },
+              "feedbackText": "Вы раскрыли самозванца и не пустили его в служебную зону (+15% к безопасности)!"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "lena_client",
+      "npcId": "client_lena",
+      "speakerName": "Лена",
+      "speakerRole": "Четвёртый клиент",
+      "startNodeId": "lena_1",
+      "nodes": {
+        "lena_1": {
+          "id": "lena_1",
+          "text": "Мне пришло письмо, что карта заблокирована. Я перешла по ссылке и ввела данные... Теперь боюсь.",
+          "choices": [
+            {
+              "id": "lena_1_block",
+              "text": "Заблокируем карту и разберёмся",
+              "nextNodeId": "lena_2"
+            },
+            {
+              "id": "lena_1_wait",
+              "text": "Ничего страшного, подождите",
+              "metricChanges": {
+                "trust": -15,
+                "security": -20
+              },
+              "setFlags": {
+                "clientLenaServed": true,
+                "clientLenaMistake": true
+              },
+              "feedbackText": "После ввода данных на фишинговом сайте карту нужно блокировать немедленно (-15% доверия, -20% безопасности)."
+            }
+          ]
+        },
+        "lena_2": {
+          "id": "lena_2",
+          "text": "Спасибо! А как понять, что письмо было от мошенников?",
+          "choices": [
+            {
+              "id": "lena_2_explain",
+              "text": "Настоящий банк не просит данные по ссылке. Проверяйте адрес отправителя",
+              "metricChanges": {
+                "trust": 10
+              },
+              "nextNodeId": "lena_3"
+            }
+          ]
+        },
+        "lena_3": {
+          "id": "lena_3",
+          "text": "Теперь буду внимательнее. Спасибо, что объяснили.",
+          "choices": [
+            {
+              "id": "lena_3_done",
+              "text": "Обращайтесь",
+              "metricChanges": {
+                "security": 10
+              },
+              "setFlags": {
+                "clientLenaServed": true
+              },
+              "feedbackText": "Карта защищена, а Лена теперь знает, как распознавать фишинг (+10% к безопасности)!"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "anna_client",
+      "npcId": "director_anna",
+      "speakerName": "Дарья Фокс",
+      "speakerRole": "Пятый клиент (проверка)",
+      "startNodeId": "anna_client_1",
+      "nodes": {
+        "anna_client_1": {
+          "id": "anna_client_1",
+          "text": "Срочно переведите деньги по этому письму от генерального. Процедуру можно обойти, время поджимает.",
+          "choices": [
+            {
+              "id": "anna_client_1_confirm",
+              "text": "Позвоню генеральному и подтвержу",
+              "nextNodeId": "anna_client_2"
+            },
+            {
+              "id": "anna_client_1_bypass",
+              "text": "Сделаю без процедуры",
+              "metricChanges": {
+                "security": -30
+              },
+              "setFlags": {
+                "clientAnnaServed": true,
+                "clientAnnaMistake": true
+              },
+              "feedbackText": "Проверка не пройдена: даже по срочной просьбе руководителя нельзя обходить процедуру (-30% к безопасности)."
+            }
+          ]
+        },
+        "anna_client_2": {
+          "id": "anna_client_2",
+          "text": "Хорошо, звоните. Если подтвердится — действуем по правилам.",
+          "choices": [
+            {
+              "id": "anna_client_2_ok",
+              "text": "Генеральный подтвердил, переводим",
+              "nextNodeId": "anna_client_3"
+            }
+          ]
+        },
+        "anna_client_3": {
+          "id": "anna_client_3",
+          "text": "Отлично. Спасибо, что остановились и проверили. Так и надо работать.",
+          "choices": [
+            {
+              "id": "anna_client_3_thanks",
+              "text": "Спасибо",
+              "metricChanges": {
+                "security": 15
+              },
+              "setFlags": {
+                "clientAnnaServed": true
+              },
+              "feedbackText": "Блестяще! Вы прошли проверку директора по второму каналу связи (+15% к безопасности)."
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

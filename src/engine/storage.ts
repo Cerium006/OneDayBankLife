@@ -3,16 +3,45 @@
  * Все данные хранятся только на устройстве игрока и никуда не отправляются.
  */
 
-import type { GameSaveState, WorldState } from './types';
+import {
+  createCheckpointSnapshot,
+  createInitialMetrics,
+  createInitialQuestStatuses,
+  evaluateQuests,
+} from './questEngine';
+import type { GameSaveState, RoleConfig, WorldState } from './types';
 
 // Уникальный ключ, под которым игра хранит данные в localStorage браузера
 const STORAGE_KEY = 'bank_day_sim_save_v1';
 
-/** Начальные значения флагов общего мира по умолчанию */
+/** Начальные значения флагов общего мира и текущей смены по умолчанию */
 export function createDefaultWorldState(): WorldState {
   return {
+    // Флаги текущей смены
+    entranceCleared: false,
+    kiraBriefed: false,
+    managerBriefed: false,
+    marinaNameKnown: false,
+    ticketNumberKnown: false,
+    permitShown: false,
+    stickyNoticed: false,
+    fraudStopped: false,
+    clientDanyaServed: false,
+    clientNinaServed: false,
+    clientOrlovServed: false,
+    clientLenaServed: false,
+    clientAnnaServed: false,
     stickyPasswordFound: false,
     badgePickedUp: false,
+    reconInfoFound: false,
+    reconScheduleFound: false,
+    wifiChecked: false,
+    serverEntered: false,
+    monitorChecked: false,
+    stickyRemoved: false,
+    usbReported: false,
+    hallClientsChecked: false,
+    // Межролевые флаги общего мира (передаются между ролями)
     stickyPasswordLeft: false,
     usbPlanted: false,
     guardFooled: false,
@@ -23,17 +52,16 @@ export function createDefaultWorldState(): WorldState {
 
 /**
  * Создаёт чистое сохранение при запуске новой смены.
- * Межролевые флаги общего мира (например, оставленный стикер или отчёт) сохраняются,
- * а флаги подобранных в текущей смене предметов сбрасываются вместе с пустым инвентарём.
+ * Межролевые флаги общего мира сохраняются,
+ * а метрики, квесты, таймер и инвентарь запускаются с нуля для выбранной роли.
  */
 export function createNewSaveState(params: {
   nickname: string;
-  roleId: string;
+  role: RoleConfig;
   difficultyId: string;
-  startPointId: string;
   previousSave: GameSaveState | null;
 }): GameSaveState {
-  const { nickname, roleId, difficultyId, startPointId, previousSave } = params;
+  const { nickname, role, difficultyId, previousSave } = params;
 
   const baseWorld = createDefaultWorldState();
   const nextWorldState: WorldState = previousSave?.worldState
@@ -44,27 +72,46 @@ export function createNewSaveState(params: {
         guardFooled: Boolean(previousSave.worldState.guardFooled),
         wifiWeak: Boolean(previousSave.worldState.wifiWeak),
         reportDelivered: Boolean(previousSave.worldState.reportDelivered),
+        activeRole: role.id,
+        entranceCleared: role.id === 'manager',
       }
-    : baseWorld;
+    : {
+        ...baseWorld,
+        activeRole: role.id,
+        entranceCleared: role.id === 'manager',
+      };
 
-  return {
-    version: 3,
+  const initialMetrics = createInitialMetrics(role);
+  const initialQuests = createInitialQuestStatuses(role);
+  const evaluated = evaluateQuests(role, nextWorldState, initialQuests);
+
+  const initialSave: GameSaveState = {
+    version: 4,
     nickname: nickname.trim(),
-    activeRoleId: roleId,
+    activeRoleId: role.id,
     difficultyId,
-    currentPointId: startPointId,
+    currentPointId: role.startPoint,
     worldState: nextWorldState,
-    inventory: [],
+    inventory: [...(role.startingItems ?? [])],
+    metrics: initialMetrics,
+    questStatuses: evaluated.nextStatuses,
+    elapsedGameMinutes: 0,
+    triggeredEventIds: [],
     rolesProgress: previousSave?.rolesProgress ? { ...previousSave.rolesProgress } : {},
     updatedAt: new Date().toISOString(),
+  };
+
+  return {
+    ...initialSave,
+    checkpoint: createCheckpointSnapshot(initialSave),
   };
 }
 
 /**
  * Читает сохранённый прогресс из localStorage.
- * Недостающие флаги аккуратно дополняются значениями по умолчанию.
+ * Недостающие поля от старых версий аккуратно дополняются по описанию роли.
  */
-export function loadSaveState(fallbackPointId: string): GameSaveState | null {
+export function loadSaveState(roles: RoleConfig[], fallbackPointId: string): GameSaveState | null {
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     if (!raw) {
@@ -85,8 +132,29 @@ export function loadSaveState(fallbackPointId: string): GameSaveState | null {
       return null;
     }
 
+    const matchedRole = roles.find((r) => r.id === parsed.activeRoleId) ?? roles[0];
+    const mergedWorld: WorldState =
+      parsed.worldState && typeof parsed.worldState === 'object'
+        ? { ...createDefaultWorldState(), ...parsed.worldState, activeRole: matchedRole?.id ?? parsed.activeRoleId }
+        : { ...createDefaultWorldState(), activeRole: matchedRole?.id ?? parsed.activeRoleId };
+
+    const defaultMetrics = matchedRole ? createInitialMetrics(matchedRole) : {};
+    const mergedMetrics =
+      parsed.metrics && typeof parsed.metrics === 'object'
+        ? { ...defaultMetrics, ...parsed.metrics }
+        : defaultMetrics;
+
+    const defaultQuests = matchedRole ? createInitialQuestStatuses(matchedRole) : {};
+    const mergedQuests =
+      parsed.questStatuses && typeof parsed.questStatuses === 'object'
+        ? { ...defaultQuests, ...parsed.questStatuses }
+        : defaultQuests;
+    const evaluated = matchedRole
+      ? evaluateQuests(matchedRole, mergedWorld, mergedQuests)
+      : { nextStatuses: mergedQuests };
+
     return {
-      version: 3,
+      version: 4,
       nickname: parsed.nickname,
       activeRoleId: parsed.activeRoleId,
       difficultyId: parsed.difficultyId,
@@ -94,11 +162,14 @@ export function loadSaveState(fallbackPointId: string): GameSaveState | null {
         typeof parsed.currentPointId === 'string' && parsed.currentPointId.trim()
           ? parsed.currentPointId
           : fallbackPointId,
-      worldState:
-        parsed.worldState && typeof parsed.worldState === 'object'
-          ? { ...createDefaultWorldState(), ...parsed.worldState }
-          : createDefaultWorldState(),
+      worldState: mergedWorld,
       inventory: Array.isArray(parsed.inventory) ? parsed.inventory : [],
+      metrics: mergedMetrics,
+      questStatuses: evaluated.nextStatuses,
+      elapsedGameMinutes:
+        typeof parsed.elapsedGameMinutes === 'number' ? parsed.elapsedGameMinutes : 0,
+      triggeredEventIds: Array.isArray(parsed.triggeredEventIds) ? parsed.triggeredEventIds : [],
+      checkpoint: parsed.checkpoint,
       rolesProgress:
         parsed.rolesProgress && typeof parsed.rolesProgress === 'object'
           ? parsed.rolesProgress

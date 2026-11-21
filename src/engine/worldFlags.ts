@@ -1,7 +1,7 @@
 /**
  * Хранилище и функции работы с флагами мира (worldState).
  * Флаги — это простые переключатели (true/false или числа), по которым игра понимает,
- * что уже сделал игрок, и какие предметы или слои комнат нужно показать или скрыть.
+ * что уже сделал игрок, какие квесты выполнены и какие слои комнат показать.
  */
 
 import type { WorldFlagValue, WorldState } from './types';
@@ -22,8 +22,7 @@ export function getFlag<T extends WorldFlagValue = WorldFlagValue>(
 }
 
 /**
- * Записывает новое значение одного флага мира, возвращая обновлённую копию worldState
- * (не мутирует старый объект, чтобы React сразу перерисовал изменившуюся комнату).
+ * Записывает новое значение одного флага мира, возвращая обновлённую копию worldState.
  */
 export function setFlag(
   worldState: WorldState,
@@ -33,6 +32,22 @@ export function setFlag(
   return {
     ...worldState,
     [flagName]: value,
+  };
+}
+
+/**
+ * Прибавляет (или отнимает) число к числовому флагу мира.
+ * Удобно для счётчиков прогресса (например, сколько улик собрано).
+ */
+export function addFlag(
+  worldState: WorldState,
+  flagName: string,
+  delta: number,
+): WorldState {
+  const current = typeof worldState[flagName] === 'number' ? worldState[flagName] : 0;
+  return {
+    ...worldState,
+    [flagName]: current + delta,
   };
 }
 
@@ -50,7 +65,7 @@ export function setFlags(
 }
 
 /**
- * Проверяет, совпадают ли все требуемые флаги мира (используется для показа слоёв и объектов).
+ * Проверяет, совпадают ли все требуемые флаги мира (используется для показа слоёв, объектов и квестов).
  */
 export function matchesFlags(
   requiredFlags: Record<string, WorldFlagValue> | undefined,
@@ -61,7 +76,11 @@ export function matchesFlags(
   }
 
   for (const [key, expected] of Object.entries(requiredFlags)) {
-    if (worldState[key] !== expected) {
+    const actual = worldState[key];
+    if (expected === false && actual === undefined) {
+      continue;
+    }
+    if (actual !== expected) {
       return false;
     }
   }

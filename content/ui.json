@@ -32,7 +32,7 @@
   },
   "room": {
     "backToMenuButton": "Меню (Esc)",
-    "mapButton": "Карта точек",
+    "mapButton": "Карта (M)",
     "mapCloseButton": "Закрыть карту",
     "mapTitle": "Карта здания банка",
     "mapHint": "Нажми на соседнюю подсвеченную точку, чтобы перейти в неё.",
@@ -40,10 +40,31 @@
     "mapConnectedHint": "Доступен переход",
     "mapFarHint": "Переход через соседние комнаты",
     "inventoryButton": "Инвентарь (Tab)",
-    "inventoryTitle": "Инвентарь",
-    "inventoryCloseButton": "Закрыть",
+    "tasksButton": "Задачи",
+    "journalTitle": "Дневник смены",
+    "journalTasksTab": "Задачи",
+    "journalInventoryTab": "Инвентарь",
+    "journalCloseButton": "Закрыть",
     "inventoryEmpty": "В инвентаре пока пусто. Осматривай комнаты и забирай нужные предметы.",
     "inventoryCountLabel": "Предметов",
+    "tasksEmpty": "Активных задач пока нет.",
+    "taskStatusLabels": {
+      "hidden": "Скрыта",
+      "active": "В работе",
+      "completed": "Выполнено",
+      "failed": "Провалено"
+    },
+    "taskOptionalLabel": "Дополнительно",
+    "hudCurrentGoalLabel": "Текущая цель",
+    "hudAllGoalsDoneLabel": "Все основные задачи выполнены!",
+    "hudHintShowButton": "Подсказка",
+    "hudHintHideButton": "Скрыть подсказку",
+    "hudHintLabel": "Подсказка",
+    "hudTimeLabel": "Время",
+    "hudCheckpointButton": "Чекпоинт",
+    "failRestartCheckpointButton": "Перезапустить с чекпоинта",
+    "failRestartShiftButton": "Начать смену заново",
+    "failBackToMenuButton": "В главное меню",
     "kindLabels": {
       "object": "Предмет",
       "npc": "Персонаж",
@@ -56,8 +77,10 @@
       "talk": "Поговорить"
     },
     "actionMenuClose": "Отмена",
-    "inspectActionHint": "Полноценные диалоги с ветвлением появятся на следующем шаге.",
-    "lockedDefaultMessage": "Проход пока закрыт."
+    "inspectActionHint": "Выбери действие из меню.",
+    "lockedDefaultMessage": "Проход пока закрыт.",
+    "dialogCloseButton": "Закончить разговор",
+    "dialogChoicesHint": "Выбери ответ:"
   },
   "errors": {
     "contentLoadTitle": "Не удалось загрузить файлы игры",

@@ -1,14 +1,20 @@
 /**
  * Загрузчик и проверщик (валидатор) контента из папки /content.
  * Проверяет ui.json, difficulty.json, items.json, роли в /content/roles/*.json и world.json.
- * Если в файлах указан несуществующий id комнаты, NPC или предмета, выводит понятную ошибку в консоль.
+ * Если в файлах указан несуществующий id комнаты, NPC, предмета или квеста, выводит понятную ошибку.
  */
 
 import difficultyRaw from '../../content/difficulty.json';
+import dialogsRaw from '../../content/dialogs.json';
 import itemsRaw from '../../content/items.json';
 import uiRaw from '../../content/ui.json';
 import worldRaw from '../../content/world.json';
 import type {
+  DayEventDef,
+  DialogChoice,
+  DialogDefinition,
+  DialogNode,
+  DialogsConfig,
   DifficultyConfig,
   DifficultyProfile,
   ExitDirection,
@@ -17,7 +23,9 @@ import type {
   InteractableType,
   ItemDefinition,
   LoadedGameContent,
+  QuestDef,
   RoleConfig,
+  RoleMetricDef,
   UiTexts,
   WorldConfig,
   WorldExit,
@@ -75,6 +83,104 @@ function validateItems(raw: unknown): { items: ItemDefinition[]; itemIds: Set<st
   });
 
   return { items, itemIds };
+}
+
+function validateDialogs(
+  raw: unknown,
+  validItemIds: Set<string>,
+): { dialogs: DialogsConfig; dialogIds: Set<string> } {
+  if (typeof raw !== 'object' || raw === null) {
+    throw new Error('Ошибка в content/dialogs.json: файл должен содержать JSON-объект.');
+  }
+  const data = raw as Record<string, unknown>;
+  if (!Array.isArray(data.dialogs)) {
+    throw new Error('Ошибка в content/dialogs.json: поле dialogs должно быть массивом.');
+  }
+
+  const dialogIds = new Set<string>();
+  const dialogs: DialogDefinition[] = data.dialogs.map((rawDialog, dIdx) => {
+    const d = rawDialog as Record<string, unknown>;
+    const id = assertNonEmptyString(d.id, `dialogs[${dIdx}].id`);
+    if (dialogIds.has(id)) {
+      throw new Error(`Ошибка в content/dialogs.json: дублируется id диалога "${id}".`);
+    }
+    dialogIds.add(id);
+
+    const startNodeId = assertNonEmptyString(d.startNodeId, `dialogs[${id}].startNodeId`);
+    if (typeof d.nodes !== 'object' || d.nodes === null) {
+      throw new Error(`Ошибка в content/dialogs.json: у диалога "${id}" отсутствует объект nodes.`);
+    }
+
+    const rawNodes = d.nodes as Record<string, unknown>;
+    const nodes: Record<string, DialogNode> = {};
+    for (const [nodeKey, rawNode] of Object.entries(rawNodes)) {
+      const n = rawNode as Record<string, unknown>;
+      const choices: DialogChoice[] = Array.isArray(n.choices)
+        ? n.choices.map((rawChoice, cIdx) => {
+            const c = rawChoice as Record<string, unknown>;
+            const giveItemId = typeof c.giveItemId === 'string' ? c.giveItemId : undefined;
+            const requireItemId = typeof c.requireItemId === 'string' ? c.requireItemId : undefined;
+            if (giveItemId && !validItemIds.has(giveItemId)) {
+              throw new Error(
+                `Ошибка в content/dialogs.json: диалог "${id}" -> "${nodeKey}" выдаёт несуществующий предмет "${giveItemId}".`,
+              );
+            }
+            if (requireItemId && !validItemIds.has(requireItemId)) {
+              throw new Error(
+                `Ошибка в content/dialogs.json: диалог "${id}" -> "${nodeKey}" требует несуществующий предмет "${requireItemId}".`,
+              );
+            }
+            return {
+              id: assertNonEmptyString(c.id, `dialogs[${id}].nodes[${nodeKey}].choices[${cIdx}].id`),
+              text: assertNonEmptyString(
+                c.text,
+                `dialogs[${id}].nodes[${nodeKey}].choices[${cIdx}].text`,
+              ),
+              nextNodeId: typeof c.nextNodeId === 'string' ? c.nextNodeId : undefined,
+              requireFlags: c.requireFlags as DialogChoice['requireFlags'],
+              requireItemId,
+              giveItemId,
+              setFlags: c.setFlags as DialogChoice['setFlags'],
+              metricChanges: c.metricChanges as DialogChoice['metricChanges'],
+              feedbackText: typeof c.feedbackText === 'string' ? c.feedbackText : undefined,
+            };
+          })
+        : [];
+
+      nodes[nodeKey] = {
+        id: assertNonEmptyString(n.id, `dialogs[${id}].nodes[${nodeKey}].id`),
+        text: assertNonEmptyString(n.text, `dialogs[${id}].nodes[${nodeKey}].text`),
+        choices,
+      };
+    }
+
+    if (!nodes[startNodeId]) {
+      throw new Error(
+        `Ошибка в content/dialogs.json: у диалога "${id}" стартовый узел "${startNodeId}" не найден в nodes.`,
+      );
+    }
+
+    for (const node of Object.values(nodes)) {
+      for (const choice of node.choices) {
+        if (choice.nextNodeId && choice.nextNodeId !== 'END' && !nodes[choice.nextNodeId]) {
+          throw new Error(
+            `Ошибка в content/dialogs.json: ответ "${choice.id}" в "${id}" ведёт на несуществующий узел "${choice.nextNodeId}".`,
+          );
+        }
+      }
+    }
+
+    return {
+      id,
+      npcId: typeof d.npcId === 'string' ? d.npcId : undefined,
+      speakerName: assertNonEmptyString(d.speakerName, `dialogs[${id}].speakerName`),
+      speakerRole: assertNonEmptyString(d.speakerRole, `dialogs[${id}].speakerRole`),
+      startNodeId,
+      nodes,
+    };
+  });
+
+  return { dialogs: { dialogs }, dialogIds };
 }
 
 function validateDifficulty(raw: unknown): DifficultyConfig {
@@ -155,7 +261,11 @@ function validateDifficulty(raw: unknown): DifficultyConfig {
   return { defaultDifficultyId, profiles };
 }
 
-function validateRoles(validPointIds: Set<string>): RoleConfig[] {
+function validateRoles(
+  validPointIds: Set<string>,
+  validItemIds: Set<string>,
+  validDialogIds: Set<string>,
+): RoleConfig[] {
   const entries = Object.entries(roleModules);
   if (entries.length === 0) {
     throw new Error('Ошибка контента: в папке /content/roles не найдено ни одного JSON-файла профессии.');
@@ -195,16 +305,105 @@ function validateRoles(validPointIds: Set<string>): RoleConfig[] {
       );
     }
 
-    const initialMetrics: Record<string, number> = {};
-    if (obj.initialMetrics && typeof obj.initialMetrics === 'object') {
-      for (const [metricKey, metricVal] of Object.entries(
-        obj.initialMetrics as Record<string, unknown>,
-      )) {
-        if (typeof metricVal === 'number') {
-          initialMetrics[metricKey] = metricVal;
-        }
-      }
+    if (!Array.isArray(obj.metrics) || obj.metrics.length === 0) {
+      throw new Error(`Ошибка в файле роли ${filePath}: список metrics должен быть непустым массивом.`);
     }
+
+    const seenMetricIds = new Set<string>();
+    const metrics: RoleMetricDef[] = obj.metrics.map((rawMetric, mIdx) => {
+      const m = rawMetric as Record<string, unknown>;
+      const mId = assertNonEmptyString(m.id, `${filePath} -> metrics[${mIdx}].id`);
+      if (seenMetricIds.has(mId)) {
+        throw new Error(`Ошибка в файле роли ${filePath}: дублируется id метрики "${mId}".`);
+      }
+      seenMetricIds.add(mId);
+
+      const tone = m.tone === 'dangerUp' || m.tone === 'goodUp' ? m.tone : 'goodUp';
+      return {
+        id: mId,
+        label: assertNonEmptyString(m.label, `${filePath} -> metrics[${mId}].label`),
+        min: typeof m.min === 'number' ? m.min : 0,
+        max: typeof m.max === 'number' ? m.max : 100,
+        initial: typeof m.initial === 'number' ? m.initial : 0,
+        tone,
+        applySuspicionMultiplier: Boolean(m.applySuspicionMultiplier),
+        failAt: m.failAt as RoleMetricDef['failAt'],
+      };
+    });
+
+    if (!Array.isArray(obj.quests)) {
+      throw new Error(`Ошибка в файле роли ${filePath}: список quests должен быть массивом.`);
+    }
+
+    const seenQuestIds = new Set<string>();
+    const quests: QuestDef[] = obj.quests
+      .map((rawQuest, qIdx) => {
+        const q = rawQuest as Record<string, unknown>;
+        const qId = assertNonEmptyString(q.id, `${filePath} -> quests[${qIdx}].id`);
+        if (seenQuestIds.has(qId)) {
+          throw new Error(`Ошибка в файле роли ${filePath}: дублируется id задачи "${qId}".`);
+        }
+        seenQuestIds.add(qId);
+
+        const initialStatus: QuestDef['initialStatus'] =
+          q.initialStatus === 'hidden' ? 'hidden' : 'active';
+        return {
+          id: qId,
+          order: typeof q.order === 'number' ? q.order : qIdx + 1,
+          title: assertNonEmptyString(q.title, `${filePath} -> quests[${qId}].title`),
+          description: assertNonEmptyString(
+            q.description,
+            `${filePath} -> quests[${qId}].description`,
+          ),
+          hint: assertNonEmptyString(q.hint, `${filePath} -> quests[${qId}].hint`),
+          optional: Boolean(q.optional),
+          initialStatus,
+          activateWhen: q.activateWhen as QuestDef['activateWhen'],
+          completeWhen: q.completeWhen as QuestDef['completeWhen'],
+          failWhen: q.failWhen as QuestDef['failWhen'],
+        };
+      })
+      .sort((a, b) => a.order - b.order);
+
+    const dayEvents: DayEventDef[] | undefined = Array.isArray(obj.dayEvents)
+      ? obj.dayEvents.map((rawEvent, eIdx) => {
+          const ev = rawEvent as Record<string, unknown>;
+          return {
+            id: assertNonEmptyString(ev.id, `${filePath} -> dayEvents[${eIdx}].id`),
+            triggerMinute: typeof ev.triggerMinute === 'number' ? ev.triggerMinute : 10,
+            requireFlags: ev.requireFlags as DayEventDef['requireFlags'],
+            setFlags: ev.setFlags as DayEventDef['setFlags'],
+            metricChanges: ev.metricChanges as DayEventDef['metricChanges'],
+            notificationTitle: assertNonEmptyString(
+              ev.notificationTitle,
+              `${filePath} -> dayEvents[${eIdx}].notificationTitle`,
+            ),
+            notificationText: assertNonEmptyString(
+              ev.notificationText,
+              `${filePath} -> dayEvents[${eIdx}].notificationText`,
+            ),
+          };
+        })
+      : undefined;
+
+    const introDialogId = typeof obj.introDialogId === 'string' ? obj.introDialogId : undefined;
+    if (introDialogId && !validDialogIds.has(introDialogId)) {
+      throw new Error(
+        `Ошибка в файле роли ${filePath}: стартовый диалог "${introDialogId}" не найден в content/dialogs.json.`,
+      );
+    }
+
+    const startingItems = Array.isArray(obj.startingItems)
+      ? obj.startingItems.map((item, idx) => {
+          const itemId = assertNonEmptyString(item, `${filePath} -> startingItems[${idx}]`);
+          if (!validItemIds.has(itemId)) {
+            throw new Error(
+              `Ошибка в файле роли ${filePath}: стартовый предмет "${itemId}" не найден в content/items.json.`,
+            );
+          }
+          return itemId;
+        })
+      : undefined;
 
     return {
       id,
@@ -215,7 +414,13 @@ function validateRoles(validPointIds: Set<string>): RoleConfig[] {
       durationEstimate,
       primaryMetricLabel,
       startPoint,
-      initialMetrics,
+      startTimeMinutes: typeof obj.startTimeMinutes === 'number' ? obj.startTimeMinutes : 540,
+      introDialogId,
+      introDoneFlag: typeof obj.introDoneFlag === 'string' ? obj.introDoneFlag : undefined,
+      startingItems,
+      metrics,
+      quests,
+      dayEvents,
     };
   });
 
@@ -225,6 +430,7 @@ function validateRoles(validPointIds: Set<string>): RoleConfig[] {
 function validateWorld(
   raw: unknown,
   validItemIds: Set<string>,
+  validDialogIds: Set<string>,
 ): { world: WorldConfig; pointIds: Set<string> } {
   if (typeof raw !== 'object' || raw === null) {
     throw new Error('Ошибка в content/world.json: файл должен содержать JSON-объект.');
@@ -356,9 +562,12 @@ function validateWorld(
                   ),
                   giveItemId: typeof a.giveItemId === 'string' ? a.giveItemId : undefined,
                   requireItemId: typeof a.requireItemId === 'string' ? a.requireItemId : undefined,
+                  requireFlags: a.requireFlags as HotspotAction['requireFlags'],
                   lockedText: typeof a.lockedText === 'string' ? a.lockedText : undefined,
                   setFlags: a.setFlags as HotspotAction['setFlags'],
+                  metricChanges: a.metricChanges as HotspotAction['metricChanges'],
                   targetPointId: typeof a.targetPointId === 'string' ? a.targetPointId : undefined,
+                  dialogId: typeof a.dialogId === 'string' ? a.dialogId : undefined,
                 };
               })
             : undefined;
@@ -411,7 +620,6 @@ function validateWorld(
     };
   });
 
-  // Перекрёстная проверка всех ссылок: комнаты, персонажи и предметы из items.json
   for (const point of points) {
     for (const exit of point.exits) {
       if (!pointIds.has(exit.targetPointId)) {
@@ -463,6 +671,11 @@ function validateWorld(
             `Ошибка в content/world.json: действие в "${hs.id}" ведёт в несуществующую точку "${act.targetPointId}".`,
           );
         }
+        if (act.dialogId && !validDialogIds.has(act.dialogId)) {
+          throw new Error(
+            `Ошибка в content/world.json: действие в "${hs.id}" ссылается на несуществующий диалог "${act.dialogId}".`,
+          );
+        }
       }
     }
   }
@@ -479,6 +692,7 @@ function validateUi(raw: unknown): UiTexts {
   assertNonEmptyString(data.menu?.startButton, 'ui.menu.startButton');
   assertNonEmptyString(data.room?.mapButton, 'ui.room.mapButton');
   assertNonEmptyString(data.room?.inventoryButton, 'ui.room.inventoryButton');
+  assertNonEmptyString(data.room?.tasksButton, 'ui.room.tasksButton');
   return data;
 }
 
@@ -491,10 +705,11 @@ export function loadAndValidateContent(): LoadedGameContent {
     const ui = validateUi(uiRaw);
     const difficulty = validateDifficulty(difficultyRaw);
     const { items, itemIds } = validateItems(itemsRaw);
-    const { world, pointIds } = validateWorld(worldRaw, itemIds);
-    const roles = validateRoles(pointIds);
+    const { dialogs, dialogIds } = validateDialogs(dialogsRaw, itemIds);
+    const { world, pointIds } = validateWorld(worldRaw, itemIds, dialogIds);
+    const roles = validateRoles(pointIds, itemIds, dialogIds);
 
-    return { ui, difficulty, roles, items, world };
+    return { ui, difficulty, roles, items, world, dialogs };
   } catch (error) {
     console.error('[Проверка контента JSON]', error);
     throw error;
