@@ -63,8 +63,8 @@ npm run build
 
 ## Как менять контент и картинки без программирования
 
-### Как заменить фоны комнат на картинки от дизайнера
-Положите готовые файлы (`.svg` или `.png`) в папку `public/rooms/` под теми же именами (`entrance.svg`, `hall.svg`, `counter.svg`, `office.svg`, `meeting.svg`, `corridor.svg`, `server_room.svg`) или укажите новое имя файла в поле `"background"` внутри `content/world.json`.
+### Как заменить фоны комнат
+Положите готовые файлы (`.jpg`, `.svg` или `.png`) в папку `public/rooms/` под теми же именами (`entrance.jpg`, `hall.jpg`, `counter.svg`, `office.jpg`, `meeting.jpg`, `corridor.jpg`, `server_room.jpg`) или укажите новое имя файла в поле `"background"` внутри `content/world.json`.
 
 ### Как добавить комнату, переход или предмет в комнату
 Откройте `content/world.json`:

@@ -105,6 +105,8 @@ export function RoomScreen({
 }: RoomScreenProps) {
   const stageRef = useRef<HTMLDivElement | null>(null);
 
+  // Соотношение сторон текущей картинки комнаты (подстраивается автоматически при загрузке фото)
+  const [stageAspectRatio, setStageAspectRatio] = useState<number>(16 / 9);
   // Смещение параллакса от положения курсора (от -1 до +1 по каждой оси)
   const [parallaxOffset, setParallaxOffset] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
   // Позиция курсора внутри сцены в процентах (нужна для подсветки на нормальной сложности)
@@ -373,15 +375,17 @@ export function RoomScreen({
         </div>
       </header>
 
-      {/* Основная область сцены: держит пропорции 16:9, чтобы % координаты зон всегда совпадали с фоном */}
+      {/* Основная область сцены: подстраивается под пропорции фото, чтобы % координаты зон точно совпадали */}
       <div className="relative flex flex-1 items-center justify-center overflow-hidden p-0 sm:p-2">
         <div
           ref={stageRef}
           onMouseMove={handleStageMouseMove}
           onMouseLeave={handleStageMouseLeave}
           onClick={() => setSelectedHotspotId(null)}
-          className="relative aspect-video max-h-full w-full max-w-[calc((100vh-64px)*16/9)] overflow-hidden shadow-2xl"
+          className="relative max-h-full max-w-full overflow-hidden shadow-2xl"
           style={{
+            aspectRatio: String(stageAspectRatio),
+            width: `min(100%, calc((100vh - 76px) * ${stageAspectRatio}))`,
             backgroundColor: roomBackdropColor,
             borderRadius: 'var(--radius-card)',
           }}
@@ -395,7 +399,13 @@ export function RoomScreen({
               src={currentPoint.background}
               alt={currentPoint.title}
               draggable={false}
-              className="pointer-events-none h-full w-full object-cover"
+              onLoad={(event) => {
+                const { naturalWidth, naturalHeight } = event.currentTarget;
+                if (naturalWidth > 0 && naturalHeight > 0) {
+                  setStageAspectRatio(naturalWidth / naturalHeight);
+                }
+              }}
+              className="pointer-events-none h-full w-full object-fill"
             />
 
             {visibleLayers.map((layer) => (

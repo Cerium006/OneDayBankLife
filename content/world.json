@@ -61,8 +61,8 @@
     {
       "id": "entrance",
       "title": "Вход и холл",
-      "subtitle": "Турникет на входе, пост охраны и стойка администратора",
-      "background": "/rooms/entrance.svg",
+      "subtitle": "Пост охраны, стеклянный вход и стойка администратора",
+      "background": "/rooms/entrance.jpg",
       "mapCoords": { "x": 14, "y": 50 },
       "exits": [
         {
@@ -77,51 +77,14 @@
           "label": "План отделения",
           "kind": "object",
           "interactType": "inspect",
-          "x": 6,
-          "y": 24,
-          "width": 14,
-          "height": 28,
+          "x": 32.5,
+          "y": 44.5,
+          "width": 6,
+          "height": 9,
           "actions": [
             {
               "type": "inspect",
               "resultText": "Схема этажа: операционный зал прямо, за ним офис сотрудников, переговорная и серверная за дверью по бейджу."
-            }
-          ]
-        },
-        {
-          "id": "hs_guard_viktor",
-          "label": "Охранник Виктор",
-          "kind": "npc",
-          "interactType": "talk",
-          "npcId": "guard_viktor",
-          "x": 23,
-          "y": 32,
-          "width": 13,
-          "height": 48,
-          "actions": [
-            {
-              "type": "inspect",
-              "resultText": "Охранник внимательно смотрит на входящих. На поясе рация и журнал посещений."
-            },
-            {
-              "type": "talk",
-              "resultText": "Виктор: «Добрый день! Если нужно в служебные помещения — оформляйте пропуск у администратора или предъявите бейдж»."
-            }
-          ]
-        },
-        {
-          "id": "hs_turnstile",
-          "label": "Турникет",
-          "kind": "object",
-          "interactType": "use",
-          "x": 38,
-          "y": 54,
-          "width": 22,
-          "height": 28,
-          "actions": [
-            {
-              "type": "inspect",
-              "resultText": "Электронный турникет на входе. В клиентскую зону проход свободен, а в офис пускают только сотрудников."
             }
           ]
         },
@@ -132,9 +95,9 @@
           "interactType": "use",
           "targetPointId": "hall",
           "x": 42,
-          "y": 20,
-          "width": 16,
-          "height": 32,
+          "y": 38,
+          "width": 17,
+          "height": 26,
           "actions": [
             {
               "type": "inspect",
@@ -148,19 +111,56 @@
           ]
         },
         {
+          "id": "hs_turnstile",
+          "label": "Контроль прохода",
+          "kind": "object",
+          "interactType": "use",
+          "x": 43,
+          "y": 65,
+          "width": 16,
+          "height": 14,
+          "actions": [
+            {
+              "type": "inspect",
+              "resultText": "Зона входа в клиентский зал. В офис сотрудников пускают только по пропуску."
+            }
+          ]
+        },
+        {
+          "id": "hs_guard_viktor",
+          "label": "Охранник Виктор",
+          "kind": "npc",
+          "interactType": "talk",
+          "npcId": "guard_viktor",
+          "x": 64.5,
+          "y": 39,
+          "width": 9.5,
+          "height": 27,
+          "actions": [
+            {
+              "type": "inspect",
+              "resultText": "Пост службы охраны у колонны. Отсюда хорошо просматривается весь холл."
+            },
+            {
+              "type": "talk",
+              "resultText": "Виктор: «Добрый день! Если нужно в служебные помещения — оформляйте пропуск у администратора или предъявите бейдж»."
+            }
+          ]
+        },
+        {
           "id": "hs_admin_marina",
           "label": "Администратор Марина",
           "kind": "npc",
           "interactType": "talk",
           "npcId": "admin_marina",
-          "x": 68,
-          "y": 34,
-          "width": 16,
-          "height": 46,
+          "x": 60,
+          "y": 61,
+          "width": 34,
+          "height": 28,
           "actions": [
             {
               "type": "inspect",
-              "resultText": "Администратор за стойкой регистрации. Помогает посетителям и следит за порядком в холле."
+              "resultText": "Стойка регистрации в холле. Здесь встречают гостей и записывают посетителей."
             },
             {
               "type": "talk",
@@ -173,8 +173,8 @@
     {
       "id": "hall",
       "title": "Операционный зал",
-      "subtitle": "Очередь клиентов, терминал самообслуживания и проход к окнам",
-      "background": "/rooms/hall.svg",
+      "subtitle": "Клиентские окна, зона ожидания, терминал и служебные двери",
+      "background": "/rooms/hall.jpg",
       "mapCoords": { "x": 38, "y": 50 },
       "exits": [
         {
@@ -195,24 +195,24 @@
       ],
       "hotspots": [
         {
-          "id": "hs_door_hall_office",
-          "label": "Служебная дверь в офис",
+          "id": "hs_door_hall_counter",
+          "label": "К окну обслуживания",
           "kind": "door",
           "interactType": "use",
-          "targetPointId": "office",
-          "x": 4,
-          "y": 24,
-          "width": 10,
-          "height": 52,
+          "targetPointId": "counter",
+          "x": 18,
+          "y": 46,
+          "width": 22,
+          "height": 22,
           "actions": [
             {
               "type": "inspect",
-              "resultText": "Дверь с табличкой «Офис сотрудников». Сейчас она приоткрыта."
+              "resultText": "Рабочее место клиентского менеджера с монитором и стеклянной перегородкой."
             },
             {
               "type": "use",
-              "targetPointId": "office",
-              "resultText": "Вы вошли в офис сотрудников."
+              "targetPointId": "counter",
+              "resultText": "Вы подошли к окну обслуживания."
             }
           ]
         },
@@ -222,14 +222,14 @@
           "kind": "npc",
           "interactType": "talk",
           "npcId": "client_elderly",
-          "x": 16,
-          "y": 36,
-          "width": 11,
-          "height": 46,
+          "x": 30,
+          "y": 64,
+          "width": 16,
+          "height": 27,
           "actions": [
             {
               "type": "inspect",
-              "resultText": "Клиентка держит телефон у уха и явно нервничает."
+              "resultText": "Клиентское место у первого окна. Здесь принимают срочные переводы."
             },
             {
               "type": "talk",
@@ -243,18 +243,60 @@
           "kind": "npc",
           "interactType": "talk",
           "npcId": "client_young",
-          "x": 30,
-          "y": 36,
-          "width": 11,
-          "height": 46,
+          "x": 48,
+          "y": 57,
+          "width": 12,
+          "height": 21,
           "actions": [
             {
               "type": "inspect",
-              "resultText": "Ждёт своей очереди, листая мобильное приложение банка."
+              "resultText": "Второе клиентское кресло в очереди к окну."
             },
             {
               "type": "talk",
               "resultText": "Парень: «Хочу перевыпустить карту. Очередь сегодня движется быстро»."
+            }
+          ]
+        },
+        {
+          "id": "hs_door_hall_office",
+          "label": "Служебная дверь в офис",
+          "kind": "door",
+          "interactType": "use",
+          "targetPointId": "office",
+          "x": 68,
+          "y": 43,
+          "width": 12,
+          "height": 25,
+          "actions": [
+            {
+              "type": "inspect",
+              "resultText": "Белые двери в глубине зала ведут в офис сотрудников."
+            },
+            {
+              "type": "use",
+              "targetPointId": "office",
+              "resultText": "Вы вошли в офис сотрудников."
+            }
+          ]
+        },
+        {
+          "id": "hs_kiosk",
+          "label": "Терминал самообслуживания",
+          "kind": "object",
+          "interactType": "use",
+          "x": 85,
+          "y": 44,
+          "width": 14,
+          "height": 26,
+          "actions": [
+            {
+              "type": "inspect",
+              "resultText": "Терминал электронной очереди и самообслуживания у правой стены."
+            },
+            {
+              "type": "use",
+              "resultText": "Терминал выдал талон с номером А-104 и памяткой по безопасности."
             }
           ]
         },
@@ -264,60 +306,18 @@
           "kind": "npc",
           "interactType": "talk",
           "npcId": "client_suit",
-          "x": 44,
-          "y": 34,
-          "width": 11,
-          "height": 48,
+          "x": 89,
+          "y": 71,
+          "width": 10.5,
+          "height": 25,
           "actions": [
             {
               "type": "inspect",
-              "resultText": "Стоит в стороне от очереди и посматривает на служебную дверь."
+              "resultText": "Зона ожидания у правой стены, откуда хорошо видны двери в офис."
             },
             {
               "type": "talk",
               "resultText": "Незнакомец уклоняется от взгляда: «Я просто жду знакомого, не обращайте внимания»."
-            }
-          ]
-        },
-        {
-          "id": "hs_door_hall_counter",
-          "label": "К окну обслуживания",
-          "kind": "door",
-          "interactType": "use",
-          "targetPointId": "counter",
-          "x": 58,
-          "y": 24,
-          "width": 17,
-          "height": 38,
-          "actions": [
-            {
-              "type": "inspect",
-              "resultText": "Рабочее место клиентского менеджера за стеклянной перегородкой."
-            },
-            {
-              "type": "use",
-              "targetPointId": "counter",
-              "resultText": "Вы подошли к окну обслуживания."
-            }
-          ]
-        },
-        {
-          "id": "hs_kiosk",
-          "label": "Терминал самообслуживания",
-          "kind": "object",
-          "interactType": "use",
-          "x": 79,
-          "y": 30,
-          "width": 14,
-          "height": 50,
-          "actions": [
-            {
-              "type": "inspect",
-              "resultText": "Терминал электронной очереди. На экране напоминание: «Никому не называйте коды из СМС»."
-            },
-            {
-              "type": "use",
-              "resultText": "Терминал выдал талон с номером А-104 и памяткой по безопасности."
             }
           ]
         }
@@ -473,8 +473,8 @@
     {
       "id": "office",
       "title": "Офис сотрудников",
-      "subtitle": "Рабочие столы, мониторы, сетевой принтер и выход в коридор",
-      "background": "/rooms/office.svg",
+      "subtitle": "Рабочие столы, мониторы и стеклянная перегородка в служебную зону",
+      "background": "/rooms/office.jpg",
       "mapCoords": { "x": 62, "y": 50 },
       "exits": [
         {
@@ -497,9 +497,9 @@
         {
           "id": "layer_office_sticky_new",
           "image": "/rooms/layer-office-sticky.svg",
-          "x": 28.5,
-          "y": 44,
-          "width": 4.5,
+          "x": 15.8,
+          "y": 42.8,
+          "width": 4,
           "height": 6,
           "visibleWhen": {
             "stickyPasswordFound": false
@@ -508,9 +508,9 @@
         {
           "id": "layer_office_sticky_checked",
           "image": "/rooms/layer-office-sticky-checked.svg",
-          "x": 28.5,
-          "y": 44,
-          "width": 4.5,
+          "x": 15.8,
+          "y": 42.8,
+          "width": 4,
           "height": 6,
           "visibleWhen": {
             "stickyPasswordFound": true
@@ -519,8 +519,8 @@
         {
           "id": "layer_office_badge",
           "image": "/rooms/layer-badge.svg",
-          "x": 17,
-          "y": 60,
+          "x": 7.5,
+          "y": 76.5,
           "width": 5.5,
           "height": 8.5,
           "visibleWhen": {
@@ -531,17 +531,17 @@
       "hotspots": [
         {
           "id": "hs_office_printer",
-          "label": "Сетевой принтер",
+          "label": "Системный блок и бумаги",
           "kind": "object",
           "interactType": "inspect",
-          "x": 4,
-          "y": 50,
-          "width": 11,
-          "height": 26,
+          "x": 1,
+          "y": 58,
+          "width": 6,
+          "height": 19,
           "actions": [
             {
               "type": "inspect",
-              "resultText": "На лотке принтера лежит график обедов: сисадмин Игорь уходит в 13:00."
+              "resultText": "Возле рабочего компьютера лежит распечатка графика обедов: сисадмин Игорь уходит в 13:00."
             }
           ]
         },
@@ -550,8 +550,8 @@
           "label": "Бейдж на столе",
           "kind": "object",
           "interactType": "pickup",
-          "x": 16.5,
-          "y": 59.5,
+          "x": 7,
+          "y": 75.5,
           "width": 6.5,
           "height": 9.5,
           "visibleWhen": {
@@ -578,9 +578,9 @@
           "label": "Стикер на мониторе",
           "kind": "object",
           "interactType": "inspect",
-          "x": 28,
-          "y": 43.5,
-          "width": 5.5,
+          "x": 15.2,
+          "y": 42,
+          "width": 5.2,
           "height": 7.5,
           "actions": [
             {
@@ -597,10 +597,10 @@
           "label": "Рабочий стол и клавиатура",
           "kind": "object",
           "interactType": "inspect",
-          "x": 23.5,
-          "y": 57,
-          "width": 14.5,
-          "height": 18,
+          "x": 14,
+          "y": 68,
+          "width": 15,
+          "height": 14,
           "actions": [
             {
               "type": "inspect",
@@ -614,14 +614,14 @@
           "kind": "npc",
           "interactType": "talk",
           "npcId": "director_anna",
-          "x": 41,
-          "y": 32,
-          "width": 12,
-          "height": 46,
+          "x": 34,
+          "y": 38,
+          "width": 22,
+          "height": 20,
           "actions": [
             {
               "type": "inspect",
-              "resultText": "Директор отделения просматривает бумаги по безопасности."
+              "resultText": "Рабочая зона руководства у большого окна."
             },
             {
               "type": "talk",
@@ -635,14 +635,14 @@
           "kind": "door",
           "interactType": "use",
           "targetPointId": "corridor",
-          "x": 55,
-          "y": 21,
-          "width": 11,
-          "height": 42,
+          "x": 62,
+          "y": 7,
+          "width": 12,
+          "height": 56,
           "actions": [
             {
               "type": "inspect",
-              "resultText": "Служебная дверь в коридор, ведущий к серверной."
+              "resultText": "Стеклянная дверь ведёт в служебный коридор к серверному блоку."
             },
             {
               "type": "use",
@@ -657,14 +657,14 @@
           "kind": "npc",
           "interactType": "talk",
           "npcId": "sysadmin_igor",
-          "x": 68,
-          "y": 32,
-          "width": 12,
-          "height": 48,
+          "x": 75,
+          "y": 20,
+          "width": 13,
+          "height": 42,
           "actions": [
             {
               "type": "inspect",
-              "resultText": "Системный администратор занят настройкой роутера и серверного журнала."
+              "resultText": "Рабочий пост ИТ-отдела рядом со стеклянными стойками."
             },
             {
               "type": "talk",
@@ -678,14 +678,14 @@
           "kind": "door",
           "interactType": "use",
           "targetPointId": "meeting",
-          "x": 84,
-          "y": 22,
-          "width": 12,
-          "height": 54,
+          "x": 89,
+          "y": 8,
+          "width": 10,
+          "height": 58,
           "actions": [
             {
               "type": "inspect",
-              "resultText": "Стеклянная дверь в комнату для переговоров."
+              "resultText": "Проход вдоль стеклянной перегородки в комнату для переговоров."
             },
             {
               "type": "use",
@@ -699,8 +699,8 @@
     {
       "id": "meeting",
       "title": "Переговорная",
-      "subtitle": "Комната для встреч с гостевым Wi-Fi-роутером",
-      "background": "/rooms/meeting.svg",
+      "subtitle": "Комната для встреч с маркерной доской и гостевым Wi-Fi",
+      "background": "/rooms/meeting.jpg",
       "mapCoords": { "x": 62, "y": 80 },
       "exits": [
         {
@@ -711,14 +711,30 @@
       ],
       "hotspots": [
         {
+          "id": "hs_meeting_table",
+          "label": "Стол переговоров",
+          "kind": "object",
+          "interactType": "inspect",
+          "x": 29,
+          "y": 50,
+          "width": 41,
+          "height": 42,
+          "actions": [
+            {
+              "type": "inspect",
+              "resultText": "Большой стол для совещаний с ноутбуками и рабочими местами для гостей."
+            }
+          ]
+        },
+        {
           "id": "hs_whiteboard",
           "label": "Маркерная доска",
           "kind": "object",
           "interactType": "inspect",
-          "x": 28,
-          "y": 18,
-          "width": 38,
-          "height": 25,
+          "x": 71,
+          "y": 30,
+          "width": 19,
+          "height": 26,
           "actions": [
             {
               "type": "inspect",
@@ -727,38 +743,22 @@
           ]
         },
         {
-          "id": "hs_meeting_table",
-          "label": "Стол переговоров",
-          "kind": "object",
-          "interactType": "inspect",
-          "x": 26,
-          "y": 54,
-          "width": 44,
-          "height": 26,
-          "actions": [
-            {
-              "type": "inspect",
-              "resultText": "Большой стол для совещаний с чистым блокнотом для заметок."
-            }
-          ]
-        },
-        {
           "id": "hs_wifi_router",
           "label": "Wi-Fi-роутер",
           "kind": "object",
           "interactType": "use",
-          "x": 74,
-          "y": 28,
-          "width": 14,
-          "height": 20,
+          "x": 82,
+          "y": 16,
+          "width": 9,
+          "height": 14,
           "actions": [
             {
               "type": "inspect",
-              "resultText": "Точка доступа беспроводной сети переговорной. Мигает зелёный индикатор."
+              "resultText": "Точка доступа и настенный модуль беспроводной сети над доской."
             },
             {
               "type": "use",
-              "resultText": "На наклейке сзади указана модель роутера — проверка Wi-Fi будет доступна на шаге квестов."
+              "resultText": "На панели отображается имя сети BankGuest — проверка пароля Wi-Fi будет доступна на шаге квестов."
             }
           ]
         }
@@ -768,7 +768,7 @@
       "id": "corridor",
       "title": "Коридор",
       "subtitle": "Закрытая служебная зона с доступом по бейджу",
-      "background": "/rooms/corridor.svg",
+      "background": "/rooms/corridor.jpg",
       "mapCoords": { "x": 84, "y": 50 },
       "exits": [
         {
@@ -792,14 +792,14 @@
           "label": "Шкафчик и журнал доступа",
           "kind": "object",
           "interactType": "inspect",
-          "x": 14,
-          "y": 30,
-          "width": 16,
-          "height": 48,
+          "x": 16,
+          "y": 6,
+          "width": 9,
+          "height": 67,
           "actions": [
             {
               "type": "inspect",
-              "resultText": "Металлический шкафчик с бумажным журналом входов в серверную."
+              "resultText": "Боковая служебная дверь и ниша с бумажным журналом входов в серверную."
             }
           ]
         },
@@ -809,10 +809,10 @@
           "kind": "door",
           "interactType": "use",
           "targetPointId": "server_room",
-          "x": 40,
-          "y": 18,
-          "width": 18,
-          "height": 60,
+          "x": 42,
+          "y": 25,
+          "width": 16,
+          "height": 35,
           "condition": {
             "requiredItem": "badge",
             "lockedMessage": "Дверь в серверную закрыта: в инвентаре нет бейджа сотрудника. Поищите бейдж на столе в офисе."
@@ -820,7 +820,7 @@
           "actions": [
             {
               "type": "inspect",
-              "resultText": "Усиленная дверь в главное серверное помещение. На замке значок магнитного пропуска."
+              "resultText": "Вход в главное серверное помещение в конце коридора. На замке значок магнитного пропуска."
             },
             {
               "type": "use",
@@ -836,14 +836,14 @@
           "label": "Считыватель бейджа",
           "kind": "object",
           "interactType": "use",
-          "x": 60,
-          "y": 38,
-          "width": 9,
-          "height": 15,
+          "x": 65,
+          "y": 31,
+          "width": 8,
+          "height": 26,
           "actions": [
             {
               "type": "inspect",
-              "resultText": "Электронный картридер у двери в серверную. Горит оранжевый огонёк ожидания бейджа."
+              "resultText": "Панель контроля доступа у правой стены коридора. Ожидает магнитный пропуск сотрудника."
             },
             {
               "type": "use",
@@ -859,8 +859,8 @@
     {
       "id": "server_room",
       "title": "Серверная",
-      "subtitle": "Серверная стойка и терминал администратора (цель пентестера)",
-      "background": "/rooms/server_room.svg",
+      "subtitle": "Серверные стойки и терминал администратора (цель пентестера)",
+      "background": "/rooms/server_room.jpg",
       "mapCoords": { "x": 84, "y": 20 },
       "exits": [
         {
@@ -875,14 +875,14 @@
           "label": "Серверная стойка",
           "kind": "object",
           "interactType": "inspect",
-          "x": 22,
-          "y": 16,
-          "width": 24,
-          "height": 66,
+          "x": 4,
+          "y": 5,
+          "width": 42,
+          "height": 88,
           "actions": [
             {
               "type": "inspect",
-              "resultText": "Главная стойка с серверами отделения. Все кабели аккуратно подписаны, мигают индикаторы."
+              "resultText": "Главная стойка с серверами отделения. Все кабели аккуратно подписаны, мигают зелёные индикаторы."
             }
           ]
         },
@@ -891,14 +891,14 @@
           "label": "Терминал серверной",
           "kind": "object",
           "interactType": "use",
-          "x": 55,
-          "y": 34,
-          "width": 23,
-          "height": 36,
+          "x": 59,
+          "y": 6,
+          "width": 35,
+          "height": 86,
           "actions": [
             {
               "type": "inspect",
-              "resultText": "Консоль локального администратора. Отлично! Вы добрались до сердца банка."
+              "resultText": "Правая стойка с консолью локального администратора. Вы добрались до сердца банка!"
             },
             {
               "type": "use",
