@@ -1,0 +1,108 @@
+{
+  "miniGames": [
+    {
+      "id": "pentest_report_audit",
+      "title": "Сбор итогового отчёта в серверной",
+      "subtitle": "Отметь только корректные выводы и меры защиты, которые нужно передать команде банка.",
+      "instruction": "На основе проверки отделения выбери правильные пункты для отчёта (ошибочные или опасные советы не отмечай).",
+      "confirmButton": "Отправить отчёт Кире",
+      "successMessage": "Отчёт успешно сформирован и передан! Можно завершать смену и смотреть итоговый разбор.",
+      "mistakeMessage": "В отчёт попали неточные пункты — отчёт принят с замечанием (+10% к подозрению).",
+      "setFlagsOnComplete": {
+        "reportDelivered": true
+      },
+      "mistakeMetricChanges": {
+        "suspicion": 10
+      },
+      "options": [
+        {
+          "id": "opt_second_channel",
+          "text": "Проверять посетителей и курьеров по второму каналу связи (внутренний звонок сотруднику)",
+          "isCorrect": true
+        },
+        {
+          "id": "opt_no_sticky",
+          "text": "Запретить хранение паролей на стикерах у мониторов и настроить автоблокировку экрана",
+          "isCorrect": true
+        },
+        {
+          "id": "opt_wifi_upgrade",
+          "text": "Обновить шифрование гостевого Wi-Fi и отделить его от внутренней сети",
+          "isCorrect": true,
+          "minDifficulty": "normal"
+        },
+        {
+          "id": "opt_badge_public",
+          "text": "Сделать гостевые бейджи без возврата, чтобы не тратить время охраны",
+          "isCorrect": false
+        },
+        {
+          "id": "opt_fire_guard",
+          "text": "Выложить личные данные охранника в открытый чат для примера другим",
+          "isCorrect": false,
+          "minDifficulty": "normal"
+        },
+        {
+          "id": "opt_disable_logs",
+          "text": "Отключить журнал считывателя в коридоре, чтобы ускорить проход сотрудников",
+          "isCorrect": false,
+          "minDifficulty": "hard"
+        }
+      ]
+    },
+    {
+      "id": "phishing_letter_check",
+      "title": "Разбор подозрительного письма",
+      "subtitle": "Клиентка Лена показала письмо о «блокировке карты». Отметь реальные признаки фишинга.",
+      "instruction": "Выбери пункты, по которым сотрудник банка сразу распознаёт поддельное письмо.",
+      "confirmButton": "Зафиксировать разбор",
+      "successMessage": "Верно! Вы точно выделили признаки фишинга (+10% к безопасности).",
+      "mistakeMessage": "Некоторые признаки определены неверно — обратите внимание на домен и давление срочностью.",
+      "setFlagsOnComplete": {
+        "monitorChecked": true,
+        "phishingChecked": true
+      },
+      "successMetricChanges": {
+        "security": 10
+      },
+      "mistakeMetricChanges": {
+        "security": -5
+      },
+      "options": [
+        {
+          "id": "phish_domain",
+          "text": "Подозрительный адрес отправителя с опечаткой вместо официального домена банка",
+          "isCorrect": true
+        },
+        {
+          "id": "phish_urgency",
+          "text": "Жёсткое давление: «карта будет удалена через 10 минут, срочно перейдите по ссылке»",
+          "isCorrect": true
+        },
+        {
+          "id": "phish_sms_form",
+          "text": "Просьба ввести ПИН-код, CVV и код из СМС на внешней странице",
+          "isCorrect": true,
+          "minDifficulty": "normal"
+        },
+        {
+          "id": "phish_logo",
+          "text": "Наличие логотипа банка гарантирует, что письмо настоящее",
+          "isCorrect": false
+        },
+        {
+          "id": "phish_evening",
+          "text": "Настоящий банк присылает письма только по понедельникам утром",
+          "isCorrect": false,
+          "minDifficulty": "normal"
+        },
+        {
+          "id": "phish_link_hover",
+          "text": "Если в тексте есть вежливое обращение по имени, ссылку можно открывать без проверки",
+          "isCorrect": false,
+          "minDifficulty": "hard"
+        }
+      ]
+    }
+  ]
+}

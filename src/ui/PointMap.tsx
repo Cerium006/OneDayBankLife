@@ -34,7 +34,7 @@ export function PointMap({
 
   return (
     <div
-      className="fixed inset-0 z-40 flex items-center justify-center bg-slate-950/65 p-4 backdrop-blur-xs"
+      className="fixed inset-0 z-40 flex items-center justify-center bg-black/70 p-4 backdrop-blur-xs"
       role="dialog"
       aria-modal="true"
       aria-labelledby="point-map-title"
@@ -67,7 +67,7 @@ export function PointMap({
             type="button"
             onClick={onClose}
             aria-label={ui.room.mapCloseButton}
-            className="inline-flex min-h-[40px] items-center gap-1.5 border px-3 py-1.5 text-sm font-medium whitespace-nowrap transition-colors hover:bg-slate-100"
+            className="inline-flex min-h-[40px] items-center gap-1.5 border px-3 py-1.5 text-sm font-medium whitespace-nowrap transition-colors hover:bg-white/10"
             style={{
               borderColor: 'var(--border-default)',
               borderRadius: 'var(--radius-control)',
@@ -111,7 +111,7 @@ export function PointMap({
                   y1={fromPoint.mapCoords.y}
                   x2={toPoint.mapCoords.x}
                   y2={toPoint.mapCoords.y}
-                  stroke={touchesCurrent ? '#1D4ED8' : '#94A3B8'}
+                  stroke={touchesCurrent ? '#D4FA42' : '#7A867A'}
                   strokeWidth={touchesCurrent ? '1.1' : '0.7'}
                   strokeDasharray={touchesCurrent ? undefined : '2 1.5'}
                 />
@@ -168,9 +168,9 @@ export function PointMap({
                   className="mt-0.5 text-[11px]"
                   style={{
                     color: isCurrent
-                      ? 'rgba(255, 255, 255, 0.85)'
+                      ? 'rgba(20, 26, 20, 0.85)'
                       : isNeighbor
-                        ? 'var(--accent-primary)'
+                        ? 'var(--accent-lime)'
                         : 'var(--text-secondary)',
                   }}
                 >

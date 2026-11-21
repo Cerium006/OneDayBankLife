@@ -85,6 +85,9 @@
             {
               "id": "viktor_2a_unknown",
               "text": "Не помню, кому-то в зале",
+              "setFlags": {
+                "guardMistake": true
+              },
               "metricChanges": {
                 "suspicion": 25
               },
@@ -110,6 +113,9 @@
             {
               "id": "viktor_2b_call",
               "text": "Тогда позвоните в отдел, там подтвердят",
+              "setFlags": {
+                "guardMistake": true
+              },
               "metricChanges": {
                 "suspicion": 25
               },
@@ -138,7 +144,7 @@
         },
         "viktor_2c": {
           "id": "viktor_2c",
-          "text": "Проверка? Мне никто не говорил. Подождите, позвоню Дарье Фокс.",
+          "text": "Проверка? Мне никто не говорил. Подождите, позвоню Дарье Лисичкиной.",
           "choices": [
             {
               "id": "viktor_2c_permit",
@@ -148,7 +154,8 @@
                 "suspicion": 30
               },
               "setFlags": {
-                "permitShown": true
+                "permitShown": true,
+                "guardMistake": true
               },
               "feedbackText": "Охранник сверил разрешение, но подозрение выросло (+30%). Можно попробовать другую легенду чуть позже."
             }
@@ -259,7 +266,7 @@
     {
       "id": "anna_director_brief",
       "npcId": "director_anna",
-      "speakerName": "Дарья Фокс",
+      "speakerName": "Дарья Лисичкина",
       "speakerRole": "Директор отделения",
       "startNodeId": "anna_1",
       "nodes": {
@@ -588,7 +595,7 @@
     {
       "id": "anna_client",
       "npcId": "director_anna",
-      "speakerName": "Дарья Фокс",
+      "speakerName": "Дарья Лисичкина",
       "speakerRole": "Пятый клиент (проверка)",
       "startNodeId": "anna_client_1",
       "nodes": {

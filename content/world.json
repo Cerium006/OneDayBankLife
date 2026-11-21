@@ -72,7 +72,7 @@
     },
     {
       "id": "director_anna",
-      "name": "Дарья Фокс",
+      "name": "Дарья Лисичкина",
       "roleTitle": "Директор отделения",
       "pointId": "office",
       "description": "Контролирует работу отделения и проверяет соблюдение регламентов безопасности."
@@ -574,7 +574,7 @@
         },
         {
           "id": "hs_counter_client_5",
-          "label": "Клиент 5: Дарья Фокс",
+          "label": "Клиент 5: Дарья Лисичкина",
           "kind": "npc",
           "interactType": "talk",
           "npcId": "director_anna",
@@ -591,7 +591,7 @@
             {
               "type": "talk",
               "dialogId": "anna_client",
-              "resultText": "Проверка от директора Дарьи Фокс."
+              "resultText": "Проверка от директора Дарьи Лисичкиной."
             }
           ]
         },
@@ -611,6 +611,15 @@
                 "monitorChecked": true
               },
               "resultText": "На экране открыта внутренняя почта банка и карточка клиента. Рабочее место проверено."
+            },
+            {
+              "type": "use",
+              "label": "Проверить фишинговое письмо",
+              "requireFlags": {
+                "activeRole": "manager"
+              },
+              "miniGameId": "phishing_letter_check",
+              "resultText": "Учебная проверка фишингового письма пройдена."
             }
           ]
         },
@@ -897,7 +906,7 @@
         },
         {
           "id": "hs_director_anna",
-          "label": "Директор Дарья Фокс",
+          "label": "Директор Дарья Лисичкина",
           "kind": "npc",
           "interactType": "talk",
           "npcId": "director_anna",
@@ -913,7 +922,7 @@
             {
               "type": "talk",
               "dialogId": "anna_director_brief",
-              "resultText": "Разговор с директором Дарьей Фокс."
+              "resultText": "Разговор с директором Дарьей Лисичкиной."
             }
           ]
         },
@@ -1077,8 +1086,10 @@
           "targetPointId": "server_room",
           "label": "Серверная",
           "condition": {
-            "requiredItem": "badge",
-            "lockedMessage": "Дверь в серверную закрыта: в инвентаре нет бейджа сотрудника. Поищите бейдж на столе в офисе."
+            "requiredFlag": {
+              "serverDoorUnlocked": true
+            },
+            "lockedMessage": "Дверь в серверную заблокирована: сначала приложите бейдж сотрудника к считывателю у правой стены коридора."
           }
         }
       ],
@@ -1110,23 +1121,23 @@
           "width": 16,
           "height": 35,
           "condition": {
-            "requiredItem": "badge",
-            "lockedMessage": "Дверь в серверную закрыта: в инвентаре нет бейджа сотрудника. Поищите бейдж на столе в офисе."
+            "requiredFlag": {
+              "serverDoorUnlocked": true
+            },
+            "lockedMessage": "Дверь в серверную заблокирована: сначала приложите бейдж сотрудника к считывателю у правой стены коридора."
           },
           "actions": [
             {
               "type": "inspect",
-              "resultText": "Вход в главное серверное помещение в конце коридора. На замке значок магнитного пропуска."
+              "resultText": "Вход в главное серверное помещение в конце коридора. Справа на стене установлен считыватель магнитных пропусков."
             },
             {
               "type": "use",
-              "requireItemId": "badge",
               "targetPointId": "server_room",
               "setFlags": {
                 "serverEntered": true
               },
-              "lockedText": "Дверь в серверную закрыта: нужен «Бейдж сотрудника» в инвентаре (проверьте стол в офисе).",
-              "resultText": "Вы приложили бейдж к считывателю — замок щёлкнул, дверь в серверную открыта!"
+              "resultText": "Вы открыли разблокированную дверь и вошли в серверную."
             }
           ]
         },
@@ -1142,17 +1153,26 @@
           "actions": [
             {
               "type": "inspect",
-              "resultText": "Панель контроля доступа у правой стены коридора. Ожидает магнитный пропуск сотрудника."
+              "resultText": "Панель контроля доступа у правой стены коридора. Ожидает магнитный пропуск сотрудника, чтобы разблокировать замок двери."
             },
             {
               "type": "use",
               "requireItemId": "badge",
-              "targetPointId": "server_room",
+              "requireFlags": {
+                "serverDoorUnlocked": false
+              },
               "setFlags": {
-                "serverEntered": true
+                "serverDoorUnlocked": true
               },
               "lockedText": "Картридер мигнул красным: в инвентаре нет бейджа сотрудника.",
-              "resultText": "Картридер пикнул зелёным по вашему бейджу и открыл проход в серверную!"
+              "resultText": "Картридер пикнул зелёным, индикатор на замке сменился — дверь в серверную разблокирована! Теперь можно пройти в дверь в центре коридора."
+            },
+            {
+              "type": "use",
+              "requireFlags": {
+                "serverDoorUnlocked": true
+              },
+              "resultText": "Считыватель уже горит зелёным — дверь в серверную разблокирована."
             }
           ]
         }
@@ -1204,6 +1224,8 @@
             },
             {
               "type": "use",
+              "label": "Собрать и сдать отчёт",
+              "miniGameId": "pentest_report_audit",
               "setFlags": {
                 "reportDelivered": true
               },

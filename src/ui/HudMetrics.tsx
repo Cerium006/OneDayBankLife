@@ -25,7 +25,7 @@ function getMetricBarColor(def: RoleMetricDef, value: number): string {
     if (ratio >= 0.4) {
       return 'var(--warning-primary)';
     }
-    return '#38BDF8';
+    return 'var(--accent-primary)';
   }
 
   if (ratio <= 0.3) {
@@ -52,7 +52,11 @@ export function HudMetrics({ ui, role, metrics, elapsedGameMinutes }: HudMetrics
         }}
         title={ui.room.hudTimeLabel}
       >
-        <Clock className="h-3.5 w-3.5 text-slate-300" aria-hidden="true" />
+        <Clock
+          className="h-3.5 w-3.5"
+          style={{ color: 'var(--text-secondary)' }}
+          aria-hidden="true"
+        />
         <span>{timeText}</span>
       </div>
 
@@ -67,7 +71,7 @@ export function HudMetrics({ ui, role, metrics, elapsedGameMinutes }: HudMetrics
           return (
             <div key={def.id} className="min-w-[132px]">
               <div className="flex items-baseline justify-between gap-2 text-xs">
-                <span className="text-slate-200">{def.label}</span>
+                <span style={{ color: 'var(--text-secondary)' }}>{def.label}</span>
                 <span className="font-semibold tabular-nums" style={{ color: 'var(--hud-text)' }}>
                   {clamped}%
                 </span>

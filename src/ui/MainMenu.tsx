@@ -138,7 +138,7 @@ export function MainMenu({
                 <button
                   type="button"
                   onClick={onContinueGame}
-                  className="min-h-[42px] px-5 py-2 text-sm font-semibold whitespace-nowrap transition-colors"
+                  className="min-h-[42px] px-5 py-2 text-sm font-semibold whitespace-nowrap transition-all hover:brightness-110"
                   style={{
                     backgroundColor: 'var(--accent-primary)',
                     color: 'var(--accent-text)',
@@ -150,10 +150,10 @@ export function MainMenu({
                 <button
                   type="button"
                   onClick={() => setIsResetModalOpen(true)}
-                  className="min-h-[42px] border px-4 py-2 text-sm font-medium whitespace-nowrap transition-colors hover:bg-red-50"
+                  className="min-h-[42px] border px-4 py-2 text-sm font-medium whitespace-nowrap transition-colors hover:bg-white/10"
                   style={{
                     borderColor: 'var(--border-default)',
-                    color: 'var(--danger-primary)',
+                    color: 'var(--danger-text)',
                     borderRadius: 'var(--radius-control)',
                   }}
                 >
@@ -211,13 +211,13 @@ export function MainMenu({
               className="mt-2 block w-full border px-3.5 py-2.5 text-base"
               style={{
                 backgroundColor: 'var(--bg-surface)',
-                borderColor: nicknameError ? 'var(--danger-primary)' : 'var(--border-default)',
+                borderColor: nicknameError ? 'var(--danger-text)' : 'var(--border-default)',
                 borderRadius: 'var(--radius-control)',
                 color: 'var(--text-primary)',
               }}
             />
             {nicknameError && (
-              <p role="alert" className="mt-2 text-sm" style={{ color: 'var(--danger-primary)' }}>
+              <p role="alert" className="mt-2 text-sm" style={{ color: 'var(--danger-text)' }}>
                 {nicknameError}
               </p>
             )}
@@ -283,7 +283,7 @@ export function MainMenu({
                     >
                       <span>{role.primaryMetricLabel}</span>
                       {isCompleted && (
-                        <span className="font-semibold" style={{ color: 'var(--success-primary)' }}>
+                        <span className="font-semibold" style={{ color: 'var(--success-text)' }}>
                           {ui.menu.roleCompletedLabel}
                         </span>
                       )}
@@ -398,7 +398,7 @@ export function MainMenu({
             </p>
             <button
               type="submit"
-              className="min-h-[44px] shrink-0 px-6 py-2.5 text-base font-semibold whitespace-nowrap transition-colors"
+              className="min-h-[44px] shrink-0 px-6 py-2.5 text-base font-semibold whitespace-nowrap transition-all hover:brightness-110"
               style={{
                 backgroundColor: 'var(--accent-primary)',
                 color: 'var(--accent-text)',

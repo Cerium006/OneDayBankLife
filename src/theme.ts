@@ -1,40 +1,48 @@
 /**
  * Единый файл оформления (темы) приложения.
- * Все цвета, шрифты, размеры и палитра фонов-заглушек комнат хранятся здесь,
- * чтобы на финальном шаге можно было изменить весь внешний вид в одном месте.
+ * Палитра основана на тёмном графите (#2A2A2A), лесной подложке (#496648),
+ * изумрудном (#00B849), лаймовом (#D4FA42), сером (#585858) и тёплом песочном (#E9C69C).
  */
 
 export const theme = {
   colors: {
-    // Основной нейтральный фон страницы
-    background: '#F4F6F8',
-    // Фон карточек и рабочих панелей
-    surface: '#FFFFFF',
-    // Слегка затемнённая поверхность для второстепенных блоков
-    surfaceMuted: '#EEF2F6',
-    // Тонкая рамка для разделения блоков без визуального шума
-    border: '#CBD5E1',
-    // Основной тёмный цвет текста для высокой читаемости
-    textPrimary: '#0F172A',
-    // Вторичный цвет текста для пояснений и подсказок
-    textSecondary: '#475569',
-    // Главный акцентный цвет для ключевых кнопок и активного выбора
-    accent: '#1D4ED8',
-    // Цвет главной кнопки при наведении курсора
-    accentHover: '#1E40AF',
-    // Цвет текста поверх акцентной кнопки
-    accentText: '#FFFFFF',
-    // Цвет предупреждения и кнопки сброса прогресса
+    // Основной фон страницы (глубокий графит)
+    background: '#2A2A2A',
+    // Фон карточек и модальных панелей
+    surface: '#333734',
+    // Вторичная поверхность с приглушённым оттенком лесного фона
+    surfaceMuted: '#3E4A3E',
+    // Подложка лесного оттенка для карт и декоративных областей
+    sageBackdrop: '#496648',
+    // Тонкая рамка для разделения блоков (средний серый из палитры)
+    border: '#585858',
+    // Основной светлый текст на тёмных карточках (контраст > 11:1)
+    textPrimary: '#F7F4EE',
+    // Вторичный тёплый песочный цвет текста (контраст > 5.7:1 на всех поверхностях)
+    textSecondary: '#E9C69C',
+    // Главный акцентный цвет для ключевых кнопок (изумрудный)
+    accent: '#00B849',
+    // Лаймовый цвет для подсветки при наведении и активных подсказок
+    accentHover: '#D4FA42',
+    // Яркий лаймовый акцент для иконок, целей и контуров
+    accentLime: '#D4FA42',
+    // Тёмный текст поверх изумрудной и лаймовой кнопок (контраст 6.7:1 и 14.8:1)
+    accentText: '#141A14',
+    // Цвет заливки опасных кнопок (с белым текстом) и критических шкал
     danger: '#B91C1C',
     dangerHover: '#991B1B',
-    // Цвет умеренного предупреждения на шкалах метрик
-    warning: '#D97706',
-    // Цвет успешного статуса (например, пройденная роль)
-    success: '#15803D',
+    // Читаемый светло-красный цвет текста/ошибок на тёмном фоне
+    dangerText: '#FCA5A5',
+    // Цвет умеренного предупреждения на шкалах и отчётах
+    warning: '#F6B95E',
+    // Цвет заливки успешных кнопок и безопасных шкал
+    success: '#00B849',
+    // Светло-зелёный текст статуса выполненной задачи на тёмном фоне
+    successText: '#2EE673',
     // Полупрозрачная подложка панелей поверх комнаты
-    hudOverlay: 'rgba(15, 23, 42, 0.84)',
-    hudText: '#F8FAFC',
-    hudBorder: 'rgba(255, 255, 255, 0.16)',
+    hudOverlay: 'rgba(42, 42, 42, 0.90)',
+    hudText: '#F7F4EE',
+    hudBorder: 'rgba(233, 198, 156, 0.24)',
   },
   typography: {
     // Системные шрифты не требуют интернета — игра работает полностью офлайн
@@ -55,21 +63,21 @@ export const theme = {
     card: '10px',
     control: '8px',
   },
-  // Цвета временных фонов-заглушек для комнат банка (используются под SVG-схемами)
+  // Цвета временных фонов комнат на время загрузки фотографий
   roomColors: {
-    entrance: '#DCE7F3',
-    hall: '#E2E8F0',
-    counter: '#DFECE6',
-    office: '#E6E4F0',
-    meeting: '#EFE6DA',
-    corridor: '#D8DEE6',
-    server_room: '#CBD5E1',
+    entrance: '#353E35',
+    hall: '#333A33',
+    counter: '#3E4A3E',
+    office: '#333734',
+    meeting: '#3A3A35',
+    corridor: '#2F3B30',
+    server_room: '#2A2F2A',
   } as Record<string, string>,
   // Цвета подсветки кликабельных зон (hotspots) по их типу
   hotspotColors: {
-    object: '#0284C7',
-    npc: '#15803D',
-    door: '#B45309',
+    object: '#D4FA42',
+    npc: '#00B849',
+    door: '#E9C69C',
   } as Record<'object' | 'npc' | 'door', string>,
 } as const;
 
@@ -82,16 +90,20 @@ export function applyThemeCssVariables(): void {
   root.style.setProperty('--bg-page', theme.colors.background);
   root.style.setProperty('--bg-surface', theme.colors.surface);
   root.style.setProperty('--bg-surface-muted', theme.colors.surfaceMuted);
+  root.style.setProperty('--sage-backdrop', theme.colors.sageBackdrop);
   root.style.setProperty('--border-default', theme.colors.border);
   root.style.setProperty('--text-primary', theme.colors.textPrimary);
   root.style.setProperty('--text-secondary', theme.colors.textSecondary);
   root.style.setProperty('--accent-primary', theme.colors.accent);
   root.style.setProperty('--accent-hover', theme.colors.accentHover);
+  root.style.setProperty('--accent-lime', theme.colors.accentLime);
   root.style.setProperty('--accent-text', theme.colors.accentText);
   root.style.setProperty('--danger-primary', theme.colors.danger);
   root.style.setProperty('--danger-hover', theme.colors.dangerHover);
+  root.style.setProperty('--danger-text', theme.colors.dangerText);
   root.style.setProperty('--warning-primary', theme.colors.warning);
   root.style.setProperty('--success-primary', theme.colors.success);
+  root.style.setProperty('--success-text', theme.colors.successText);
   root.style.setProperty('--hud-overlay', theme.colors.hudOverlay);
   root.style.setProperty('--hud-text', theme.colors.hudText);
   root.style.setProperty('--hud-border', theme.colors.hudBorder);

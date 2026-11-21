@@ -41,7 +41,7 @@ function QuestStatusMark({
     return (
       <span
         className="inline-flex items-center gap-1 text-xs font-semibold whitespace-nowrap"
-        style={{ color: 'var(--success-primary)' }}
+        style={{ color: 'var(--success-text)' }}
       >
         <CheckCircle2 className="h-4 w-4 shrink-0" aria-hidden="true" />
         <span>{label}</span>
@@ -53,7 +53,7 @@ function QuestStatusMark({
     return (
       <span
         className="inline-flex items-center gap-1 text-xs font-semibold whitespace-nowrap"
-        style={{ color: 'var(--danger-primary)' }}
+        style={{ color: 'var(--danger-text)' }}
       >
         <XCircle className="h-4 w-4 shrink-0" aria-hidden="true" />
         <span>{label}</span>
@@ -64,7 +64,7 @@ function QuestStatusMark({
   return (
     <span
       className="inline-flex items-center gap-1 text-xs font-semibold whitespace-nowrap"
-      style={{ color: 'var(--accent-primary)' }}
+      style={{ color: 'var(--accent-lime)' }}
     >
       <Circle className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
       <span>{label}</span>
@@ -115,7 +115,7 @@ export function JournalModal({
 
   return (
     <div
-      className="fixed inset-0 z-40 flex items-center justify-center bg-slate-950/65 p-4 backdrop-blur-xs"
+      className="fixed inset-0 z-40 flex items-center justify-center bg-black/70 p-4 backdrop-blur-xs"
       role="dialog"
       aria-modal="true"
       aria-labelledby="journal-modal-title"
@@ -151,7 +151,7 @@ export function JournalModal({
           <button
             type="button"
             onClick={onClose}
-            className="inline-flex min-h-[40px] items-center gap-1.5 border px-3 py-1.5 text-sm font-medium whitespace-nowrap transition-colors hover:bg-slate-100"
+            className="inline-flex min-h-[40px] items-center gap-1.5 border px-3 py-1.5 text-sm font-medium whitespace-nowrap transition-colors hover:bg-white/10"
             style={{
               borderColor: 'var(--border-default)',
               borderRadius: 'var(--radius-control)',
@@ -244,7 +244,7 @@ export function JournalModal({
                           status === 'completed'
                             ? 'var(--success-primary)'
                             : status === 'failed'
-                              ? 'var(--danger-primary)'
+                              ? 'var(--danger-text)'
                               : 'var(--border-default)',
                         borderRadius: 'var(--radius-control)',
                       }}
@@ -335,7 +335,7 @@ export function JournalModal({
               onClose();
               onRestartCheckpoint();
             }}
-            className="inline-flex min-h-[38px] items-center gap-1.5 border px-3 py-1.5 text-xs font-medium whitespace-nowrap transition-colors hover:bg-slate-100"
+            className="inline-flex min-h-[38px] items-center gap-1.5 border px-3 py-1.5 text-xs font-medium whitespace-nowrap transition-colors hover:bg-white/10"
             style={{
               borderColor: 'var(--border-default)',
               borderRadius: 'var(--radius-control)',

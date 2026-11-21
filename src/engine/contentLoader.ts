@@ -7,6 +7,7 @@
 import difficultyRaw from '../../content/difficulty.json';
 import dialogsRaw from '../../content/dialogs.json';
 import itemsRaw from '../../content/items.json';
+import miniGamesRaw from '../../content/minigames.json';
 import uiRaw from '../../content/ui.json';
 import worldRaw from '../../content/world.json';
 import type {
@@ -23,9 +24,14 @@ import type {
   InteractableType,
   ItemDefinition,
   LoadedGameContent,
+  MiniGameDef,
+  MiniGameOption,
+  MiniGamesConfig,
   QuestDef,
+  ReportRule,
   RoleConfig,
   RoleMetricDef,
+  RoleReportConfig,
   UiTexts,
   WorldConfig,
   WorldExit,
@@ -181,6 +187,63 @@ function validateDialogs(
   });
 
   return { dialogs: { dialogs }, dialogIds };
+}
+
+function validateMiniGames(raw: unknown): {
+  miniGames: MiniGamesConfig;
+  miniGameIds: Set<string>;
+} {
+  if (typeof raw !== 'object' || raw === null) {
+    throw new Error('Ошибка в content/minigames.json: файл должен содержать JSON-объект.');
+  }
+  const data = raw as Record<string, unknown>;
+  if (!Array.isArray(data.miniGames)) {
+    throw new Error('Ошибка в content/minigames.json: поле miniGames должно быть массивом.');
+  }
+
+  const miniGameIds = new Set<string>();
+  const miniGames: MiniGameDef[] = data.miniGames.map((rawGame, gIdx) => {
+    const g = rawGame as Record<string, unknown>;
+    const id = assertNonEmptyString(g.id, `miniGames[${gIdx}].id`);
+    if (miniGameIds.has(id)) {
+      throw new Error(`Ошибка в content/minigames.json: дублируется id проверки "${id}".`);
+    }
+    miniGameIds.add(id);
+
+    if (!Array.isArray(g.options) || g.options.length === 0) {
+      throw new Error(`Ошибка в content/minigames.json: у проверки "${id}" пустой список options.`);
+    }
+
+    const options: MiniGameOption[] = g.options.map((rawOpt, oIdx) => {
+      const o = rawOpt as Record<string, unknown>;
+      const minDifficulty =
+        o.minDifficulty === 'easy' || o.minDifficulty === 'normal' || o.minDifficulty === 'hard'
+          ? o.minDifficulty
+          : undefined;
+      return {
+        id: assertNonEmptyString(o.id, `miniGames[${id}].options[${oIdx}].id`),
+        text: assertNonEmptyString(o.text, `miniGames[${id}].options[${oIdx}].text`),
+        isCorrect: Boolean(o.isCorrect),
+        minDifficulty,
+      };
+    });
+
+    return {
+      id,
+      title: assertNonEmptyString(g.title, `miniGames[${id}].title`),
+      subtitle: assertNonEmptyString(g.subtitle, `miniGames[${id}].subtitle`),
+      instruction: assertNonEmptyString(g.instruction, `miniGames[${id}].instruction`),
+      confirmButton: assertNonEmptyString(g.confirmButton, `miniGames[${id}].confirmButton`),
+      successMessage: assertNonEmptyString(g.successMessage, `miniGames[${id}].successMessage`),
+      mistakeMessage: assertNonEmptyString(g.mistakeMessage, `miniGames[${id}].mistakeMessage`),
+      setFlagsOnComplete: g.setFlagsOnComplete as MiniGameDef['setFlagsOnComplete'],
+      successMetricChanges: g.successMetricChanges as MiniGameDef['successMetricChanges'],
+      mistakeMetricChanges: g.mistakeMetricChanges as MiniGameDef['mistakeMetricChanges'],
+      options,
+    };
+  });
+
+  return { miniGames: { miniGames }, miniGameIds };
 }
 
 function validateDifficulty(raw: unknown): DifficultyConfig {
@@ -405,6 +468,45 @@ function validateRoles(
         })
       : undefined;
 
+    let report: RoleReportConfig | undefined;
+    if (obj.report !== undefined) {
+      if (typeof obj.report !== 'object' || obj.report === null) {
+        throw new Error(`Ошибка в файле роли ${filePath}: поле report должно быть объектом.`);
+      }
+      const r = obj.report as Record<string, unknown>;
+      const parseRules = (rawList: unknown, label: string): ReportRule[] =>
+        Array.isArray(rawList)
+          ? rawList.map((item, idx) => {
+              const rule = item as Record<string, unknown>;
+              return {
+                when: rule.when as ReportRule['when'],
+                text: assertNonEmptyString(rule.text, `${filePath} -> report.${label}[${idx}].text`),
+              };
+            })
+          : [];
+
+      report = {
+        title: assertNonEmptyString(r.title, `${filePath} -> report.title`),
+        subtitle: assertNonEmptyString(r.subtitle, `${filePath} -> report.subtitle`),
+        whatWorked: parseRules(r.whatWorked, 'whatWorked'),
+        whatWorkedFallback: assertNonEmptyString(
+          r.whatWorkedFallback,
+          `${filePath} -> report.whatWorkedFallback`,
+        ),
+        mistakes: parseRules(r.mistakes, 'mistakes'),
+        noMistakesText: assertNonEmptyString(
+          r.noMistakesText,
+          `${filePath} -> report.noMistakesText`,
+        ),
+        realWorld: assertNonEmptyString(r.realWorld, `${filePath} -> report.realWorld`),
+        takeaways: Array.isArray(r.takeaways)
+          ? r.takeaways.map((t, idx) =>
+              assertNonEmptyString(t, `${filePath} -> report.takeaways[${idx}]`),
+            )
+          : [],
+      };
+    }
+
     return {
       id,
       order: typeof obj.order === 'number' ? obj.order : 99,
@@ -421,6 +523,7 @@ function validateRoles(
       metrics,
       quests,
       dayEvents,
+      report,
     };
   });
 
@@ -431,6 +534,7 @@ function validateWorld(
   raw: unknown,
   validItemIds: Set<string>,
   validDialogIds: Set<string>,
+  validMiniGameIds: Set<string>,
 ): { world: WorldConfig; pointIds: Set<string> } {
   if (typeof raw !== 'object' || raw === null) {
     throw new Error('Ошибка в content/world.json: файл должен содержать JSON-объект.');
@@ -568,6 +672,7 @@ function validateWorld(
                   metricChanges: a.metricChanges as HotspotAction['metricChanges'],
                   targetPointId: typeof a.targetPointId === 'string' ? a.targetPointId : undefined,
                   dialogId: typeof a.dialogId === 'string' ? a.dialogId : undefined,
+                  miniGameId: typeof a.miniGameId === 'string' ? a.miniGameId : undefined,
                 };
               })
             : undefined;
@@ -676,6 +781,11 @@ function validateWorld(
             `Ошибка в content/world.json: действие в "${hs.id}" ссылается на несуществующий диалог "${act.dialogId}".`,
           );
         }
+        if (act.miniGameId && !validMiniGameIds.has(act.miniGameId)) {
+          throw new Error(
+            `Ошибка в content/world.json: действие в "${hs.id}" ссылается на несуществующую мини-проверку "${act.miniGameId}".`,
+          );
+        }
       }
     }
   }
@@ -706,10 +816,11 @@ export function loadAndValidateContent(): LoadedGameContent {
     const difficulty = validateDifficulty(difficultyRaw);
     const { items, itemIds } = validateItems(itemsRaw);
     const { dialogs, dialogIds } = validateDialogs(dialogsRaw, itemIds);
-    const { world, pointIds } = validateWorld(worldRaw, itemIds, dialogIds);
+    const { miniGames, miniGameIds } = validateMiniGames(miniGamesRaw);
+    const { world, pointIds } = validateWorld(worldRaw, itemIds, dialogIds, miniGameIds);
     const roles = validateRoles(pointIds, itemIds, dialogIds);
 
-    return { ui, difficulty, roles, items, world, dialogs };
+    return { ui, difficulty, roles, items, world, dialogs, miniGames };
   } catch (error) {
     console.error('[Проверка контента JSON]', error);
     throw error;

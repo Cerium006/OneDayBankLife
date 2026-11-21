@@ -1,20 +1,27 @@
 @import "tailwindcss";
 
-/* Базовые значения переменных на случай, если скрипт ещё не успел примениться */
+/* Базовые значения переменных новой палитры до инициализации скрипта темы */
 :root {
-  --bg-page: #F4F6F8;
-  --bg-surface: #FFFFFF;
-  --bg-surface-muted: #EEF2F6;
-  --border-default: #CBD5E1;
-  --text-primary: #0F172A;
-  --text-secondary: #475569;
-  --accent-primary: #1D4ED8;
-  --accent-hover: #1E40AF;
-  --accent-text: #FFFFFF;
+  --bg-page: #2A2A2A;
+  --bg-surface: #333734;
+  --bg-surface-muted: #3E4A3E;
+  --sage-backdrop: #496648;
+  --border-default: #585858;
+  --text-primary: #F7F4EE;
+  --text-secondary: #E9C69C;
+  --accent-primary: #00B849;
+  --accent-hover: #D4FA42;
+  --accent-lime: #D4FA42;
+  --accent-text: #141A14;
   --danger-primary: #B91C1C;
   --danger-hover: #991B1B;
-  --warning-primary: #D97706;
-  --success-primary: #15803D;
+  --danger-text: #FCA5A5;
+  --warning-primary: #F6B95E;
+  --success-primary: #00B849;
+  --success-text: #2EE673;
+  --hud-overlay: rgba(42, 42, 42, 0.90);
+  --hud-text: #F7F4EE;
+  --hud-border: rgba(233, 198, 156, 0.24);
   --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   --radius-card: 10px;
@@ -33,6 +40,6 @@ body {
 
 /* Отчётливая рамка фокуса при навигации с клавиатуры (доступность) */
 :focus-visible {
-  outline: 2px solid var(--accent-primary);
+  outline: 2px solid var(--accent-lime);
   outline-offset: 2px;
 }

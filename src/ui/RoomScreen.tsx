@@ -12,6 +12,7 @@ import {
   ArrowRight,
   ArrowUp,
   Briefcase,
+  ClipboardCheck,
   ClipboardList,
   Eye,
   Hand,
@@ -26,6 +27,7 @@ import {
 } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState, type MouseEvent } from 'react';
 import { executeDialogChoice } from '../engine/dialogEngine';
+import { evaluateMiniGameSubmission } from '../engine/miniGameEngine';
 import {
   advanceDayTimer,
   checkRoleFailure,
@@ -50,6 +52,7 @@ import type {
   HotspotAction,
   InteractableType,
   ItemDefinition,
+  MiniGameDef,
   RoleConfig,
   UiTexts,
   WorldConfig,
@@ -60,19 +63,24 @@ import { theme } from '../theme';
 import { DialogModal } from './DialogModal';
 import { HudMetrics } from './HudMetrics';
 import { JournalModal, type JournalTab } from './JournalModal';
+import { MiniGameModal } from './MiniGameModal';
 import { PointMap } from './PointMap';
+import { ShiftReportModal } from './ShiftReportModal';
 
 interface RoomScreenProps {
   ui: UiTexts;
   world: WorldConfig;
   items: ItemDefinition[];
   dialogs: DialogDefinition[];
+  miniGames: MiniGameDef[];
   currentPoint: WorldPoint;
   saveState: GameSaveState;
   role: RoleConfig;
+  otherRole: RoleConfig | null;
   difficulty: DifficultyProfile;
   onSaveUpdate: (nextSave: GameSaveState) => void;
   onRestartShift: () => void;
+  onSwitchRole: (roleId: string) => void;
   onBackToMenu: () => void;
 }
 
@@ -117,12 +125,15 @@ export function RoomScreen({
   world,
   items,
   dialogs,
+  miniGames,
   currentPoint,
   saveState,
   role,
+  otherRole,
   difficulty,
   onSaveUpdate,
   onRestartShift,
+  onSwitchRole,
   onBackToMenu,
 }: RoomScreenProps) {
   const stageWrapperRef = useRef<HTMLDivElement | null>(null);
@@ -151,6 +162,9 @@ export function RoomScreen({
   // Активный ветвящийся диалог (идентификатор дерева и текущего узла)
   const [activeDialogId, setActiveDialogId] = useState<string | null>(null);
   const [activeDialogNodeId, setActiveDialogNodeId] = useState<string | null>(null);
+  // Активная мини-проверка безопасности и окно итогового отчёта смены
+  const [activeMiniGameId, setActiveMiniGameId] = useState<string | null>(null);
+  const [isReportOpen, setIsReportOpen] = useState<boolean>(false);
   // Показана ли подсказка текущей цели на нормальной сложности
   const [isNormalHintShown, setIsNormalHintShown] = useState<boolean>(false);
   // Плашка результата действия (осмотр, подбор предмета, диалог, закрытая дверь, событие дня)
@@ -159,6 +173,10 @@ export function RoomScreen({
   const activeDialog = useMemo(
     () => dialogs.find((d) => d.id === activeDialogId) ?? null,
     [dialogs, activeDialogId],
+  );
+  const activeMiniGame = useMemo(
+    () => miniGames.find((m) => m.id === activeMiniGameId) ?? null,
+    [miniGames, activeMiniGameId],
   );
 
   const prefersReducedMotion = useMemo(() => {
@@ -202,7 +220,7 @@ export function RoomScreen({
     setSelectedHotspotId(null);
   }, [currentPoint.id]);
 
-  // Если у роли есть вступительный диалог (Кира / Дарья Фокс) и он ещё не пройден — открываем его сразу при старте
+  // Если у роли есть вступительный диалог (Кира / Дарья Лисичкина) и он ещё не пройден — открываем его сразу при старте
   const introCheckedForRoleRef = useRef<string | null>(null);
   useEffect(() => {
     if (introCheckedForRoleRef.current === `${role.id}:${saveState.updatedAt}`) {
@@ -234,7 +252,13 @@ export function RoomScreen({
     saveState,
     role,
     difficulty,
-    isPaused: isMapOpen || isJournalOpen || Boolean(activeDialog) || roleFailure.failed,
+    isPaused:
+      isMapOpen ||
+      isJournalOpen ||
+      Boolean(activeDialog) ||
+      Boolean(activeMiniGame) ||
+      isReportOpen ||
+      roleFailure.failed,
     onSaveUpdate,
   };
 
@@ -297,6 +321,14 @@ export function RoomScreen({
       }
 
       if (event.key === 'Escape') {
+        if (isReportOpen) {
+          setIsReportOpen(false);
+          return;
+        }
+        if (activeMiniGame) {
+          setActiveMiniGameId(null);
+          return;
+        }
         if (activeDialog) {
           setActiveDialogId(null);
           setActiveDialogNodeId(null);
@@ -323,7 +355,7 @@ export function RoomScreen({
       }
 
       if (event.key === 'm' || event.key === 'M' || event.key === 'ь' || event.key === 'Ь') {
-        if (activeDialog) {
+        if (activeDialog || activeMiniGame || isReportOpen) {
           return;
         }
         setIsJournalOpen(false);
@@ -334,7 +366,17 @@ export function RoomScreen({
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [activeDialog, isJournalOpen, isMapOpen, selectedHotspotId, notice, roleFailure.failed, onBackToMenu]);
+  }, [
+    activeDialog,
+    activeMiniGame,
+    isReportOpen,
+    isJournalOpen,
+    isMapOpen,
+    selectedHotspotId,
+    notice,
+    roleFailure.failed,
+    onBackToMenu,
+  ]);
 
   // Отбираем слои комнаты, которые разрешены текущими флагами мира
   const visibleLayers = useMemo(
@@ -383,6 +425,14 @@ export function RoomScreen({
       null
     );
   }, [visibleQuests, saveState.questStatuses]);
+
+  const allRequiredQuestsCompleted = useMemo(() => {
+    const required = role.quests.filter((q) => !q.optional);
+    return (
+      required.length > 0 &&
+      required.every((q) => (saveState.questStatuses[q.id] ?? q.initialStatus) === 'completed')
+    );
+  }, [role.quests, saveState.questStatuses]);
 
   function handleStageMouseMove(event: MouseEvent<HTMLDivElement>) {
     const stageEl = stageRef.current;
@@ -490,6 +540,16 @@ export function RoomScreen({
   function handleExecuteAction(hotspot: WorldHotspot, action: HotspotAction) {
     setSelectedHotspotId(null);
 
+    // Если к действию привязана мини-проверка безопасности — открываем её окно
+    if (action.miniGameId) {
+      const game = miniGames.find((m) => m.id === action.miniGameId);
+      if (game) {
+        setNotice(null);
+        setActiveMiniGameId(game.id);
+        return;
+      }
+    }
+
     // Если у действия привязан ветвящийся диалог — открываем окно диалога
     if (action.dialogId) {
       const dialog = dialogs.find((d) => d.id === action.dialogId);
@@ -536,6 +596,43 @@ export function RoomScreen({
       body: result.message,
       questNote: questParts.length > 0 ? questParts.join(' · ') : undefined,
       isLocked: result.isLocked,
+    });
+  }
+
+  /** Обработка завершения мини-проверки безопасности */
+  function handleSubmitMiniGame(selectedIds: string[]) {
+    if (!activeMiniGame) {
+      return;
+    }
+
+    const result = evaluateMiniGameSubmission({
+      miniGame: activeMiniGame,
+      selectedOptionIds: selectedIds,
+      saveState,
+      role,
+      difficulty,
+    });
+
+    onSaveUpdate(result.nextSave);
+    setActiveMiniGameId(null);
+
+    const questParts: string[] = [];
+    if (result.newlyCompletedQuests.length > 0) {
+      questParts.push(
+        `Выполнена задача: ${result.newlyCompletedQuests.map((q) => q.title).join(', ')}`,
+      );
+    }
+    if (result.newlyActivatedQuests.length > 0) {
+      questParts.push(
+        `Новая задача: ${result.newlyActivatedQuests.map((q) => q.title).join(', ')}`,
+      );
+    }
+
+    setNotice({
+      title: activeMiniGame.title,
+      subtitle: role.title,
+      body: result.message,
+      questNote: questParts.length > 0 ? questParts.join(' · ') : undefined,
     });
   }
 
@@ -618,7 +715,10 @@ export function RoomScreen({
     (difficulty.id === 'easy' || (difficulty.id === 'normal' && isNormalHintShown));
 
   return (
-    <div className="relative flex h-screen w-screen flex-col overflow-hidden bg-slate-950 select-none">
+    <div
+      className="relative flex h-screen w-screen flex-col overflow-hidden select-none"
+      style={{ backgroundColor: 'var(--bg-page)' }}
+    >
       {/* Верхняя панель информации (HUD): комната, часы и метрики, текущая цель и кнопки */}
       <header
         className="z-20 border-b px-4 py-2 sm:px-6"
@@ -631,7 +731,7 @@ export function RoomScreen({
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="min-w-0">
             <h1 className="truncate text-base font-semibold sm:text-lg">{currentPoint.title}</h1>
-            <p className="truncate text-xs text-slate-300">
+            <p className="truncate text-xs" style={{ color: 'var(--text-secondary)' }}>
               {currentPoint.subtitle} · {saveState.nickname} · {difficulty.title}
             </p>
           </div>
@@ -736,7 +836,7 @@ export function RoomScreen({
           </div>
         </div>
 
-        {/* Полоса активной цели и подсказки в зависимости от сложности */}
+        {/* Полоса активной цели, подсказки и кнопки завершения смены */}
         <div
           className="mt-2 flex flex-wrap items-center justify-between gap-2 border-t pt-2 text-xs"
           style={{ borderColor: 'var(--hud-border)' }}
@@ -744,36 +844,63 @@ export function RoomScreen({
           <div className="min-w-0 flex-1">
             {currentActiveQuest ? (
               <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
-                <span className="font-semibold text-sky-300">{ui.room.hudCurrentGoalLabel}:</span>
-                <span className="font-medium text-white">{currentActiveQuest.title}</span>
+                <span className="font-semibold" style={{ color: 'var(--accent-lime)' }}>
+                  {ui.room.hudCurrentGoalLabel}:
+                </span>
+                <span className="font-medium" style={{ color: 'var(--hud-text)' }}>
+                  {currentActiveQuest.title}
+                </span>
                 {showHintInline && (
-                  <span className="text-slate-300">
+                  <span style={{ color: 'var(--text-secondary)' }}>
                     — {ui.room.hudHintLabel}: {currentActiveQuest.hint}
                   </span>
                 )}
               </div>
             ) : (
-              <span className="font-semibold text-emerald-300">{ui.room.hudAllGoalsDoneLabel}</span>
+              <span className="font-semibold" style={{ color: 'var(--accent-lime)' }}>
+                {ui.room.hudAllGoalsDoneLabel}
+              </span>
             )}
           </div>
 
-          {currentActiveQuest && difficulty.id === 'normal' && (
-            <button
-              type="button"
-              onClick={() => setIsNormalHintShown((prev) => !prev)}
-              className="inline-flex items-center gap-1 border px-2 py-0.5 text-xs font-medium whitespace-nowrap transition-colors hover:bg-white/10"
-              style={{
-                borderColor: 'var(--hud-border)',
-                borderRadius: 'var(--radius-control)',
-                color: 'var(--hud-text)',
-              }}
-            >
-              <HelpCircle className="h-3.5 w-3.5" aria-hidden="true" />
-              <span>
-                {isNormalHintShown ? ui.room.hudHintHideButton : ui.room.hudHintShowButton}
-              </span>
-            </button>
-          )}
+          <div className="flex flex-wrap items-center gap-2">
+            {currentActiveQuest && difficulty.id === 'normal' && (
+              <button
+                type="button"
+                onClick={() => setIsNormalHintShown((prev) => !prev)}
+                className="inline-flex items-center gap-1 border px-2 py-0.5 text-xs font-medium whitespace-nowrap transition-colors hover:bg-white/10"
+                style={{
+                  borderColor: 'var(--hud-border)',
+                  borderRadius: 'var(--radius-control)',
+                  color: 'var(--hud-text)',
+                }}
+              >
+                <HelpCircle className="h-3.5 w-3.5" aria-hidden="true" />
+                <span>
+                  {isNormalHintShown ? ui.room.hudHintHideButton : ui.room.hudHintShowButton}
+                </span>
+              </button>
+            )}
+
+            {allRequiredQuestsCompleted && (
+              <button
+                type="button"
+                onClick={() => {
+                  setNotice(null);
+                  setIsReportOpen(true);
+                }}
+                className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold whitespace-nowrap transition-colors"
+                style={{
+                  backgroundColor: 'var(--success-primary)',
+                  color: 'var(--accent-text)',
+                  borderRadius: 'var(--radius-control)',
+                }}
+              >
+                <ClipboardCheck className="h-3.5 w-3.5" aria-hidden="true" />
+                <span>{ui.room.finishShiftButton}</span>
+              </button>
+            )}
+          </div>
         </div>
       </header>
 
@@ -882,7 +1009,7 @@ export function RoomScreen({
                         }}
                       >
                         {hotspot.label}
-                        <span className="ml-1.5 font-normal text-slate-300">
+                        <span className="ml-1.5 font-normal" style={{ color: 'var(--text-secondary)' }}>
                           · {ui.room.kindLabels[hotspot.kind]}
                         </span>
                       </span>
@@ -961,7 +1088,7 @@ export function RoomScreen({
                     setSelectedHotspotId(null);
                     tryMoveToPoint(exit.targetPointId, exit.condition);
                   }}
-                  className={`absolute z-20 inline-flex min-h-[40px] cursor-pointer items-center gap-2 border px-3.5 py-2 text-xs font-semibold whitespace-nowrap shadow-lg backdrop-blur-xs transition-colors hover:bg-slate-900 ${positionClass}`}
+                  className={`absolute z-20 inline-flex min-h-[40px] cursor-pointer items-center gap-2 border px-3.5 py-2 text-xs font-semibold whitespace-nowrap shadow-lg backdrop-blur-xs transition-all hover:brightness-110 ${positionClass}`}
                   style={{
                     backgroundColor: 'var(--hud-overlay)',
                     borderColor: 'var(--hud-border)',
@@ -990,13 +1117,35 @@ export function RoomScreen({
               >
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <div className="text-xs text-slate-300">{notice.subtitle}</div>
+                    <div className="text-xs" style={{ color: 'var(--text-secondary)' }}>
+                      {notice.subtitle}
+                    </div>
                     <div className="mt-0.5 text-base font-semibold">{notice.title}</div>
-                    <p className="mt-1.5 text-sm text-slate-100">{notice.body}</p>
+                    <p className="mt-1.5 text-sm" style={{ color: 'var(--hud-text)' }}>
+                      {notice.body}
+                    </p>
                     {notice.questNote && (
-                      <p className="mt-2 text-xs font-semibold text-emerald-300">
+                      <p className="mt-2 text-xs font-semibold" style={{ color: 'var(--accent-lime)' }}>
                         {notice.questNote}
                       </p>
+                    )}
+                    {allRequiredQuestsCompleted && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setNotice(null);
+                          setIsReportOpen(true);
+                        }}
+                        className="mt-3 inline-flex min-h-[36px] items-center gap-1.5 px-3 py-1.5 text-xs font-semibold whitespace-nowrap transition-colors"
+                        style={{
+                          backgroundColor: 'var(--success-primary)',
+                          color: 'var(--accent-text)',
+                          borderRadius: 'var(--radius-control)',
+                        }}
+                      >
+                        <ClipboardCheck className="h-3.5 w-3.5" aria-hidden="true" />
+                        <span>{ui.room.finishShiftButton}</span>
+                      </button>
                     )}
                   </div>
 
@@ -1057,26 +1206,55 @@ export function RoomScreen({
         }}
       />
 
+      {/* Интерактивная мини-проверка безопасности */}
+      <MiniGameModal
+        miniGame={activeMiniGame}
+        difficulty={difficulty}
+        ui={ui}
+        onSubmit={handleSubmitMiniGame}
+        onClose={() => setActiveMiniGameId(null)}
+      />
+
+      {/* Итоговый отчёт в конце смены (без чисел — только выводы) */}
+      <ShiftReportModal
+        isOpen={isReportOpen}
+        role={role}
+        otherRole={otherRole}
+        nickname={saveState.nickname}
+        worldState={saveState.worldState}
+        ui={ui}
+        onSwitchRole={(nextRoleId) => {
+          setIsReportOpen(false);
+          setNotice(null);
+          onSwitchRole(nextRoleId);
+        }}
+        onBackToMenu={() => {
+          setIsReportOpen(false);
+          onBackToMenu();
+        }}
+        onStayInRoom={() => setIsReportOpen(false)}
+      />
+
       {/* Экран провала смены при достижении критической отметки шкалы */}
       {roleFailure.failed && (
         <div
           role="alertdialog"
           aria-modal="true"
           aria-labelledby="fail-modal-title"
-          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 p-4 backdrop-blur-xs"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-xs"
         >
           <div
             className="w-full max-w-md border p-6 shadow-2xl"
             style={{
               backgroundColor: 'var(--bg-surface)',
-              borderColor: 'var(--danger-primary)',
+              borderColor: 'var(--danger-text)',
               borderRadius: 'var(--radius-card)',
             }}
           >
             <div className="flex items-center gap-3">
               <ShieldAlert
                 className="h-7 w-7 shrink-0"
-                style={{ color: 'var(--danger-primary)' }}
+                style={{ color: 'var(--danger-text)' }}
                 aria-hidden="true"
               />
               <h2
@@ -1096,7 +1274,7 @@ export function RoomScreen({
               <button
                 type="button"
                 onClick={handleRestoreCheckpoint}
-                className="min-h-[42px] w-full px-4 py-2 text-sm font-semibold transition-colors"
+                className="min-h-[42px] w-full px-4 py-2 text-sm font-semibold transition-all hover:brightness-110"
                 style={{
                   backgroundColor: 'var(--accent-primary)',
                   color: 'var(--accent-text)',
@@ -1111,7 +1289,7 @@ export function RoomScreen({
                   setNotice(null);
                   onRestartShift();
                 }}
-                className="min-h-[42px] w-full border px-4 py-2 text-sm font-medium transition-colors hover:bg-slate-100"
+                className="min-h-[42px] w-full border px-4 py-2 text-sm font-medium transition-colors hover:bg-white/10"
                 style={{
                   borderColor: 'var(--border-default)',
                   borderRadius: 'var(--radius-control)',
@@ -1123,7 +1301,7 @@ export function RoomScreen({
               <button
                 type="button"
                 onClick={onBackToMenu}
-                className="min-h-[42px] w-full border px-4 py-2 text-sm font-medium transition-colors hover:bg-slate-100"
+                className="min-h-[42px] w-full border px-4 py-2 text-sm font-medium transition-colors hover:bg-white/10"
                 style={{
                   borderColor: 'var(--border-default)',
                   borderRadius: 'var(--radius-control)',

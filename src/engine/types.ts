@@ -76,6 +76,51 @@ export interface DayEventDef {
   notificationText: string;
 }
 
+/** Условный вывод для итогового отчёта в конце смены */
+export interface ReportRule {
+  when?: Record<string, WorldFlagValue>;
+  text: string;
+}
+
+/** Структура итогового качественного отчёта профессии (без чисел, только выводы) */
+export interface RoleReportConfig {
+  title: string;
+  subtitle: string;
+  whatWorked: ReportRule[];
+  whatWorkedFallback: string;
+  mistakes: ReportRule[];
+  noMistakesText: string;
+  realWorld: string;
+  takeaways: string[];
+}
+
+/** Один пункт выбора внутри интерактивной мини-проверки безопасности */
+export interface MiniGameOption {
+  id: string;
+  text: string;
+  isCorrect: boolean;
+  minDifficulty?: 'easy' | 'normal' | 'hard';
+}
+
+/** Описание мини-проверки безопасности из content/minigames.json */
+export interface MiniGameDef {
+  id: string;
+  title: string;
+  subtitle: string;
+  instruction: string;
+  confirmButton: string;
+  successMessage: string;
+  mistakeMessage: string;
+  setFlagsOnComplete?: Record<string, WorldFlagValue>;
+  successMetricChanges?: Record<string, number>;
+  mistakeMetricChanges?: Record<string, number>;
+  options: MiniGameOption[];
+}
+
+export interface MiniGamesConfig {
+  miniGames: MiniGameDef[];
+}
+
 /** Описание профессии (роли) из content/roles/*.json */
 export interface RoleConfig {
   id: string;
@@ -93,6 +138,7 @@ export interface RoleConfig {
   metrics: RoleMetricDef[];
   quests: QuestDef[];
   dayEvents?: DayEventDef[];
+  report?: RoleReportConfig;
 }
 
 /** Предмет инвентаря из content/items.json */
@@ -128,6 +174,7 @@ export interface HotspotAction {
   metricChanges?: Record<string, number>;
   targetPointId?: string;
   dialogId?: string;
+  miniGameId?: string;
 }
 
 /** Кликабельная зона (интерактивный объект), заданная в процентах от размера картинки комнаты */
@@ -305,6 +352,17 @@ export interface UiTexts {
     lockedDefaultMessage: string;
     dialogCloseButton: string;
     dialogChoicesHint: string;
+    finishShiftButton: string;
+    reportWhatWorkedTitle: string;
+    reportMistakesTitle: string;
+    reportRealWorldTitle: string;
+    reportTakeawaysTitle: string;
+    reportSwitchRoleButton: string;
+    reportBackToMenuButton: string;
+    reportStayButton: string;
+    reportSharedWorldNotice: string;
+    miniGameCloseButton: string;
+    miniGameDifficultyNote: string;
   };
   errors: {
     contentLoadTitle: string;
@@ -355,4 +413,5 @@ export interface LoadedGameContent {
   items: ItemDefinition[];
   world: WorldConfig;
   dialogs: DialogsConfig;
+  miniGames: MiniGamesConfig;
 }

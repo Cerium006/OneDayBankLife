@@ -58,7 +58,7 @@ export function DialogModal({
 
   return (
     <div
-      className="fixed inset-0 z-40 flex items-end justify-center bg-slate-950/65 p-4 backdrop-blur-xs sm:items-center"
+      className="fixed inset-0 z-40 flex items-end justify-center bg-black/70 p-4 backdrop-blur-xs sm:items-center"
       role="dialog"
       aria-modal="true"
       aria-labelledby="dialog-speaker-name"
@@ -85,7 +85,7 @@ export function DialogModal({
                 backgroundColor: 'var(--bg-surface-muted)',
                 borderColor: 'var(--accent-primary)',
                 borderRadius: 'var(--radius-control)',
-                color: 'var(--accent-primary)',
+                color: 'var(--accent-lime)',
               }}
               aria-hidden="true"
             >
@@ -109,7 +109,7 @@ export function DialogModal({
             type="button"
             onClick={onClose}
             aria-label={ui.room.dialogCloseButton}
-            className="inline-flex min-h-[38px] items-center gap-1.5 border px-3 py-1.5 text-xs font-medium whitespace-nowrap transition-colors hover:bg-slate-100"
+            className="inline-flex min-h-[38px] items-center gap-1.5 border px-3 py-1.5 text-xs font-medium whitespace-nowrap transition-colors hover:bg-white/10"
             style={{
               borderColor: 'var(--border-default)',
               borderRadius: 'var(--radius-control)',
@@ -149,7 +149,7 @@ export function DialogModal({
                 key={choice.id}
                 type="button"
                 onClick={() => onSelectChoice(choice)}
-                className="flex min-h-[44px] w-full cursor-pointer items-center gap-3 border px-4 py-2.5 text-left text-sm font-medium transition-colors hover:bg-slate-100"
+                className="flex min-h-[44px] w-full cursor-pointer items-center gap-3 border px-4 py-2.5 text-left text-sm font-medium transition-colors hover:bg-white/10"
                 style={{
                   backgroundColor: 'var(--bg-surface)',
                   borderColor: 'var(--border-default)',
@@ -159,7 +159,7 @@ export function DialogModal({
               >
                 <span
                   className="font-semibold tabular-nums"
-                  style={{ color: 'var(--accent-primary)' }}
+                  style={{ color: 'var(--accent-lime)' }}
                 >
                   {idx + 1}.
                 </span>

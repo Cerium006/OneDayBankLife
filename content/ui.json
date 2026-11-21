@@ -80,7 +80,18 @@
     "inspectActionHint": "Выбери действие из меню.",
     "lockedDefaultMessage": "Проход пока закрыт.",
     "dialogCloseButton": "Закончить разговор",
-    "dialogChoicesHint": "Выбери ответ:"
+    "dialogChoicesHint": "Выбери ответ:",
+    "finishShiftButton": "Завершить смену",
+    "reportWhatWorkedTitle": "Что получилось",
+    "reportMistakesTitle": "Где ошибка",
+    "reportRealWorldTitle": "Как в реальной работе",
+    "reportTakeawaysTitle": "Чему вы научились",
+    "reportSwitchRoleButton": "Сыграть за вторую профессию",
+    "reportBackToMenuButton": "В главное меню",
+    "reportStayButton": "Остаться в отделении",
+    "reportSharedWorldNotice": "События этой смены сохранены в общем мире банка.",
+    "miniGameCloseButton": "Отмена",
+    "miniGameDifficultyNote": "Сложность проверки"
   },
   "errors": {
     "contentLoadTitle": "Не удалось загрузить файлы игры",

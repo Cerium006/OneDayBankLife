@@ -133,6 +133,7 @@ export default function App() {
   if (screen === 'room' && savedState) {
     const activeRole =
       content.roles.find((r) => r.id === savedState.activeRoleId) ?? content.roles[0];
+    const otherRole = content.roles.find((r) => r.id !== activeRole.id) ?? null;
     const activeDifficulty =
       content.difficulty.profiles.find((p) => p.id === savedState.difficultyId) ??
       content.difficulty.profiles[0];
@@ -144,12 +145,21 @@ export default function App() {
         world={content.world}
         items={content.items}
         dialogs={content.dialogs.dialogs}
+        miniGames={content.miniGames.miniGames}
         currentPoint={currentPoint}
         saveState={savedState}
         role={activeRole}
+        otherRole={otherRole}
         difficulty={activeDifficulty}
         onSaveUpdate={handleSaveUpdate}
         onRestartShift={handleRestartCurrentShift}
+        onSwitchRole={(nextRoleId) =>
+          handleStartNewGame({
+            nickname: savedState.nickname,
+            roleId: nextRoleId,
+            difficultyId: savedState.difficultyId,
+          })
+        }
         onBackToMenu={() => setScreen('menu')}
       />
     );

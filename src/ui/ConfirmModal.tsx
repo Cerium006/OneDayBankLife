@@ -28,7 +28,7 @@ export function ConfirmModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
       role="dialog"
       aria-modal="true"
       aria-labelledby="confirm-modal-title"
@@ -56,7 +56,7 @@ export function ConfirmModal({
           <button
             type="button"
             onClick={onCancel}
-            className="min-h-[40px] border px-4 py-2 text-sm font-medium whitespace-nowrap transition-colors hover:bg-slate-100"
+            className="min-h-[40px] border px-4 py-2 text-sm font-medium whitespace-nowrap transition-colors hover:bg-white/10"
             style={{
               borderColor: 'var(--border-default)',
               borderRadius: 'var(--radius-control)',
