@@ -153,6 +153,37 @@ export function loadSaveState(roles: RoleConfig[], fallbackPointId: string): Gam
       ? evaluateQuests(matchedRole, mergedWorld, mergedQuests)
       : { nextStatuses: mergedQuests };
 
+    const rawCheckpoint = parsed.checkpoint;
+    const normalizedCheckpoint =
+      rawCheckpoint && typeof rawCheckpoint === 'object'
+        ? {
+            currentPointId:
+              typeof rawCheckpoint.currentPointId === 'string' && rawCheckpoint.currentPointId.trim()
+                ? rawCheckpoint.currentPointId
+                : fallbackPointId,
+            worldState:
+              rawCheckpoint.worldState && typeof rawCheckpoint.worldState === 'object'
+                ? { ...createDefaultWorldState(), ...rawCheckpoint.worldState, activeRole: matchedRole?.id ?? parsed.activeRoleId }
+                : mergedWorld,
+            inventory: Array.isArray(rawCheckpoint.inventory) ? rawCheckpoint.inventory : [],
+            metrics:
+              rawCheckpoint.metrics && typeof rawCheckpoint.metrics === 'object'
+                ? { ...defaultMetrics, ...rawCheckpoint.metrics }
+                : defaultMetrics,
+            questStatuses:
+              rawCheckpoint.questStatuses && typeof rawCheckpoint.questStatuses === 'object'
+                ? { ...defaultQuests, ...rawCheckpoint.questStatuses }
+                : defaultQuests,
+            elapsedGameMinutes:
+              typeof rawCheckpoint.elapsedGameMinutes === 'number'
+                ? rawCheckpoint.elapsedGameMinutes
+                : 0,
+            triggeredEventIds: Array.isArray(rawCheckpoint.triggeredEventIds)
+              ? rawCheckpoint.triggeredEventIds
+              : [],
+          }
+        : undefined;
+
     return {
       version: 4,
       nickname: parsed.nickname,
@@ -169,7 +200,7 @@ export function loadSaveState(roles: RoleConfig[], fallbackPointId: string): Gam
       elapsedGameMinutes:
         typeof parsed.elapsedGameMinutes === 'number' ? parsed.elapsedGameMinutes : 0,
       triggeredEventIds: Array.isArray(parsed.triggeredEventIds) ? parsed.triggeredEventIds : [],
-      checkpoint: parsed.checkpoint,
+      checkpoint: normalizedCheckpoint,
       rolesProgress:
         parsed.rolesProgress && typeof parsed.rolesProgress === 'object'
           ? parsed.rolesProgress

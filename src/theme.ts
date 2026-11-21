@@ -27,6 +27,8 @@ export const theme = {
     // Цвет предупреждения и кнопки сброса прогресса
     danger: '#B91C1C',
     dangerHover: '#991B1B',
+    // Цвет умеренного предупреждения на шкалах метрик
+    warning: '#D97706',
     // Цвет успешного статуса (например, пройденная роль)
     success: '#15803D',
     // Полупрозрачная подложка панелей поверх комнаты
@@ -88,6 +90,7 @@ export function applyThemeCssVariables(): void {
   root.style.setProperty('--accent-text', theme.colors.accentText);
   root.style.setProperty('--danger-primary', theme.colors.danger);
   root.style.setProperty('--danger-hover', theme.colors.dangerHover);
+  root.style.setProperty('--warning-primary', theme.colors.warning);
   root.style.setProperty('--success-primary', theme.colors.success);
   root.style.setProperty('--hud-overlay', theme.colors.hudOverlay);
   root.style.setProperty('--hud-text', theme.colors.hudText);
