@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none">
+  <!-- Шнурок бейджа -->
+  <path d="M40 8 L60 34 L80 8" stroke="#1D4ED8" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Корпус пластиковой карты -->
+  <rect x="24" y="34" width="72" height="76" rx="8" fill="#FFFFFF" stroke="#0F172A" stroke-width="4"/>
+  <!-- Верхняя синяя полоса банка -->
+  <rect x="26" y="36" width="68" height="16" rx="5" fill="#1D4ED8"/>
+  <!-- Фото и чип -->
+  <rect x="34" y="60" width="22" height="26" rx="4" fill="#CBD5E1" stroke="#64748B" stroke-width="2"/>
+  <rect x="64" y="62" width="22" height="8" rx="2" fill="#475569"/>
+  <rect x="64" y="76" width="16" height="8" rx="2" fill="#94A3B8"/>
+  <!-- Золотистый магнитный чип -->
+  <rect x="34" y="92" width="16" height="10" rx="2" fill="#F59E0B" stroke="#B45309" stroke-width="1.5"/>
+</svg>

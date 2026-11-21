@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <polygon points="14,10 88,16 82,88 10,84" fill="#FEF08A" stroke="#15803D" stroke-width="4"/>
+  <line x1="24" y1="36" x2="74" y2="39" stroke="#854D0E" stroke-width="4" stroke-linecap="round"/>
+  <line x1="24" y1="54" x2="68" y2="57" stroke="#854D0E" stroke-width="4" stroke-linecap="round"/>
+  <!-- Отметка о том, что стикер уже осмотрен -->
+  <circle cx="72" cy="72" r="18" fill="#15803D" stroke="#FFFFFF" stroke-width="3"/>
+  <path d="M64 72 L70 78 L81 66" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

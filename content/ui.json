@@ -1,0 +1,66 @@
+{
+  "appTitle": "День из жизни банка",
+  "appSubtitle": "Учебный симулятор в жанре point-and-click о том, как работают специалисты по безопасности и клиентские менеджеры в одном здании банка.",
+  "menu": {
+    "continueSectionTitle": "Сохранённая смена",
+    "continueButton": "Продолжить",
+    "resetButton": "Сбросить прогресс",
+    "newGameSectionTitle": "Новая игра",
+    "nicknameLabel": "Твой никнейм",
+    "nicknamePlaceholder": "Например: Артём или CyberFox",
+    "nicknameErrorEmpty": "Напиши никнейм, чтобы мы знали, на чьё имя оформить пропуск в банк.",
+    "nicknameErrorTooShort": "Никнейм должен содержать хотя бы 2 символа.",
+    "roleLabel": "Выбери профессию",
+    "roleCompletedLabel": "Глава пройдена",
+    "difficultyLabel": "Выбери уровень сложности",
+    "startButton": "Начать смену",
+    "sharedWorldNoteTitle": "Общий мир",
+    "sharedWorldNoteBody": "Действия в одной профессии сохраняются и влияют на вторую. Сначала можно пройти любую роль, а затем посмотреть на последствия с другой стороны."
+  },
+  "difficultyLabels": {
+    "hints": "Подсказки",
+    "suspicionRate": "Рост подозрения",
+    "clientTimer": "Таймер на клиента",
+    "objectHighlight": "Подсветка предметов",
+    "miniGames": "Мини-задания"
+  },
+  "confirmReset": {
+    "title": "Сбросить весь прогресс?",
+    "message": "Никнейм, выбранная сложность, пройденные главы и следы в общем мире будут удалены из памяти браузера.",
+    "confirmButton": "Да, сбросить",
+    "cancelButton": "Отмена"
+  },
+  "room": {
+    "backToMenuButton": "Меню (Esc)",
+    "mapButton": "Карта точек",
+    "mapCloseButton": "Закрыть карту",
+    "mapTitle": "Карта здания банка",
+    "mapHint": "Нажми на соседнюю подсвеченную точку, чтобы перейти в неё.",
+    "mapCurrentBadge": "Вы здесь",
+    "mapConnectedHint": "Доступен переход",
+    "mapFarHint": "Переход через соседние комнаты",
+    "inventoryButton": "Инвентарь (Tab)",
+    "inventoryTitle": "Инвентарь",
+    "inventoryCloseButton": "Закрыть",
+    "inventoryEmpty": "В инвентаре пока пусто. Осматривай комнаты и забирай нужные предметы.",
+    "inventoryCountLabel": "Предметов",
+    "kindLabels": {
+      "object": "Предмет",
+      "npc": "Персонаж",
+      "door": "Переход"
+    },
+    "actionLabels": {
+      "inspect": "Осмотреть",
+      "pickup": "Взять",
+      "use": "Использовать",
+      "talk": "Поговорить"
+    },
+    "actionMenuClose": "Отмена",
+    "inspectActionHint": "Полноценные диалоги с ветвлением появятся на следующем шаге.",
+    "lockedDefaultMessage": "Проход пока закрыт."
+  },
+  "errors": {
+    "contentLoadTitle": "Не удалось загрузить файлы игры",
+    "contentLoadHint": "Проверь консоль браузера — там указано, какой JSON-файл содержит ошибку."
+  }
+}

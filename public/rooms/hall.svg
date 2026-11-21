@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" fill="none">
+  <!-- Перспектива операционного зала -->
+  <polygon points="0,0 1600,0 1420,140 180,140" fill="#FFFFFF" fill-opacity="0.35" stroke="#64748B" stroke-width="2"/>
+  <polygon points="0,900 1600,900 1420,740 180,740" fill="#94A3B8" fill-opacity="0.25" stroke="#64748B" stroke-width="2"/>
+  <line x1="180" y1="140" x2="180" y2="740" stroke="#64748B" stroke-width="2"/>
+  <line x1="1420" y1="140" x2="1420" y2="740" stroke="#64748B" stroke-width="2"/>
+
+  <!-- Служебная дверь в офис слева (x:4% y:24% w:10% h:52%) -->
+  <rect x="64" y="216" width="160" height="468" rx="6" fill="#CBD5E1" stroke="#0F172A" stroke-width="4"/>
+  <rect x="86" y="264" width="116" height="42" rx="4" fill="#B91C1C" fill-opacity="0.85"/>
+  <circle cx="196" cy="460" r="10" fill="#0F172A"/>
+
+  <!-- Окно обслуживания в глубине (x:58% y:24% w:17% h:38%) -->
+  <rect x="928" y="216" width="272" height="342" rx="8" fill="#FFFFFF" fill-opacity="0.88" stroke="#334155" stroke-width="4"/>
+  <rect x="954" y="254" width="220" height="170" rx="6" fill="#BAE6FD" fill-opacity="0.55" stroke="#0F172A" stroke-width="2"/>
+  <rect x="928" y="450" width="272" height="108" fill="#64748B" fill-opacity="0.3"/>
+
+  <!-- Терминал самообслуживания справа (x:79% y:30% w:14% h:50%) -->
+  <rect x="1264" y="270" width="224" height="450" rx="14" fill="#334155" stroke="#0F172A" stroke-width="4"/>
+  <rect x="1294" y="310" width="164" height="140" rx="6" fill="#38BDF8" fill-opacity="0.8" stroke="#0F172A" stroke-width="2"/>
+  <rect x="1326" y="486" width="100" height="24" rx="4" fill="#94A3B8"/>
+
+  <!-- Пожилая клиентка (x:16% y:36% w:11% h:46%) -->
+  <circle cx="344" cy="378" r="38" fill="#FDE68A" stroke="#0F172A" stroke-width="3"/>
+  <rect x="294" y="424" width="100" height="186" rx="18" fill="#7C3AED" fill-opacity="0.75" stroke="#0F172A" stroke-width="3"/>
+  <rect x="308" y="610" width="28" height="110" rx="6" fill="#334155"/>
+  <rect x="352" y="610" width="28" height="110" rx="6" fill="#334155"/>
+
+  <!-- Молодой парень (x:30% y:36% w:11% h:46%) -->
+  <circle cx="568" cy="378" r="38" fill="#FDE68A" stroke="#0F172A" stroke-width="3"/>
+  <rect x="518" y="424" width="100" height="186" rx="18" fill="#0284C7" fill-opacity="0.85" stroke="#0F172A" stroke-width="3"/>
+  <rect x="532" y="610" width="28" height="110" rx="6" fill="#1E293B"/>
+  <rect x="576" y="610" width="28" height="110" rx="6" fill="#1E293B"/>
+
+  <!-- Человек в костюме (x:44% y:34% w:11% h:48%) -->
+  <circle cx="792" cy="364" r="40" fill="#FDE68A" stroke="#0F172A" stroke-width="3"/>
+  <rect x="740" y="412" width="104" height="198" rx="16" fill="#1E293B" stroke="#0F172A" stroke-width="3"/>
+  <rect x="754" y="610" width="30" height="116" rx="6" fill="#0F172A"/>
+  <rect x="798" y="610" width="30" height="116" rx="6" fill="#0F172A"/>
+
+  <rect x="610" y="34" width="380" height="54" rx="8" fill="#0F172A" fill-opacity="0.72"/>
+  <text x="800" y="69" text-anchor="middle" font-family="system-ui, sans-serif" font-size="24" font-weight="700" fill="#FFFFFF">ОПЕРАЦИОННЫЙ ЗАЛ</text>
+</svg>

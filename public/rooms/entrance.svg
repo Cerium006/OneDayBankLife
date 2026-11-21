@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" fill="none">
+  <!-- Потолок и пол (перспектива комнаты) -->
+  <polygon points="0,0 1600,0 1400,150 200,150" fill="#FFFFFF" fill-opacity="0.35" stroke="#64748B" stroke-width="2"/>
+  <polygon points="0,900 1600,900 1400,740 200,740" fill="#94A3B8" fill-opacity="0.25" stroke="#64748B" stroke-width="2"/>
+  <line x1="200" y1="150" x2="200" y2="740" stroke="#64748B" stroke-width="2"/>
+  <line x1="1400" y1="150" x2="1400" y2="740" stroke="#64748B" stroke-width="2"/>
+
+  <!-- Стенд информации слева (x:6% y:24% w:14% h:28%) -->
+  <rect x="96" y="216" width="224" height="252" rx="8" fill="#FFFFFF" fill-opacity="0.85" stroke="#334155" stroke-width="3"/>
+  <rect x="118" y="242" width="180" height="24" rx="4" fill="#1D4ED8" fill-opacity="0.8"/>
+  <rect x="118" y="286" width="180" height="148" rx="4" fill="#E2E8F0" stroke="#94A3B8" stroke-width="2"/>
+  <line x1="138" y1="320" x2="278" y2="320" stroke="#64748B" stroke-width="3"/>
+  <line x1="138" y1="355" x2="250" y2="355" stroke="#64748B" stroke-width="3"/>
+  <line x1="138" y1="390" x2="265" y2="390" stroke="#64748B" stroke-width="3"/>
+
+  <!-- Стеклянные двери в операционный зал (x:42% y:20% w:16% h:32%) -->
+  <rect x="672" y="180" width="256" height="288" rx="6" fill="#BAE6FD" fill-opacity="0.55" stroke="#0F172A" stroke-width="4"/>
+  <line x1="800" y1="180" x2="800" y2="468" stroke="#0F172A" stroke-width="3"/>
+  <rect x="756" y="310" width="12" height="44" rx="3" fill="#334155"/>
+  <rect x="832" y="310" width="12" height="44" rx="3" fill="#334155"/>
+
+  <!-- Турникет в центре (x:38% y:54% w:22% h:28%) -->
+  <rect x="608" y="510" width="70" height="220" rx="8" fill="#475569" stroke="#0F172A" stroke-width="3"/>
+  <rect x="890" y="510" width="70" height="220" rx="8" fill="#475569" stroke="#0F172A" stroke-width="3"/>
+  <rect x="678" y="565" width="212" height="24" rx="6" fill="#EF4444" fill-opacity="0.75" stroke="#7F1D1D" stroke-width="2"/>
+  <circle cx="643" cy="548" r="14" fill="#22C55E"/>
+
+  <!-- Охранник Виктор (x:23% y:32% w:13% h:48%) -->
+  <circle cx="472" cy="348" r="44" fill="#FDE68A" stroke="#0F172A" stroke-width="3"/>
+  <rect x="412" y="400" width="120" height="200" rx="20" fill="#1E3A8A" stroke="#0F172A" stroke-width="3"/>
+  <rect x="432" y="600" width="34" height="110" rx="8" fill="#0F172A"/>
+  <rect x="478" y="600" width="34" height="110" rx="8" fill="#0F172A"/>
+
+  <!-- Администратор Марина и стойка (x:68% y:34% w:16% h:46%) -->
+  <circle cx="1216" cy="364" r="40" fill="#FDE68A" stroke="#0F172A" stroke-width="3"/>
+  <rect x="1164" y="412" width="104" height="130" rx="18" fill="#0F766E" stroke="#0F172A" stroke-width="3"/>
+  <rect x="1088" y="520" width="256" height="196" rx="10" fill="#FFFFFF" fill-opacity="0.92" stroke="#334155" stroke-width="3"/>
+  <rect x="1146" y="458" width="90" height="58" rx="4" fill="#334155"/>
+
+  <!-- Подпись заглушки комнаты -->
+  <rect x="620" y="34" width="360" height="54" rx="8" fill="#0F172A" fill-opacity="0.72"/>
+  <text x="800" y="69" text-anchor="middle" font-family="system-ui, sans-serif" font-size="24" font-weight="700" fill="#FFFFFF">ВХОД И ХОЛЛ</text>
+</svg>

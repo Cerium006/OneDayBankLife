@@ -1,0 +1,6 @@
+{
+  "name": "День из жизни банка",
+  "description": "Браузерная point-and-click игра про профессии в банке: пентестер и клиентский менеджер в общем мире.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

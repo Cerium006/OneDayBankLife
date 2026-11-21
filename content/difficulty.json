@@ -1,0 +1,47 @@
+{
+  "defaultDifficultyId": "normal",
+  "profiles": [
+    {
+      "id": "easy",
+      "title": "Лёгкий",
+      "description": "Спокойный режим для первого знакомства: подсказки всегда видны, время не поджимает.",
+      "params": {
+        "hintsMode": "постоянные",
+        "suspicionGrowthLabel": "медленный",
+        "suspicionMultiplier": 0.6,
+        "clientTimeLabel": "нет",
+        "clientTimeSeconds": 0,
+        "objectHighlight": "да",
+        "miniGamesDifficulty": "простые"
+      }
+    },
+    {
+      "id": "normal",
+      "title": "Нормальный",
+      "description": "Сбалансированная смена: подсказки по кнопке, умеренный контроль времени и внимания.",
+      "params": {
+        "hintsMode": "по кнопке",
+        "suspicionGrowthLabel": "средний",
+        "suspicionMultiplier": 1.0,
+        "clientTimeLabel": "мягкое",
+        "clientTimeSeconds": 90,
+        "objectHighlight": "при приближении",
+        "miniGamesDifficulty": "средние"
+      }
+    },
+    {
+      "id": "hard",
+      "title": "Сложный",
+      "description": "Испытание без подсказок и подсветки: охрана внимательнее, а клиенты не любят ждать.",
+      "params": {
+        "hintsMode": "выключены",
+        "suspicionGrowthLabel": "быстрый",
+        "suspicionMultiplier": 1.5,
+        "clientTimeLabel": "жёсткое",
+        "clientTimeSeconds": 50,
+        "objectHighlight": "нет",
+        "miniGamesDifficulty": "с ловушками"
+      }
+    }
+  ]
+}
