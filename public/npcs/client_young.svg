@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 240" fill="none">
+  <!-- Молодой парень: клиент в худи и кепке -->
+  <path d="M32 236 C32 178 56 154 90 154 C124 154 148 178 148 236 Z" fill="#496648" stroke="#2A2A2A" stroke-width="4"/>
+  <line x1="78" y1="168" x2="78" y2="200" stroke="#D4FA42" stroke-width="3" stroke-linecap="round"/>
+  <line x1="102" y1="168" x2="102" y2="200" stroke="#D4FA42" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="90" cy="98" r="31" fill="#E9C69C" stroke="#2A2A2A" stroke-width="4"/>
+  <!-- Кепка -->
+  <path d="M57 82 C57 52 123 52 123 82 Z" fill="#2A2A2A" stroke="#585858" stroke-width="3"/>
+  <path d="M54 82 H134" stroke="#00B849" stroke-width="6" stroke-linecap="round"/>
+  <circle cx="78" cy="98" r="3.5" fill="#2A2A2A"/>
+  <circle cx="102" cy="98" r="3.5" fill="#2A2A2A"/>
+  <path d="M82 112 Q90 117 98 112" stroke="#2A2A2A" stroke-width="3" stroke-linecap="round"/>
+</svg>

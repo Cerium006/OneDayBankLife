@@ -5,6 +5,7 @@
  */
 
 import { MessageSquare, X } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { getAvailableDialogChoices, resolveDialogText } from '../engine/dialogEngine';
 import type {
   DialogChoice,
@@ -16,6 +17,7 @@ import type {
 interface DialogModalProps {
   dialog: DialogDefinition | null;
   currentNodeId: string | null;
+  speakerAvatar?: string;
   nickname: string;
   worldState: WorldState;
   inventory: string[];
@@ -36,6 +38,7 @@ function getSpeakerInitials(name: string): string {
 export function DialogModal({
   dialog,
   currentNodeId,
+  speakerAvatar,
   nickname,
   worldState,
   inventory,
@@ -43,6 +46,12 @@ export function DialogModal({
   onSelectChoice,
   onClose,
 }: DialogModalProps) {
+  const [avatarFailed, setAvatarFailed] = useState<boolean>(false);
+
+  useEffect(() => {
+    setAvatarFailed(false);
+  }, [dialog?.id, speakerAvatar]);
+
   if (!dialog || !currentNodeId) {
     return null;
   }
@@ -55,6 +64,7 @@ export function DialogModal({
   const availableChoices = getAvailableDialogChoices(node, worldState, inventory);
   const replicaText = resolveDialogText(node.text, nickname);
   const initials = getSpeakerInitials(dialog.speakerName);
+  const showAvatar = Boolean(speakerAvatar && !avatarFailed);
 
   return (
     <div
@@ -73,23 +83,33 @@ export function DialogModal({
         }}
         onClick={(event) => event.stopPropagation()}
       >
-        {/* Шапка собеседника: квадратный аватар, имя, роль и кнопка выхода */}
+        {/* Шапка собеседника: портрет персонажа (или инициалы), имя, роль и кнопка выхода */}
         <div
           className="flex items-start justify-between gap-4 border-b pb-4"
           style={{ borderColor: 'var(--border-default)' }}
         >
           <div className="flex items-center gap-3.5">
             <div
-              className="flex h-12 w-12 shrink-0 items-center justify-center border text-base font-bold"
+              className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden border text-base font-bold"
               style={{
                 backgroundColor: 'var(--bg-surface-muted)',
                 borderColor: 'var(--accent-primary)',
                 borderRadius: 'var(--radius-control)',
                 color: 'var(--accent-lime)',
               }}
-              aria-hidden="true"
+              aria-hidden={!showAvatar}
             >
-              {initials}
+              {showAvatar ? (
+                <img
+                  src={speakerAvatar}
+                  alt={dialog.speakerName}
+                  referrerPolicy="no-referrer"
+                  onError={() => setAvatarFailed(true)}
+                  className="h-full w-full object-cover object-top"
+                />
+              ) : (
+                initials
+              )}
             </div>
             <div>
               <h2

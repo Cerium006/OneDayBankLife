@@ -146,6 +146,7 @@ export default function App() {
         items={content.items}
         dialogs={content.dialogs.dialogs}
         miniGames={content.miniGames.miniGames}
+        tutorial={content.tutorial}
         currentPoint={currentPoint}
         saveState={savedState}
         role={activeRole}
@@ -170,6 +171,7 @@ export default function App() {
       ui={content.ui}
       roles={content.roles}
       difficulty={content.difficulty}
+      tutorial={content.tutorial}
       savedState={savedState}
       onStartNewGame={handleStartNewGame}
       onContinueGame={handleContinueGame}

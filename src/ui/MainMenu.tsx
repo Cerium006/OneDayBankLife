@@ -5,19 +5,24 @@
  * Все надписи берутся из content/ui.json, а списки — из других JSON-файлов.
  */
 
+import { HelpCircle } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
+import { markTutorialCompleted } from '../engine/storage';
 import type {
   DifficultyConfig,
   GameSaveState,
   RoleConfig,
+  TutorialConfig,
   UiTexts,
 } from '../engine/types';
 import { ConfirmModal } from './ConfirmModal';
+import { TutorialModal } from './TutorialModal';
 
 interface MainMenuProps {
   ui: UiTexts;
   roles: RoleConfig[];
   difficulty: DifficultyConfig;
+  tutorial: TutorialConfig;
   savedState: GameSaveState | null;
   onStartNewGame: (params: {
     nickname: string;
@@ -32,6 +37,7 @@ export function MainMenu({
   ui,
   roles,
   difficulty,
+  tutorial,
   savedState,
   onStartNewGame,
   onContinueGame,
@@ -52,6 +58,7 @@ export function MainMenu({
   );
   const [nicknameError, setNicknameError] = useState<string | null>(null);
   const [isResetModalOpen, setIsResetModalOpen] = useState<boolean>(false);
+  const [isTutorialOpen, setIsTutorialOpen] = useState<boolean>(false);
 
   // Находим человекочитаемые названия сохранённой роли и сложности для блока «Продолжить»
   const savedRoleTitle =
@@ -92,17 +99,37 @@ export function MainMenu({
   return (
     <div className="min-h-screen px-4 py-8 sm:px-6 lg:px-8">
       <main className="mx-auto max-w-[1040px]">
-        {/* Шапка с названием игры и коротким пояснением */}
-        <header className="mb-8 border-b pb-6" style={{ borderColor: 'var(--border-default)' }}>
-          <h1
-            className="text-3xl font-bold tracking-tight sm:text-4xl"
-            style={{ color: 'var(--text-primary)', textWrap: 'balance' }}
+        {/* Шапка с названием игры, пояснением и кнопкой обучения */}
+        <header
+          className="mb-8 flex flex-col gap-4 border-b pb-6 sm:flex-row sm:items-start sm:justify-between"
+          style={{ borderColor: 'var(--border-default)' }}
+        >
+          <div>
+            <h1
+              className="text-3xl font-bold tracking-tight sm:text-4xl"
+              style={{ color: 'var(--text-primary)', textWrap: 'balance' }}
+            >
+              {ui.appTitle}
+            </h1>
+            <p className="mt-2 max-w-2xl text-base" style={{ color: 'var(--text-secondary)' }}>
+              {ui.appSubtitle}
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setIsTutorialOpen(true)}
+            className="inline-flex min-h-[40px] shrink-0 items-center gap-2 self-start border px-4 py-2 text-sm font-medium whitespace-nowrap transition-colors hover:bg-white/10"
+            style={{
+              backgroundColor: 'var(--bg-surface)',
+              borderColor: 'var(--border-default)',
+              borderRadius: 'var(--radius-control)',
+              color: 'var(--text-primary)',
+            }}
           >
-            {ui.appTitle}
-          </h1>
-          <p className="mt-2 max-w-2xl text-base" style={{ color: 'var(--text-secondary)' }}>
-            {ui.appSubtitle}
-          </p>
+            <HelpCircle className="h-4 w-4" style={{ color: 'var(--accent-lime)' }} aria-hidden="true" />
+            <span>{ui.menu.tutorialButton}</span>
+          </button>
         </header>
 
         {/* Блок продолжения игры (показывается только если в localStorage уже есть сохранение) */}
@@ -419,6 +446,15 @@ export function MainMenu({
         cancelLabel={ui.confirmReset.cancelButton}
         onConfirm={handleConfirmReset}
         onCancel={() => setIsResetModalOpen(false)}
+      />
+
+      <TutorialModal
+        isOpen={isTutorialOpen}
+        tutorial={tutorial}
+        onClose={() => {
+          markTutorialCompleted();
+          setIsTutorialOpen(false);
+        }}
       />
     </div>
   );

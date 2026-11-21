@@ -14,6 +14,7 @@
     "roleCompletedLabel": "Глава пройдена",
     "difficultyLabel": "Выбери уровень сложности",
     "startButton": "Начать смену",
+    "tutorialButton": "Как играть",
     "sharedWorldNoteTitle": "Общий мир",
     "sharedWorldNoteBody": "Действия в одной профессии сохраняются и влияют на вторую. Сначала можно пройти любую роль, а затем посмотреть на последствия с другой стороны."
   },
@@ -32,6 +33,7 @@
   },
   "room": {
     "backToMenuButton": "Меню (Esc)",
+    "tutorialButton": "Обучение",
     "mapButton": "Карта (M)",
     "mapCloseButton": "Закрыть карту",
     "mapTitle": "Карта здания банка",

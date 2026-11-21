@@ -11,8 +11,9 @@ import {
 } from './questEngine';
 import type { GameSaveState, RoleConfig, WorldState } from './types';
 
-// Уникальный ключ, под которым игра хранит данные в localStorage браузера
+// Уникальные ключи, под которыми игра хранит данные в localStorage браузера
 const STORAGE_KEY = 'bank_day_sim_save_v1';
+const TUTORIAL_KEY = 'bank_day_sim_tutorial_v1';
 
 /** Начальные значения флагов общего мира и текущей смены по умолчанию */
 export function createDefaultWorldState(): WorldState {
@@ -232,11 +233,40 @@ export function saveGameState(state: GameSaveState): void {
 }
 
 /**
+ * Проверяет, прошёл ли или пропустил игрок стартовое обучение.
+ */
+export function hasCompletedTutorial(): boolean {
+  try {
+    if (typeof window === 'undefined' || !window.localStorage) {
+      return false;
+    }
+    return window.localStorage.getItem(TUTORIAL_KEY) === '1';
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Отмечает обучение как пройденное, чтобы оно не открывалось автоматически повторно.
+ */
+export function markTutorialCompleted(): void {
+  try {
+    if (typeof window === 'undefined' || !window.localStorage) {
+      return;
+    }
+    window.localStorage.setItem(TUTORIAL_KEY, '1');
+  } catch (error) {
+    console.error('[Обучение] Не удалось сохранить отметку о прохождении:', error);
+  }
+}
+
+/**
  * Полностью удаляет сохранённый прогресс (кнопка «Сбросить прогресс»).
  */
 export function clearSaveState(): void {
   try {
     window.localStorage.removeItem(STORAGE_KEY);
+    window.localStorage.removeItem(TUTORIAL_KEY);
   } catch (error) {
     console.error('[Сохранение] Не удалось очистить localStorage:', error);
   }

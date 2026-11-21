@@ -5,84 +5,96 @@
       "name": "Кира",
       "roleTitle": "Куратор пентеста",
       "pointId": "entrance",
-      "description": "Руководитель проверки безопасности. На связи по телефону."
+      "description": "Руководитель проверки безопасности. На связи по телефону.",
+      "avatar": "/npcs/kira.svg"
     },
     {
       "id": "guard_viktor",
       "name": "Виктор Палыч",
       "roleTitle": "Служба охраны",
       "pointId": "entrance",
-      "description": "Следит за турникетом на входе и проверяет пропуска посетителей."
+      "description": "Следит за турникетом на входе и проверяет пропуска посетителей.",
+      "avatar": "/npcs/guard_viktor.svg"
     },
     {
       "id": "admin_marina",
       "name": "Марина Ковалёва",
       "roleTitle": "Администратор зала",
       "pointId": "hall",
-      "description": "Встречает посетителей в операционном зале и выдаёт гостевые бейджи."
+      "description": "Встречает посетителей в операционном зале и выдаёт гостевые бейджи.",
+      "avatar": "/npcs/admin_marina.svg"
     },
     {
       "id": "client_elderly",
       "name": "Нина Петровна",
       "roleTitle": "Посетительница",
       "pointId": "hall",
-      "description": "Держит телефон у уха и выглядит взволнованной."
+      "description": "Держит телефон у уха и выглядит взволнованной.",
+      "avatar": "/npcs/client_elderly.svg"
     },
     {
       "id": "client_young",
       "name": "Молодой парень",
       "roleTitle": "Клиент в очереди",
       "pointId": "hall",
-      "description": "Оформляет карту и изучает памятку у терминала."
+      "description": "Оформляет карту и изучает памятку у терминала.",
+      "avatar": "/npcs/client_young.svg"
     },
     {
       "id": "client_suit",
       "name": "Посетитель в костюме",
       "roleTitle": "Подозрительный посетитель",
       "pointId": "hall",
-      "description": "Осматривается по сторонам и наблюдает за дверью в служебный офис."
+      "description": "Осматривается по сторонам и наблюдает за дверью в служебный офис.",
+      "avatar": "/npcs/client_suit.svg"
     },
     {
       "id": "cashier_oleg",
       "name": "Кассир Олег",
       "roleTitle": "Клиентский отдел",
       "pointId": "counter",
-      "description": "Работает за соседним окном обслуживания, поддерживает новичков."
+      "description": "Работает за соседним окном обслуживания, поддерживает новичков.",
+      "avatar": "/npcs/cashier_oleg.svg"
     },
     {
       "id": "client_danya",
       "name": "Анна Сергеевна",
       "roleTitle": "Первый клиент",
       "pointId": "counter",
-      "description": "Торопится перевести деньги маме на лекарства."
+      "description": "Торопится перевести деньги маме на лекарства.",
+      "avatar": "/npcs/client_danya.svg"
     },
     {
       "id": "client_orlov",
       "name": "Господин Орлов",
       "roleTitle": "Третий клиент",
       "pointId": "counter",
-      "description": "Уверенный мужчина, представляющийся сотрудником надзорного органа."
+      "description": "Уверенный мужчина, представляющийся сотрудником надзорного органа.",
+      "avatar": "/npcs/client_orlov.svg"
     },
     {
       "id": "client_lena",
       "name": "Лена",
       "roleTitle": "Четвёртый клиент",
       "pointId": "counter",
-      "description": "Расстроенная клиентка, перешедшая по подозрительной ссылке из письма."
+      "description": "Расстроенная клиентка, перешедшая по подозрительной ссылке из письма.",
+      "avatar": "/npcs/client_lena.svg"
     },
     {
       "id": "director_anna",
       "name": "Дарья Лисичкина",
       "roleTitle": "Директор отделения",
       "pointId": "office",
-      "description": "Контролирует работу отделения и проверяет соблюдение регламентов безопасности."
+      "description": "Контролирует работу отделения и проверяет соблюдение регламентов безопасности.",
+      "avatar": "/npcs/director_anna.svg"
     },
     {
       "id": "sysadmin_igor",
       "name": "Сисадмин Игорь",
       "roleTitle": "ИТ-отдел",
       "pointId": "office",
-      "description": "Настраивает компьютеры сотрудников, Wi-Fi в переговорной и серверную."
+      "description": "Настраивает компьютеры сотрудников, Wi-Fi в переговорной и серверную.",
+      "avatar": "/npcs/sysadmin_igor.svg"
     }
   ],
   "points": [
@@ -213,6 +225,7 @@
           "kind": "npc",
           "interactType": "talk",
           "npcId": "kira",
+          "hideAvatarInRoom": true,
           "x": 66,
           "y": 64,
           "width": 24,

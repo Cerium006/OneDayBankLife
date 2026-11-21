@@ -85,6 +85,7 @@ export function JournalModal({
   onClose,
 }: JournalModalProps) {
   const [activeTab, setActiveTab] = useState<JournalTab>(initialTab);
+  const [failedImages, setFailedImages] = useState<Record<string, boolean>>({});
 
   // Синхронизируем выбранную вкладку каждый раз при открытии дневника конкретной кнопкой
   useEffect(() => {
@@ -299,24 +300,57 @@ export function JournalModal({
             </div>
           ) : (
             <ul className="space-y-3">
-              {ownedItems.map((item) => (
-                <li
-                  key={item.id}
-                  className="border p-4"
-                  style={{
-                    backgroundColor: 'var(--bg-surface-muted)',
-                    borderColor: 'var(--border-default)',
-                    borderRadius: 'var(--radius-control)',
-                  }}
-                >
-                  <div className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>
-                    {item.name}
-                  </div>
-                  <p className="mt-1 text-sm" style={{ color: 'var(--text-secondary)' }}>
-                    {item.description}
-                  </p>
-                </li>
-              ))}
+              {ownedItems.map((item) => {
+                const showImage = Boolean(item.image && !failedImages[item.id]);
+
+                return (
+                  <li
+                    key={item.id}
+                    className="flex items-start gap-3.5 border p-4"
+                    style={{
+                      backgroundColor: 'var(--bg-surface-muted)',
+                      borderColor: 'var(--border-default)',
+                      borderRadius: 'var(--radius-control)',
+                    }}
+                  >
+                    <div
+                      className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden border p-1.5"
+                      style={{
+                        backgroundColor: 'var(--bg-surface)',
+                        borderColor: 'var(--border-default)',
+                        borderRadius: 'var(--radius-control)',
+                      }}
+                    >
+                      {showImage ? (
+                        <img
+                          src={item.image}
+                          alt={item.name}
+                          referrerPolicy="no-referrer"
+                          onError={() =>
+                            setFailedImages((prev) => ({ ...prev, [item.id]: true }))
+                          }
+                          className="h-full w-full object-contain"
+                        />
+                      ) : (
+                        <Briefcase
+                          className="h-6 w-6"
+                          style={{ color: 'var(--accent-lime)' }}
+                          aria-hidden="true"
+                        />
+                      )}
+                    </div>
+
+                    <div className="min-w-0 flex-1">
+                      <div className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>
+                        {item.name}
+                      </div>
+                      <p className="mt-1 text-sm" style={{ color: 'var(--text-secondary)' }}>
+                        {item.description}
+                      </p>
+                    </div>
+                  </li>
+                );
+              })}
             </ul>
           )}
         </div>

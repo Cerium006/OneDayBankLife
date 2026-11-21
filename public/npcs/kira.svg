@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 240" fill="none">
+  <!-- Кира: куратор пентеста с гарнитурой -->
+  <path d="M36 236 C36 178 56 154 90 154 C124 154 144 178 144 236 Z" fill="#2A2A2A" stroke="#585858" stroke-width="4"/>
+  <path d="M72 156 L90 194 L108 156" fill="#00B849"/>
+  <path d="M56 76 C56 44 124 44 124 76 L128 118 C128 124 120 128 114 126 L66 126 C60 128 52 124 52 118 Z" fill="#2A2A2A"/>
+  <circle cx="90" cy="96" r="32" fill="#E9C69C" stroke="#2A2A2A" stroke-width="4"/>
+  <path d="M62 82 C70 64 110 64 118 82" stroke="#2A2A2A" stroke-width="6" stroke-linecap="round"/>
+  <circle cx="78" cy="95" r="3.5" fill="#2A2A2A"/>
+  <circle cx="102" cy="95" r="3.5" fill="#2A2A2A"/>
+  <path d="M82 110 Q90 116 98 110" stroke="#2A2A2A" stroke-width="3" stroke-linecap="round"/>
+  <!-- Гарнитура -->
+  <path d="M56 96 C56 58 124 58 124 96" stroke="#D4FA42" stroke-width="4.5" stroke-linecap="round"/>
+  <rect x="49" y="86" width="10" height="22" rx="4" fill="#00B849" stroke="#2A2A2A" stroke-width="2.5"/>
+  <path d="M54 106 Q62 120 82 118" stroke="#D4FA42" stroke-width="3" stroke-linecap="round"/>
+</svg>

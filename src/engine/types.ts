@@ -146,6 +146,7 @@ export interface ItemDefinition {
   id: string;
   name: string;
   description: string;
+  image?: string;
 }
 
 /** Условие доступности перехода или зоны по флагам мира / предметам */
@@ -189,6 +190,7 @@ export interface WorldHotspot {
   height: number;
   description?: string;
   npcId?: string;
+  hideAvatarInRoom?: boolean;
   targetPointId?: string;
   visibleWhen?: Record<string, WorldFlagValue>;
   hideIfHasItem?: string;
@@ -240,6 +242,7 @@ export interface WorldNpc {
   roleTitle: string;
   pointId: string;
   description: string;
+  avatar?: string;
 }
 
 /** Полная конфигурация карты мира из content/world.json */
@@ -299,6 +302,7 @@ export interface UiTexts {
     roleCompletedLabel: string;
     difficultyLabel: string;
     startButton: string;
+    tutorialButton: string;
     sharedWorldNoteTitle: string;
     sharedWorldNoteBody: string;
   };
@@ -317,6 +321,7 @@ export interface UiTexts {
   };
   room: {
     backToMenuButton: string;
+    tutorialButton: string;
     mapButton: string;
     mapCloseButton: string;
     mapTitle: string;
@@ -405,6 +410,30 @@ export interface GameSaveState {
   updatedAt: string;
 }
 
+/** Иконка шага интерактивного обучения */
+export type TutorialStepIcon = 'mouse' | 'map' | 'briefcase' | 'gauge' | 'roles';
+
+/** Один шаг обучения из content/tutorial.json */
+export interface TutorialStep {
+  id: string;
+  icon: TutorialStepIcon;
+  title: string;
+  description: string;
+  tip?: string;
+}
+
+/** Конфигурация окна обучения из content/tutorial.json */
+export interface TutorialConfig {
+  title: string;
+  subtitle: string;
+  prevButton: string;
+  nextButton: string;
+  finishButton: string;
+  skipButton: string;
+  stepCounterLabel: string;
+  steps: TutorialStep[];
+}
+
 /** Все загруженные и проверенные данные контента игры */
 export interface LoadedGameContent {
   ui: UiTexts;
@@ -414,4 +443,5 @@ export interface LoadedGameContent {
   world: WorldConfig;
   dialogs: DialogsConfig;
   miniGames: MiniGamesConfig;
+  tutorial: TutorialConfig;
 }

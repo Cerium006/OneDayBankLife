@@ -11,6 +11,7 @@ import {
   ArrowLeft,
   ArrowRight,
   ArrowUp,
+  BookOpen,
   Briefcase,
   ClipboardCheck,
   ClipboardList,
@@ -34,6 +35,7 @@ import {
   restoreSaveFromCheckpoint,
   syncQuestsAndCheckpoint,
 } from '../engine/questEngine';
+import { hasCompletedTutorial, markTutorialCompleted } from '../engine/storage';
 import { getFlag, setFlag } from '../engine/worldFlags';
 import {
   checkTransitionAccess,
@@ -54,6 +56,7 @@ import type {
   ItemDefinition,
   MiniGameDef,
   RoleConfig,
+  TutorialConfig,
   UiTexts,
   WorldConfig,
   WorldHotspot,
@@ -66,6 +69,7 @@ import { JournalModal, type JournalTab } from './JournalModal';
 import { MiniGameModal } from './MiniGameModal';
 import { PointMap } from './PointMap';
 import { ShiftReportModal } from './ShiftReportModal';
+import { TutorialModal } from './TutorialModal';
 
 interface RoomScreenProps {
   ui: UiTexts;
@@ -73,6 +77,7 @@ interface RoomScreenProps {
   items: ItemDefinition[];
   dialogs: DialogDefinition[];
   miniGames: MiniGameDef[];
+  tutorial: TutorialConfig;
   currentPoint: WorldPoint;
   saveState: GameSaveState;
   role: RoleConfig;
@@ -90,6 +95,8 @@ interface InspectNotice {
   body: string;
   questNote?: string;
   isLocked?: boolean;
+  image?: string;
+  imageAlt?: string;
 }
 
 /** Подбирает иконку-стрелку в зависимости от стороны экрана */
@@ -126,6 +133,7 @@ export function RoomScreen({
   items,
   dialogs,
   miniGames,
+  tutorial,
   currentPoint,
   saveState,
   role,
@@ -165,10 +173,23 @@ export function RoomScreen({
   // Активная мини-проверка безопасности и окно итогового отчёта смены
   const [activeMiniGameId, setActiveMiniGameId] = useState<string | null>(null);
   const [isReportOpen, setIsReportOpen] = useState<boolean>(false);
+  // Обучение: открывается автоматически при первом запуске и доступно в любой момент по кнопке HUD
+  const [isTutorialOpen, setIsTutorialOpen] = useState<boolean>(() => !hasCompletedTutorial());
   // Показана ли подсказка текущей цели на нормальной сложности
   const [isNormalHintShown, setIsNormalHintShown] = useState<boolean>(false);
   // Плашка результата действия (осмотр, подбор предмета, диалог, закрытая дверь, событие дня)
   const [notice, setNotice] = useState<InspectNotice | null>(null);
+  const [noticeImageFailed, setNoticeImageFailed] = useState<boolean>(false);
+  const [failedNpcImages, setFailedNpcImages] = useState<Record<string, boolean>>({});
+
+  const npcById = useMemo(
+    () => new Map(world.npcs.map((npc) => [npc.id, npc])),
+    [world.npcs],
+  );
+  const itemById = useMemo(
+    () => new Map(items.map((item) => [item.id, item])),
+    [items],
+  );
 
   const activeDialog = useMemo(
     () => dialogs.find((d) => d.id === activeDialogId) ?? null,
@@ -214,15 +235,24 @@ export function RoomScreen({
     return () => observer.disconnect();
   }, []);
 
+  // Сбрасываем флаг ошибки превью при показе нового уведомления
+  useEffect(() => {
+    setNoticeImageFailed(false);
+  }, [notice]);
+
   // При переходе в другую комнату закрываем старое меню действий и сбрасываем наведение
   useEffect(() => {
     setHoveredHotspotId(null);
     setSelectedHotspotId(null);
   }, [currentPoint.id]);
 
-  // Если у роли есть вступительный диалог (Кира / Дарья Лисичкина) и он ещё не пройден — открываем его сразу при старте
+  // Если у роли есть вступительный диалог (Кира / Дарья Лисичкина) и он ещё не пройден —
+  // открываем его сразу после закрытия стартового обучения
   const introCheckedForRoleRef = useRef<string | null>(null);
   useEffect(() => {
+    if (isTutorialOpen) {
+      return;
+    }
     if (introCheckedForRoleRef.current === `${role.id}:${saveState.updatedAt}`) {
       return;
     }
@@ -238,7 +268,15 @@ export function RoomScreen({
         setActiveDialogNodeId(intro.startNodeId);
       }
     }
-  }, [role.id, role.introDialogId, role.introDoneFlag, saveState.worldState, saveState.updatedAt, dialogs]);
+  }, [
+    isTutorialOpen,
+    role.id,
+    role.introDialogId,
+    role.introDoneFlag,
+    saveState.worldState,
+    saveState.updatedAt,
+    dialogs,
+  ]);
 
   // Держим свежие ссылки на пропсы, чтобы таймер рабочего дня не сбрасывался при каждом клике
   const timerStateRef = useRef({
@@ -253,6 +291,7 @@ export function RoomScreen({
     role,
     difficulty,
     isPaused:
+      isTutorialOpen ||
       isMapOpen ||
       isJournalOpen ||
       Boolean(activeDialog) ||
@@ -304,10 +343,15 @@ export function RoomScreen({
     return () => window.clearInterval(intervalId);
   }, [ui.room.hudTimeLabel]);
 
+  function handleCloseTutorial() {
+    markTutorialCompleted();
+    setIsTutorialOpen(false);
+  }
+
   // Горячие клавиши: Tab — дневник/инвентарь, M — карта точек, Esc — закрыть окна или вернуться в меню
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
-      if (roleFailure.failed) {
+      if (roleFailure.failed || isTutorialOpen) {
         return;
       }
 
@@ -367,6 +411,7 @@ export function RoomScreen({
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [
+    isTutorialOpen,
     activeDialog,
     activeMiniGame,
     isReportOpen,
@@ -574,9 +619,8 @@ export function RoomScreen({
       onSaveUpdate(result.nextSave);
     }
 
-    const npcInfo = hotspot.npcId
-      ? world.npcs.find((n) => n.id === hotspot.npcId)
-      : undefined;
+    const npcInfo = hotspot.npcId ? npcById.get(hotspot.npcId) : undefined;
+    const givenItem = action.giveItemId ? itemById.get(action.giveItemId) : undefined;
 
     const questParts: string[] = [];
     if (result.newlyCompletedQuests.length > 0) {
@@ -596,6 +640,8 @@ export function RoomScreen({
       body: result.message,
       questNote: questParts.length > 0 ? questParts.join(' · ') : undefined,
       isLocked: result.isLocked,
+      image: givenItem?.image ?? npcInfo?.avatar,
+      imageAlt: givenItem?.name ?? npcInfo?.name,
     });
   }
 
@@ -667,6 +713,7 @@ export function RoomScreen({
     if (result.isFinished) {
       const speakerName = activeDialog.speakerName;
       const speakerRole = activeDialog.speakerRole;
+      const speakerAvatar = activeDialog.npcId ? npcById.get(activeDialog.npcId)?.avatar : undefined;
       setActiveDialogId(null);
       setActiveDialogNodeId(null);
 
@@ -676,6 +723,8 @@ export function RoomScreen({
           subtitle: speakerRole,
           body: result.feedbackText ?? 'Разговор завершён.',
           questNote: questParts.length > 0 ? questParts.join(' · ') : undefined,
+          image: speakerAvatar,
+          imageAlt: speakerName,
         });
       }
     } else {
@@ -822,6 +871,23 @@ export function RoomScreen({
 
             <button
               type="button"
+              onClick={() => {
+                setSelectedHotspotId(null);
+                setIsTutorialOpen(true);
+              }}
+              className="inline-flex min-h-[36px] items-center gap-1.5 border px-2.5 py-1 text-xs font-medium whitespace-nowrap transition-colors hover:bg-white/10"
+              style={{
+                borderColor: 'var(--hud-border)',
+                borderRadius: 'var(--radius-control)',
+                color: 'var(--hud-text)',
+              }}
+            >
+              <BookOpen className="h-3.5 w-3.5" aria-hidden="true" />
+              <span className="hidden sm:inline">{ui.room.tutorialButton}</span>
+            </button>
+
+            <button
+              type="button"
               onClick={onBackToMenu}
               className="inline-flex min-h-[36px] items-center gap-1.5 border px-2.5 py-1 text-xs font-medium whitespace-nowrap transition-colors hover:bg-white/10"
               style={{
@@ -962,6 +1028,11 @@ export function RoomScreen({
                   cursorPercent,
                 });
                 const accentColor = theme.hotspotColors[hotspot.kind];
+                const npcSprite =
+                  hotspot.kind === 'npc' && !hotspot.hideAvatarInRoom && hotspot.npcId
+                    ? npcById.get(hotspot.npcId)
+                    : undefined;
+                const showNpcSprite = Boolean(npcSprite?.avatar && !failedNpcImages[npcSprite.id]);
 
                 return (
                   <button
@@ -997,6 +1068,20 @@ export function RoomScreen({
                           : 'transparent',
                     }}
                   >
+                    {/* Спрайт-плейсхолдер персонажа прямо внутри его зоны в комнате */}
+                    {showNpcSprite && npcSprite && (
+                      <img
+                        src={npcSprite.avatar}
+                        alt=""
+                        draggable={false}
+                        referrerPolicy="no-referrer"
+                        onError={() =>
+                          setFailedNpcImages((prev) => ({ ...prev, [npcSprite.id]: true }))
+                        }
+                        className="pointer-events-none h-full w-full object-contain object-bottom drop-shadow-[0_6px_12px_rgba(0,0,0,0.45)]"
+                      />
+                    )}
+
                     {/* Подпись названия объекта или имени персонажа при наведении (если меню действий не открыто) */}
                     {isHovered && !isSelected && (
                       <span
@@ -1116,37 +1201,58 @@ export function RoomScreen({
                 }}
               >
                 <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <div className="text-xs" style={{ color: 'var(--text-secondary)' }}>
-                      {notice.subtitle}
-                    </div>
-                    <div className="mt-0.5 text-base font-semibold">{notice.title}</div>
-                    <p className="mt-1.5 text-sm" style={{ color: 'var(--hud-text)' }}>
-                      {notice.body}
-                    </p>
-                    {notice.questNote && (
-                      <p className="mt-2 text-xs font-semibold" style={{ color: 'var(--accent-lime)' }}>
-                        {notice.questNote}
-                      </p>
-                    )}
-                    {allRequiredQuestsCompleted && (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setNotice(null);
-                          setIsReportOpen(true);
-                        }}
-                        className="mt-3 inline-flex min-h-[36px] items-center gap-1.5 px-3 py-1.5 text-xs font-semibold whitespace-nowrap transition-colors"
+                  <div className="flex min-w-0 flex-1 items-start gap-3.5">
+                    {notice.image && !noticeImageFailed && (
+                      <div
+                        className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden border p-1"
                         style={{
-                          backgroundColor: 'var(--success-primary)',
-                          color: 'var(--accent-text)',
+                          backgroundColor: 'var(--bg-surface)',
+                          borderColor: 'var(--hud-border)',
                           borderRadius: 'var(--radius-control)',
                         }}
                       >
-                        <ClipboardCheck className="h-3.5 w-3.5" aria-hidden="true" />
-                        <span>{ui.room.finishShiftButton}</span>
-                      </button>
+                        <img
+                          src={notice.image}
+                          alt={notice.imageAlt ?? notice.title}
+                          referrerPolicy="no-referrer"
+                          onError={() => setNoticeImageFailed(true)}
+                          className="h-full w-full object-contain"
+                        />
+                      </div>
                     )}
+
+                    <div className="min-w-0 flex-1">
+                      <div className="text-xs" style={{ color: 'var(--text-secondary)' }}>
+                        {notice.subtitle}
+                      </div>
+                      <div className="mt-0.5 text-base font-semibold">{notice.title}</div>
+                      <p className="mt-1.5 text-sm" style={{ color: 'var(--hud-text)' }}>
+                        {notice.body}
+                      </p>
+                      {notice.questNote && (
+                        <p className="mt-2 text-xs font-semibold" style={{ color: 'var(--accent-lime)' }}>
+                          {notice.questNote}
+                        </p>
+                      )}
+                      {allRequiredQuestsCompleted && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setNotice(null);
+                            setIsReportOpen(true);
+                          }}
+                          className="mt-3 inline-flex min-h-[36px] items-center gap-1.5 px-3 py-1.5 text-xs font-semibold whitespace-nowrap transition-colors"
+                          style={{
+                            backgroundColor: 'var(--success-primary)',
+                            color: 'var(--accent-text)',
+                            borderRadius: 'var(--radius-control)',
+                          }}
+                        >
+                          <ClipboardCheck className="h-3.5 w-3.5" aria-hidden="true" />
+                          <span>{ui.room.finishShiftButton}</span>
+                        </button>
+                      )}
+                    </div>
                   </div>
 
                   <button
@@ -1195,6 +1301,7 @@ export function RoomScreen({
       <DialogModal
         dialog={activeDialog}
         currentNodeId={activeDialogNodeId}
+        speakerAvatar={activeDialog?.npcId ? npcById.get(activeDialog.npcId)?.avatar : undefined}
         nickname={saveState.nickname}
         worldState={saveState.worldState}
         inventory={saveState.inventory}
@@ -1204,6 +1311,13 @@ export function RoomScreen({
           setActiveDialogId(null);
           setActiveDialogNodeId(null);
         }}
+      />
+
+      {/* Пошаговое окно обучения (показывается при первом входе и по кнопке «Обучение») */}
+      <TutorialModal
+        isOpen={isTutorialOpen}
+        tutorial={tutorial}
+        onClose={handleCloseTutorial}
       />
 
       {/* Интерактивная мини-проверка безопасности */}

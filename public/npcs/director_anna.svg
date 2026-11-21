@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 240" fill="none">
+  <!-- Дарья Лисичкина: директор отделения в изумрудном костюме и очках -->
+  <path d="M32 236 C32 176 56 152 90 152 C124 152 148 176 148 236 Z" fill="#00B849" stroke="#2A2A2A" stroke-width="4"/>
+  <path d="M72 152 L90 192 L108 152 Z" fill="#F7F4EE"/>
+  <rect x="108" y="182" width="22" height="14" rx="3" fill="#D4FA42" stroke="#2A2A2A" stroke-width="2"/>
+  <path d="M52 84 C52 44 128 44 128 84 L132 128 H48 Z" fill="#B45309"/>
+  <circle cx="90" cy="96" r="31" fill="#E9C69C" stroke="#2A2A2A" stroke-width="4"/>
+  <rect x="65" y="88" width="20" height="14" rx="3" stroke="#2A2A2A" stroke-width="3" fill="#F7F4EE" fill-opacity="0.25"/>
+  <rect x="95" y="88" width="20" height="14" rx="3" stroke="#2A2A2A" stroke-width="3" fill="#F7F4EE" fill-opacity="0.25"/>
+  <line x1="85" y1="94" x2="95" y2="94" stroke="#2A2A2A" stroke-width="3"/>
+  <circle cx="75" cy="95" r="3" fill="#2A2A2A"/>
+  <circle cx="105" cy="95" r="3" fill="#2A2A2A"/>
+  <path d="M81 112 Q90 117 99 112" stroke="#2A2A2A" stroke-width="3" stroke-linecap="round"/>
+</svg>

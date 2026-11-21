@@ -8,6 +8,7 @@ import difficultyRaw from '../../content/difficulty.json';
 import dialogsRaw from '../../content/dialogs.json';
 import itemsRaw from '../../content/items.json';
 import miniGamesRaw from '../../content/minigames.json';
+import tutorialRaw from '../../content/tutorial.json';
 import uiRaw from '../../content/ui.json';
 import worldRaw from '../../content/world.json';
 import type {
@@ -32,6 +33,9 @@ import type {
   RoleConfig,
   RoleMetricDef,
   RoleReportConfig,
+  TutorialConfig,
+  TutorialStep,
+  TutorialStepIcon,
   UiTexts,
   WorldConfig,
   WorldExit,
@@ -85,6 +89,7 @@ function validateItems(raw: unknown): { items: ItemDefinition[]; itemIds: Set<st
       id,
       name: assertNonEmptyString(item.name, `items[${id}].name`),
       description: assertNonEmptyString(item.description, `items[${id}].description`),
+      image: typeof item.image === 'string' && item.image.trim().length > 0 ? item.image : undefined,
     };
   });
 
@@ -688,6 +693,8 @@ function validateWorld(
             height: assertPercentNumber(h.height, `world.points[${id}].hotspots[${hsId}].height`),
             description: typeof h.description === 'string' ? h.description : undefined,
             npcId: typeof h.npcId === 'string' ? h.npcId : undefined,
+            hideAvatarInRoom:
+              typeof h.hideAvatarInRoom === 'boolean' ? h.hideAvatarInRoom : undefined,
             targetPointId: typeof h.targetPointId === 'string' ? h.targetPointId : undefined,
             visibleWhen: h.visibleWhen as WorldHotspot['visibleWhen'],
             hideIfHasItem: typeof h.hideIfHasItem === 'string' ? h.hideIfHasItem : undefined,
@@ -722,6 +729,7 @@ function validateWorld(
       roleTitle: assertNonEmptyString(n.roleTitle, `world.npcs[${id}].roleTitle`),
       pointId,
       description: assertNonEmptyString(n.description, `world.npcs[${id}].description`),
+      avatar: typeof n.avatar === 'string' && n.avatar.trim().length > 0 ? n.avatar : undefined,
     };
   });
 
@@ -793,6 +801,52 @@ function validateWorld(
   return { world: { npcs, points }, pointIds };
 }
 
+function validateTutorial(raw: unknown): TutorialConfig {
+  if (typeof raw !== 'object' || raw === null) {
+    throw new Error('Ошибка в content/tutorial.json: файл должен содержать JSON-объект.');
+  }
+  const data = raw as Record<string, unknown>;
+  if (!Array.isArray(data.steps) || data.steps.length === 0) {
+    throw new Error('Ошибка в content/tutorial.json: список steps должен быть непустым массивом.');
+  }
+
+  const validIcons = new Set<TutorialStepIcon>(['mouse', 'map', 'briefcase', 'gauge', 'roles']);
+  const seenStepIds = new Set<string>();
+  const steps: TutorialStep[] = data.steps.map((rawStep, index) => {
+    if (typeof rawStep !== 'object' || rawStep === null) {
+      throw new Error(`Ошибка в content/tutorial.json: шаг #${index + 1} должен быть объектом.`);
+    }
+    const s = rawStep as Record<string, unknown>;
+    const id = assertNonEmptyString(s.id, `tutorial.steps[${index}].id`);
+    if (seenStepIds.has(id)) {
+      throw new Error(`Ошибка в content/tutorial.json: повторяющийся id шага "${id}".`);
+    }
+    seenStepIds.add(id);
+
+    const rawIcon = typeof s.icon === 'string' ? (s.icon as TutorialStepIcon) : 'mouse';
+    const icon: TutorialStepIcon = validIcons.has(rawIcon) ? rawIcon : 'mouse';
+
+    return {
+      id,
+      icon,
+      title: assertNonEmptyString(s.title, `tutorial.steps[${id}].title`),
+      description: assertNonEmptyString(s.description, `tutorial.steps[${id}].description`),
+      tip: typeof s.tip === 'string' && s.tip.trim().length > 0 ? s.tip : undefined,
+    };
+  });
+
+  return {
+    title: assertNonEmptyString(data.title, 'tutorial.title'),
+    subtitle: assertNonEmptyString(data.subtitle, 'tutorial.subtitle'),
+    prevButton: assertNonEmptyString(data.prevButton, 'tutorial.prevButton'),
+    nextButton: assertNonEmptyString(data.nextButton, 'tutorial.nextButton'),
+    finishButton: assertNonEmptyString(data.finishButton, 'tutorial.finishButton'),
+    skipButton: assertNonEmptyString(data.skipButton, 'tutorial.skipButton'),
+    stepCounterLabel: assertNonEmptyString(data.stepCounterLabel, 'tutorial.stepCounterLabel'),
+    steps,
+  };
+}
+
 function validateUi(raw: unknown): UiTexts {
   if (typeof raw !== 'object' || raw === null) {
     throw new Error('Ошибка в content/ui.json: файл должен содержать JSON-объект.');
@@ -800,6 +854,8 @@ function validateUi(raw: unknown): UiTexts {
   const data = raw as UiTexts;
   assertNonEmptyString(data.appTitle, 'ui.appTitle');
   assertNonEmptyString(data.menu?.startButton, 'ui.menu.startButton');
+  assertNonEmptyString(data.menu?.tutorialButton, 'ui.menu.tutorialButton');
+  assertNonEmptyString(data.room?.tutorialButton, 'ui.room.tutorialButton');
   assertNonEmptyString(data.room?.mapButton, 'ui.room.mapButton');
   assertNonEmptyString(data.room?.inventoryButton, 'ui.room.inventoryButton');
   assertNonEmptyString(data.room?.tasksButton, 'ui.room.tasksButton');
@@ -819,8 +875,9 @@ export function loadAndValidateContent(): LoadedGameContent {
     const { miniGames, miniGameIds } = validateMiniGames(miniGamesRaw);
     const { world, pointIds } = validateWorld(worldRaw, itemIds, dialogIds, miniGameIds);
     const roles = validateRoles(pointIds, itemIds, dialogIds);
+    const tutorial = validateTutorial(tutorialRaw);
 
-    return { ui, difficulty, roles, items, world, dialogs, miniGames };
+    return { ui, difficulty, roles, items, world, dialogs, miniGames, tutorial };
   } catch (error) {
     console.error('[Проверка контента JSON]', error);
     throw error;

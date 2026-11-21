@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 240" fill="none">
+  <!-- Сисадмин Игорь: очки, тёмное худи и ИТ-пропуск -->
+  <path d="M32 236 C32 178 56 154 90 154 C124 154 148 178 148 236 Z" fill="#2A2A2A" stroke="#585858" stroke-width="4"/>
+  <path d="M74 154 L90 180 L106 154" stroke="#00B849" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="78" y="188" width="24" height="30" rx="4" fill="#F7F4EE" stroke="#2A2A2A" stroke-width="2.5"/>
+  <rect x="83" y="194" width="14" height="8" rx="2" fill="#D4FA42"/>
+  <circle cx="90" cy="96" r="31" fill="#E9C69C" stroke="#2A2A2A" stroke-width="4"/>
+  <path d="M58 84 C60 54 120 54 122 84" fill="#585858"/>
+  <rect x="65" y="88" width="20" height="14" rx="3" stroke="#2A2A2A" stroke-width="3" fill="#F7F4EE" fill-opacity="0.3"/>
+  <rect x="95" y="88" width="20" height="14" rx="3" stroke="#2A2A2A" stroke-width="3" fill="#F7F4EE" fill-opacity="0.3"/>
+  <line x1="85" y1="94" x2="95" y2="94" stroke="#2A2A2A" stroke-width="3"/>
+  <circle cx="75" cy="95" r="3" fill="#2A2A2A"/>
+  <circle cx="105" cy="95" r="3" fill="#2A2A2A"/>
+  <path d="M82 112 Q90 116 98 112" stroke="#2A2A2A" stroke-width="3" stroke-linecap="round"/>
+</svg>
