@@ -45,7 +45,7 @@ export function HudMetrics({ ui, role, metrics, elapsedGameMinutes }: HudMetrics
   const timeText = formatShiftTime(role.startTimeMinutes, elapsedGameMinutes);
 
   return (
-    <div className="flex flex-wrap items-center gap-4">
+    <div className="flex flex-wrap items-center gap-3">
       {/* Игровые часы рабочей смены */}
       <div
         className="flex items-center gap-1.5 border px-2.5 py-1 text-xs font-semibold tabular-nums"
@@ -66,7 +66,7 @@ export function HudMetrics({ ui, role, metrics, elapsedGameMinutes }: HudMetrics
       </div>
 
       {/* Полосы метрик выбранной профессии */}
-      <div className="flex flex-wrap items-center gap-4">
+      <div className="flex flex-wrap items-center gap-3">
         {role.metrics.map((def) => {
           const rawValue = typeof metrics[def.id] === 'number' ? metrics[def.id] : def.initial;
           const clamped = Math.max(def.min, Math.min(def.max, rawValue));
@@ -74,7 +74,7 @@ export function HudMetrics({ ui, role, metrics, elapsedGameMinutes }: HudMetrics
           const visual = getMetricVisual(def, clamped, ui.room.metricStatusLabels);
 
           return (
-            <div key={def.id} className="min-w-[154px]">
+            <div key={def.id} className="min-w-[136px]">
               <div className="flex items-baseline justify-between gap-2 text-xs">
                 <span style={{ color: 'var(--text-secondary)' }}>{def.label}</span>
                 <span className="font-semibold tabular-nums" style={{ color: 'var(--hud-text)' }}>

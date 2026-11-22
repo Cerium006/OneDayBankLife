@@ -234,6 +234,18 @@ function validateMiniGames(raw: unknown): {
       };
     });
 
+    const sampleSizeRaw =
+      typeof g.sampleSizeByDifficulty === 'object' && g.sampleSizeByDifficulty !== null
+        ? (g.sampleSizeByDifficulty as Record<string, unknown>)
+        : null;
+    const sampleSizeByDifficulty: MiniGameDef['sampleSizeByDifficulty'] = sampleSizeRaw
+      ? {
+          easy: typeof sampleSizeRaw.easy === 'number' ? sampleSizeRaw.easy : undefined,
+          normal: typeof sampleSizeRaw.normal === 'number' ? sampleSizeRaw.normal : undefined,
+          hard: typeof sampleSizeRaw.hard === 'number' ? sampleSizeRaw.hard : undefined,
+        }
+      : undefined;
+
     return {
       id,
       title: assertNonEmptyString(g.title, `miniGames[${id}].title`),
@@ -242,6 +254,9 @@ function validateMiniGames(raw: unknown): {
       confirmButton: assertNonEmptyString(g.confirmButton, `miniGames[${id}].confirmButton`),
       successMessage: assertNonEmptyString(g.successMessage, `miniGames[${id}].successMessage`),
       mistakeMessage: assertNonEmptyString(g.mistakeMessage, `miniGames[${id}].mistakeMessage`),
+      onceFlag:
+        typeof g.onceFlag === 'string' && g.onceFlag.trim().length > 0 ? g.onceFlag : undefined,
+      sampleSizeByDifficulty,
       setFlagsOnComplete: g.setFlagsOnComplete as MiniGameDef['setFlagsOnComplete'],
       successMetricChanges: g.successMetricChanges as MiniGameDef['successMetricChanges'],
       mistakeMetricChanges: g.mistakeMetricChanges as MiniGameDef['mistakeMetricChanges'],

@@ -6,9 +6,11 @@
  */
 
 import { Clock, MessageSquare, Square, Volume2, X } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { getAvailableDialogChoices, resolveDialogText } from '../engine/dialogEngine';
+import { shuffleArray } from '../engine/miniGameEngine';
 import { playVoiceover, stopVoiceover } from '../engine/soundEffects';
+import { getPortraitObjectPosition } from './portraitFit';
 import type {
   DialogChoice,
   DialogDefinition,
@@ -75,6 +77,7 @@ export function DialogModal({
   const [remainingSeconds, setRemainingSeconds] = useState<number>(clientTimerSeconds);
   const [timedOutOnce, setTimedOutOnce] = useState<boolean>(false);
   const [isSpeaking, setIsSpeaking] = useState<boolean>(false);
+  const [shuffleNonce, setShuffleNonce] = useState<number>(0);
 
   const currentVoiceUrl =
     dialog && currentNodeId ? dialog.nodes[currentNodeId]?.voiceUrl : undefined;
@@ -84,6 +87,23 @@ export function DialogModal({
     setRemainingSeconds(clientTimerSeconds);
     setTimedOutOnce(false);
   }, [dialog?.id, speakerAvatar, clientTimerSeconds]);
+
+  useEffect(() => {
+    if (dialog && currentNodeId) {
+      setShuffleNonce((prev) => prev + 1);
+    }
+  }, [dialog?.id, currentNodeId]);
+
+  const activeNode = dialog && currentNodeId ? dialog.nodes[currentNodeId] : undefined;
+
+  const availableChoices = useMemo(() => {
+    if (!activeNode) {
+      return [];
+    }
+    const base = getAvailableDialogChoices(activeNode, worldState, inventory);
+    return base.length > 1 ? shuffleArray(base) : base;
+    // shuffleNonce перемешивает порядок ответов при каждом открытии диалога и смене узла
+  }, [activeNode, worldState, inventory, shuffleNonce]);
 
   // Автоматическое воспроизведение озвучки текущей реплики с очисткой при переходе/закрытии
   useEffect(() => {
@@ -127,39 +147,29 @@ export function DialogModal({
     }
   }, [isTimedClientDialog, remainingSeconds, timedOutOnce, onClientTimeout]);
 
-  // Быстрый выбор ответа цифрами 1..9 с клавиатуры
+  // Быстрый выбор ответа цифрами 1..9 с клавиатуры (синхронизировано с текущим порядком)
   useEffect(() => {
-    if (!dialog || !currentNodeId) {
+    if (!dialog || !activeNode || availableChoices.length === 0) {
       return;
     }
-    const activeNode = dialog.nodes[currentNodeId];
-    if (!activeNode) {
-      return;
-    }
-    const visibleChoices = getAvailableDialogChoices(activeNode, worldState, inventory);
 
     function handleKeyDown(event: KeyboardEvent) {
       const num = Number.parseInt(event.key, 10);
-      if (!Number.isNaN(num) && num >= 1 && num <= visibleChoices.length) {
+      if (!Number.isNaN(num) && num >= 1 && num <= availableChoices.length) {
         event.preventDefault();
-        onSelectChoice(visibleChoices[num - 1]);
+        onSelectChoice(availableChoices[num - 1]);
       }
     }
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [dialog, currentNodeId, worldState, inventory, onSelectChoice]);
+  }, [dialog, activeNode, availableChoices, onSelectChoice]);
 
-  if (!dialog || !currentNodeId) {
+  if (!dialog || !currentNodeId || !activeNode) {
     return null;
   }
 
-  const node = dialog.nodes[currentNodeId];
-  if (!node) {
-    return null;
-  }
-
-  const availableChoices = getAvailableDialogChoices(node, worldState, inventory);
+  const node = activeNode;
   const replicaText = resolveDialogText(node.text, nickname);
   const initials = getSpeakerInitials(dialog.speakerName);
   const showAvatar = Boolean(speakerAvatar && !avatarFailed);
@@ -221,7 +231,8 @@ export function DialogModal({
                   alt={dialog.speakerName}
                   referrerPolicy="no-referrer"
                   onError={() => setAvatarFailed(true)}
-                  className="h-full w-full object-cover object-[50%_22%]"
+                  style={{ objectPosition: getPortraitObjectPosition(speakerAvatar) }}
+                  className="h-full w-full object-cover"
                 />
               ) : (
                 initials

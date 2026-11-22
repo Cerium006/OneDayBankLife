@@ -8,6 +8,12 @@
       "confirmButton": "Отправить отчёт Кире",
       "successMessage": "Отчёт успешно сформирован и передан! Можно завершать смену и смотреть итоговый разбор.",
       "mistakeMessage": "В отчёт попали неточные пункты — отчёт принят с замечанием (+10% к подозрению).",
+      "onceFlag": "reportDelivered",
+      "sampleSizeByDifficulty": {
+        "easy": 4,
+        "normal": 5,
+        "hard": 6
+      },
       "setFlagsOnComplete": {
         "reportDelivered": true
       },
@@ -32,8 +38,19 @@
           "minDifficulty": "normal"
         },
         {
+          "id": "opt_badge_return",
+          "text": "Выдавать гостевые бейджи только под роспись с обязательным возвратом на выходе",
+          "isCorrect": true,
+          "minDifficulty": "hard"
+        },
+        {
           "id": "opt_badge_public",
           "text": "Сделать гостевые бейджи без возврата, чтобы не тратить время охраны",
+          "isCorrect": false
+        },
+        {
+          "id": "opt_usb_test",
+          "text": "Разрешить сотрудникам проверять найденные флешки на служебных ПК перед сдачей",
           "isCorrect": false
         },
         {
@@ -58,6 +75,12 @@
       "confirmButton": "Зафиксировать разбор",
       "successMessage": "Верно! Вы точно выделили признаки фишинга (+10% к безопасности).",
       "mistakeMessage": "Некоторые признаки определены неверно — обратите внимание на домен и давление срочностью.",
+      "onceFlag": "phishingChecked",
+      "sampleSizeByDifficulty": {
+        "easy": 4,
+        "normal": 5,
+        "hard": 6
+      },
       "setFlagsOnComplete": {
         "monitorChecked": true,
         "phishingChecked": true
@@ -86,8 +109,19 @@
           "minDifficulty": "normal"
         },
         {
+          "id": "phish_attachment",
+          "text": "Неожиданное вложение или сокращённая ссылка вместо официального приложения банка",
+          "isCorrect": true,
+          "minDifficulty": "hard"
+        },
+        {
           "id": "phish_logo",
           "text": "Наличие логотипа банка гарантирует, что письмо настоящее",
+          "isCorrect": false
+        },
+        {
+          "id": "phish_manager_name",
+          "text": "Если в подписи указано «Служба безопасности», данные можно вводить без звонка в банк",
           "isCorrect": false
         },
         {

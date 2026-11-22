@@ -247,6 +247,9 @@
             {
               "id": "igor_1_remove",
               "text": "Сейчас уберу",
+              "requireFlags": {
+                "stickyNoticed": false
+              },
               "setFlags": {
                 "stickyNoticed": true,
                 "stickyPasswordFound": true
@@ -257,8 +260,19 @@
               "feedbackText": "Вы отметили стикер с паролем и помогли Игорю навести порядок."
             },
             {
+              "id": "igor_1_already",
+              "text": "Стикер уже отмечен, порядок наведён",
+              "requireFlags": {
+                "stickyNoticed": true
+              },
+              "feedbackText": "Игорь кивнул: «Отлично, за паролями нужно следить»."
+            },
+            {
               "id": "igor_1_ignore",
               "text": "Это не мой стол",
+              "requireFlags": {
+                "stickyNoticed": false
+              },
               "setFlags": {
                 "stickyPasswordFound": true
               },

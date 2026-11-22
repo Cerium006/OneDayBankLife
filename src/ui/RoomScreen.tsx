@@ -79,6 +79,7 @@ import { HudMetrics } from './HudMetrics';
 import { JournalModal, type JournalTab } from './JournalModal';
 import { MiniGameModal } from './MiniGameModal';
 import { PointMap } from './PointMap';
+import { getPortraitObjectPosition } from './portraitFit';
 import { ShiftReportModal } from './ShiftReportModal';
 import { TutorialModal } from './TutorialModal';
 
@@ -108,6 +109,7 @@ interface InspectNotice {
   isLocked?: boolean;
   image?: string;
   imageAlt?: string;
+  imageKind?: 'portrait' | 'item';
 }
 
 /** Подбирает иконку-стрелку в зависимости от стороны экрана */
@@ -694,11 +696,12 @@ export function RoomScreen({
       isLocked: result.isLocked,
       image: givenItem?.image ?? npcInfo?.avatar,
       imageAlt: givenItem?.name ?? npcInfo?.name,
+      imageKind: givenItem ? 'item' : npcInfo ? 'portrait' : undefined,
     });
   }
 
   /** Обработка завершения мини-проверки безопасности */
-  function handleSubmitMiniGame(selectedIds: string[]) {
+  function handleSubmitMiniGame(selectedIds: string[], presentedOptionIds?: string[]) {
     if (!activeMiniGame) {
       return;
     }
@@ -706,6 +709,7 @@ export function RoomScreen({
     const result = evaluateMiniGameSubmission({
       miniGame: activeMiniGame,
       selectedOptionIds: selectedIds,
+      presentedOptionIds,
       saveState,
       role,
       difficulty,
@@ -789,6 +793,7 @@ export function RoomScreen({
             questNote: questParts.length > 0 ? questParts.join(' · ') : undefined,
             image: speakerAvatar,
             imageAlt: speakerName,
+            imageKind: speakerAvatar ? 'portrait' : undefined,
           });
         }
       } else {
@@ -859,17 +864,17 @@ export function RoomScreen({
     >
       {/* Верхняя панель информации (HUD): комната, часы и метрики, текущая цель и кнопки */}
       <header
-        className="z-20 border-b px-4 py-2 sm:px-6"
+        className="z-20 border-b px-3 py-1.5 sm:px-5"
         style={{
           backgroundColor: 'var(--hud-overlay)',
           borderColor: 'var(--hud-border)',
           color: 'var(--hud-text)',
         }}
       >
-        <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="min-w-0">
-            <h1 className="truncate text-base font-semibold sm:text-lg">{currentPoint.title}</h1>
-            <p className="truncate text-xs" style={{ color: 'var(--text-secondary)' }}>
+            <h1 className="truncate text-sm font-semibold sm:text-base">{currentPoint.title}</h1>
+            <p className="truncate text-[11px]" style={{ color: 'var(--text-secondary)' }}>
               {currentPoint.subtitle} · {saveState.nickname} · {difficulty.title}
             </p>
           </div>
@@ -881,7 +886,7 @@ export function RoomScreen({
             elapsedGameMinutes={saveState.elapsedGameMinutes}
           />
 
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap items-center gap-1.5">
             <button
               type="button"
               onClick={() => {
@@ -890,14 +895,14 @@ export function RoomScreen({
                 setJournalTab('tasks');
                 setIsJournalOpen(true);
               }}
-              className="inline-flex min-h-[36px] items-center gap-1.5 border px-2.5 py-1 text-xs font-medium whitespace-nowrap tabular-nums transition-colors hover:bg-white/10"
+              className="inline-flex min-h-[34px] cursor-pointer items-center gap-1.5 border px-2.5 py-1 text-xs font-medium whitespace-nowrap tabular-nums transition-colors hover:bg-white/10"
               style={{
                 borderColor: 'var(--hud-border)',
                 borderRadius: 'var(--radius-control)',
                 color: 'var(--hud-text)',
               }}
             >
-              <ClipboardList className="h-4 w-4" aria-hidden="true" />
+              <ClipboardList className="h-3.5 w-3.5" aria-hidden="true" />
               <span>
                 {ui.room.tasksButton} · {completedQuestsCount}/{visibleQuests.length}
               </span>
@@ -911,14 +916,14 @@ export function RoomScreen({
                 setJournalTab('inventory');
                 setIsJournalOpen(true);
               }}
-              className="inline-flex min-h-[36px] items-center gap-1.5 border px-2.5 py-1 text-xs font-medium whitespace-nowrap tabular-nums transition-colors hover:bg-white/10"
+              className="inline-flex min-h-[34px] cursor-pointer items-center gap-1.5 border px-2.5 py-1 text-xs font-medium whitespace-nowrap tabular-nums transition-colors hover:bg-white/10"
               style={{
                 borderColor: 'var(--hud-border)',
                 borderRadius: 'var(--radius-control)',
                 color: 'var(--hud-text)',
               }}
             >
-              <Briefcase className="h-4 w-4" aria-hidden="true" />
+              <Briefcase className="h-3.5 w-3.5" aria-hidden="true" />
               <span>
                 {ui.room.inventoryButton}
                 {saveState.inventory.length > 0 ? ` · ${saveState.inventory.length}` : ''}
@@ -932,21 +937,21 @@ export function RoomScreen({
                 setSelectedHotspotId(null);
                 setIsMapOpen(true);
               }}
-              className="inline-flex min-h-[36px] items-center gap-1.5 border px-2.5 py-1 text-xs font-medium whitespace-nowrap transition-colors hover:bg-white/10"
+              className="inline-flex min-h-[34px] cursor-pointer items-center gap-1.5 border px-2.5 py-1 text-xs font-medium whitespace-nowrap transition-colors hover:bg-white/10"
               style={{
                 borderColor: 'var(--hud-border)',
                 borderRadius: 'var(--radius-control)',
                 color: 'var(--hud-text)',
               }}
             >
-              <MapIcon className="h-4 w-4" aria-hidden="true" />
+              <MapIcon className="h-3.5 w-3.5" aria-hidden="true" />
               <span>{ui.room.mapButton}</span>
             </button>
 
             <button
               type="button"
               onClick={handleRestoreCheckpoint}
-              className="inline-flex min-h-[36px] items-center gap-1.5 border px-2.5 py-1 text-xs font-medium whitespace-nowrap transition-colors hover:bg-white/10"
+              className="inline-flex min-h-[34px] cursor-pointer items-center gap-1.5 border px-2.5 py-1 text-xs font-medium whitespace-nowrap transition-colors hover:bg-white/10"
               style={{
                 borderColor: 'var(--hud-border)',
                 borderRadius: 'var(--radius-control)',
@@ -964,7 +969,7 @@ export function RoomScreen({
                 setSelectedHotspotId(null);
                 setIsTutorialOpen(true);
               }}
-              className="inline-flex min-h-[36px] items-center gap-1.5 border px-2.5 py-1 text-xs font-medium whitespace-nowrap transition-colors hover:bg-white/10"
+              className="inline-flex min-h-[34px] cursor-pointer items-center gap-1.5 border px-2.5 py-1 text-xs font-medium whitespace-nowrap transition-colors hover:bg-white/10"
               style={{
                 borderColor: 'var(--hud-border)',
                 borderRadius: 'var(--radius-control)',
@@ -980,7 +985,7 @@ export function RoomScreen({
               onClick={handleToggleSound}
               aria-label={isSoundEnabled ? ui.room.soundOnButton : ui.room.soundOffButton}
               title={isSoundEnabled ? ui.room.soundOnButton : ui.room.soundOffButton}
-              className="inline-flex min-h-[36px] cursor-pointer items-center justify-center border px-2.5 py-1 text-xs font-medium whitespace-nowrap transition-colors hover:bg-white/10"
+              className="inline-flex min-h-[34px] cursor-pointer items-center justify-center border px-2.5 py-1 text-xs font-medium whitespace-nowrap transition-colors hover:bg-white/10"
               style={{
                 borderColor: 'var(--hud-border)',
                 borderRadius: 'var(--radius-control)',
@@ -997,14 +1002,14 @@ export function RoomScreen({
             <button
               type="button"
               onClick={onBackToMenu}
-              className="inline-flex min-h-[36px] cursor-pointer items-center gap-1.5 border px-2.5 py-1 text-xs font-medium whitespace-nowrap transition-colors hover:bg-white/10"
+              className="inline-flex min-h-[34px] cursor-pointer items-center gap-1.5 border px-2.5 py-1 text-xs font-medium whitespace-nowrap transition-colors hover:bg-white/10"
               style={{
                 borderColor: 'var(--hud-border)',
                 borderRadius: 'var(--radius-control)',
                 color: 'var(--hud-text)',
               }}
             >
-              <LogOut className="h-4 w-4" aria-hidden="true" />
+              <LogOut className="h-3.5 w-3.5" aria-hidden="true" />
               <span>{ui.room.backToMenuButton}</span>
             </button>
           </div>
@@ -1012,7 +1017,7 @@ export function RoomScreen({
 
         {/* Полоса активной цели, подсказки и кнопки завершения смены */}
         <div
-          className="mt-2 flex flex-wrap items-center justify-between gap-2 border-t pt-2 text-xs"
+          className="mt-1.5 flex flex-wrap items-center justify-between gap-2 border-t pt-1.5 text-xs"
           style={{ borderColor: 'var(--hud-border)' }}
         >
           <div className="min-w-0 flex-1">
@@ -1042,7 +1047,7 @@ export function RoomScreen({
               <button
                 type="button"
                 onClick={() => setIsNormalHintShown((prev) => !prev)}
-                className="inline-flex items-center gap-1 border px-2 py-0.5 text-xs font-medium whitespace-nowrap transition-colors hover:bg-white/10"
+                className="inline-flex cursor-pointer items-center gap-1 border px-2 py-0.5 text-xs font-medium whitespace-nowrap transition-colors hover:bg-white/10"
                 style={{
                   borderColor: 'var(--hud-border)',
                   borderRadius: 'var(--radius-control)',
@@ -1063,7 +1068,7 @@ export function RoomScreen({
                   setNotice(null);
                   setIsReportOpen(true);
                 }}
-                className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold whitespace-nowrap transition-colors"
+                className="inline-flex cursor-pointer items-center gap-1.5 px-3 py-1 text-xs font-semibold whitespace-nowrap transition-all hover:brightness-110"
                 style={{
                   backgroundColor: 'var(--success-primary)',
                   color: 'var(--accent-text)',
@@ -1126,6 +1131,17 @@ export function RoomScreen({
                 />
               ))}
 
+              {/* Кинематографическая виньетка по краям комнаты (под персонажами и хотспотами) */}
+              <div
+                className="pointer-events-none absolute inset-0 z-[1]"
+                style={{
+                  background:
+                    'radial-gradient(ellipse at center, transparent 62%, rgba(16, 20, 17, 0.36) 100%)',
+                  boxShadow: 'inset 0 0 0 1px rgba(233, 198, 156, 0.14)',
+                }}
+                aria-hidden="true"
+              />
+
               {visibleHotspots.map((hotspot) => {
                 const isHovered = hoveredHotspotId === hotspot.id;
                 const isSelected = selectedHotspotId === hotspot.id;
@@ -1142,6 +1158,13 @@ export function RoomScreen({
                     : undefined;
                 const showNpcSprite = Boolean(npcSprite?.avatar && !failedNpcImages[npcSprite.id]);
 
+                const tooltipVerticalClass =
+                  hotspot.y < 14
+                    ? hotspot.y + hotspot.height > 82 || hotspot.height > 45
+                      ? 'top-2'
+                      : '-bottom-9'
+                    : '-top-9';
+
                 return (
                   <button
                     key={hotspot.id}
@@ -1157,7 +1180,9 @@ export function RoomScreen({
                       setHoveredHotspotId((prev) => (prev === hotspot.id ? null : prev))
                     }
                     onClick={(event) => handleHotspotClick(event, hotspot)}
-                    className="absolute cursor-pointer transition-all duration-150"
+                    className={`absolute cursor-pointer transition-all duration-150 ${
+                      isHovered || isSelected ? 'z-20' : 'z-[2]'
+                    }`}
                     style={{
                       left: `${hotspot.x}%`,
                       top: `${hotspot.y}%`,
@@ -1216,9 +1241,7 @@ export function RoomScreen({
                     {/* Подпись названия объекта или имени персонажа при наведении (если меню действий не открыто) */}
                     {isHovered && !isSelected && (
                       <span
-                        className={`pointer-events-none absolute z-30 px-2.5 py-1 text-xs font-semibold whitespace-nowrap shadow-lg backdrop-blur-sm ${
-                          hotspot.y < 14 ? '-bottom-9' : '-top-9'
-                        } ${
+                        className={`pointer-events-none absolute z-30 px-2.5 py-1 text-xs font-semibold whitespace-nowrap shadow-lg backdrop-blur-sm ${tooltipVerticalClass} ${
                           hotspot.x + hotspot.width / 2 > 80
                             ? 'right-0'
                             : hotspot.x + hotspot.width / 2 < 18
@@ -1243,29 +1266,20 @@ export function RoomScreen({
               })}
             </div>
 
-            {/* Кинематографическая виньетка по краям комнаты для плавного вписывания интерфейса */}
-            <div
-              className="pointer-events-none absolute inset-0 z-10"
-              style={{
-                background:
-                  'radial-gradient(ellipse at center, transparent 62%, rgba(16, 20, 17, 0.44) 100%)',
-                boxShadow: 'inset 0 0 0 1px rgba(233, 198, 156, 0.14)',
-              }}
-              aria-hidden="true"
-            />
-
             {/* Маленькое меню действий (Осмотреть / Взять / Использовать / Поговорить) рядом с выбранным объектом */}
             {selectedHotspot && (
               <div
                 role="menu"
                 aria-label={selectedHotspot.label}
                 onClick={(event) => event.stopPropagation()}
-                className="ui-pop-in absolute z-30 min-w-[215px] max-w-[280px] -translate-x-1/2 border p-2 shadow-2xl backdrop-blur-md"
+                className="ui-pop-in absolute z-30 min-w-[215px] max-w-[min(280px,calc(100%-24px))] -translate-x-1/2 border p-2 shadow-2xl backdrop-blur-md"
                 style={{
-                  left: `${Math.max(16, Math.min(84, selectedHotspot.x + selectedHotspot.width / 2))}%`,
-                  ...(selectedHotspot.y + selectedHotspot.height > 62
-                    ? { bottom: `${Math.max(8, 100 - selectedHotspot.y + 1.5)}%` }
-                    : { top: `${Math.max(10, selectedHotspot.y + selectedHotspot.height + 1.5)}%` }),
+                  left: `${Math.max(18, Math.min(82, selectedHotspot.x + selectedHotspot.width / 2))}%`,
+                  ...(selectedHotspot.y >= 32 && selectedHotspot.y + selectedHotspot.height > 58
+                    ? { bottom: `${Math.min(82, 100 - selectedHotspot.y + 1.5)}%` }
+                    : selectedHotspot.y + selectedHotspot.height <= 68
+                      ? { top: `${Math.max(8, selectedHotspot.y + selectedHotspot.height + 1.5)}%` }
+                      : { top: `${Math.max(10, Math.min(58, selectedHotspot.y + 12))}%` }),
                   backgroundColor: 'var(--hud-overlay)',
                   borderColor: 'var(--hud-border)',
                   color: 'var(--hud-text)',
@@ -1357,7 +1371,9 @@ export function RoomScreen({
               <div
                 role="status"
                 onClick={(event) => event.stopPropagation()}
-                className="ui-pop-in absolute bottom-14 left-1/2 z-30 w-[min(92%,560px)] -translate-x-1/2 border p-4 shadow-2xl backdrop-blur-md"
+                className={`ui-pop-in absolute left-1/2 z-30 max-h-[46%] w-[min(92%,560px)] -translate-x-1/2 overflow-y-auto border p-4 shadow-2xl backdrop-blur-md ${
+                  currentPoint.exits.some((e) => e.direction === 'down') ? 'bottom-16' : 'bottom-4'
+                }`}
                 style={{
                   backgroundColor: 'var(--hud-overlay)',
                   borderColor: notice.isLocked
@@ -1373,7 +1389,9 @@ export function RoomScreen({
                   <div className="flex min-w-0 flex-1 items-start gap-3.5">
                     {notice.image && !noticeImageFailed && (
                       <div
-                        className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden border p-1"
+                        className={`flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden border ${
+                          notice.imageKind === 'portrait' ? '' : 'p-1.5'
+                        }`}
                         style={{
                           backgroundColor: 'var(--bg-surface)',
                           borderColor: 'var(--hud-border)',
@@ -1385,7 +1403,14 @@ export function RoomScreen({
                           alt={notice.imageAlt ?? notice.title}
                           referrerPolicy="no-referrer"
                           onError={() => setNoticeImageFailed(true)}
-                          className="h-full w-full object-contain"
+                          style={
+                            notice.imageKind === 'portrait'
+                              ? { objectPosition: getPortraitObjectPosition(notice.image) }
+                              : undefined
+                          }
+                          className={`h-full w-full ${
+                            notice.imageKind === 'portrait' ? 'object-cover' : 'object-contain'
+                          }`}
                         />
                       </div>
                     )}
@@ -1563,7 +1588,7 @@ export function RoomScreen({
               <button
                 type="button"
                 onClick={handleRestoreCheckpoint}
-                className="min-h-[42px] w-full px-4 py-2 text-sm font-semibold transition-all hover:brightness-110"
+                className="min-h-[42px] w-full cursor-pointer px-4 py-2 text-sm font-semibold transition-all hover:brightness-110"
                 style={{
                   backgroundColor: 'var(--accent-primary)',
                   color: 'var(--accent-text)',
@@ -1578,7 +1603,7 @@ export function RoomScreen({
                   setNotice(null);
                   onRestartShift();
                 }}
-                className="min-h-[42px] w-full border px-4 py-2 text-sm font-medium transition-colors hover:bg-white/10"
+                className="min-h-[42px] w-full cursor-pointer border px-4 py-2 text-sm font-medium transition-colors hover:bg-white/10"
                 style={{
                   borderColor: 'var(--border-default)',
                   borderRadius: 'var(--radius-control)',
@@ -1590,7 +1615,7 @@ export function RoomScreen({
               <button
                 type="button"
                 onClick={onBackToMenu}
-                className="min-h-[42px] w-full border px-4 py-2 text-sm font-medium transition-colors hover:bg-white/10"
+                className="min-h-[42px] w-full cursor-pointer border px-4 py-2 text-sm font-medium transition-colors hover:bg-white/10"
                 style={{
                   borderColor: 'var(--border-default)',
                   borderRadius: 'var(--radius-control)',

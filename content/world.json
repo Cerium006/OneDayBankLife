@@ -187,7 +187,8 @@
               "label": "Проскочить без отметки",
               "sfx": "badgeReader",
               "requireFlags": {
-                "activeRole": "pentester"
+                "activeRole": "pentester",
+                "entranceCleared": false
               },
               "setFlags": {
                 "guardFooled": true,
@@ -206,14 +207,14 @@
           "kind": "npc",
           "interactType": "talk",
           "npcId": "guard_viktor",
-          "x": 60.2,
-          "y": 22.0,
-          "width": 16.0,
-          "height": 67.0,
+          "x": 61.1,
+          "y": 29.5,
+          "width": 14.2,
+          "height": 58.0,
           "spriteFit": {
             "heightPercent": 104.3,
             "topPercent": -4.3,
-            "leftOffsetPercent": -6.5
+            "leftOffsetPercent": -6.3
           },
           "actions": [
             {
@@ -282,14 +283,14 @@
           "kind": "npc",
           "interactType": "talk",
           "npcId": "admin_marina",
-          "x": 29.0,
-          "y": 24.0,
-          "width": 12.2,
-          "height": 60.0,
+          "x": 30.2,
+          "y": 35.5,
+          "width": 9.8,
+          "height": 47.5,
           "spriteFit": {
             "heightPercent": 103.2,
             "topPercent": -2.3,
-            "leftOffsetPercent": -3.5
+            "leftOffsetPercent": -3.3
           },
           "actions": [
             {
@@ -332,14 +333,14 @@
           "kind": "npc",
           "interactType": "talk",
           "npcId": "client_elderly",
-          "x": 53.0,
-          "y": 35.0,
-          "width": 8.6,
-          "height": 38.0,
+          "x": 53.6,
+          "y": 43.0,
+          "width": 7.4,
+          "height": 29.0,
           "spriteFit": {
-            "heightPercent": 122.0,
+            "heightPercent": 121.7,
             "topPercent": -16.8,
-            "leftOffsetPercent": 10.0
+            "leftOffsetPercent": 9.1
           },
           "actions": [
             {
@@ -348,13 +349,24 @@
             },
             {
               "type": "talk",
+              "requireFlags": {
+                "hallElderlyTalked": false
+              },
               "setFlags": {
-                "hallClientsChecked": true
+                "hallClientsChecked": true,
+                "hallElderlyTalked": true
               },
               "metricChanges": {
                 "trust": 10
               },
               "resultText": "Клиентка: «Мне позвонили и сказали срочно перевести сбережения… Хорошо, что скоро подойдёт моя очередь к менеджеру!» (+10% к доверию клиентов)."
+            },
+            {
+              "type": "talk",
+              "requireFlags": {
+                "hallElderlyTalked": true
+              },
+              "resultText": "Клиентка спокойно ждёт очереди, вы уже предупредили её не торопиться с переводом."
             }
           ]
         },
@@ -364,14 +376,14 @@
           "kind": "npc",
           "interactType": "talk",
           "npcId": "client_young",
-          "x": 62.0,
-          "y": 37.0,
-          "width": 8.0,
-          "height": 33.0,
+          "x": 62.6,
+          "y": 43.5,
+          "width": 6.2,
+          "height": 23.5,
           "spriteFit": {
             "heightPercent": 107.2,
-            "topPercent": -3.7,
-            "leftOffsetPercent": 5.5
+            "topPercent": -3.8,
+            "leftOffsetPercent": 4.8
           },
           "actions": [
             {
@@ -438,10 +450,10 @@
           "kind": "npc",
           "interactType": "talk",
           "npcId": "client_suit",
-          "x": 87.5,
-          "y": 36.0,
-          "width": 12.0,
-          "height": 55.0,
+          "x": 88.0,
+          "y": 43.0,
+          "width": 10.6,
+          "height": 46.5,
           "spriteFit": {
             "heightPercent": 102.5,
             "topPercent": -1.2,
@@ -454,13 +466,24 @@
             },
             {
               "type": "talk",
+              "requireFlags": {
+                "hallSuitTalked": false
+              },
               "setFlags": {
-                "hallClientsChecked": true
+                "hallClientsChecked": true,
+                "hallSuitTalked": true
               },
               "metricChanges": {
                 "security": 5
               },
               "resultText": "Незнакомец уклоняется от взгляда: «Я просто жду знакомого, не обращайте внимания». Вы запомнили подозрительного посетителя (+5% к безопасности)."
+            },
+            {
+              "type": "talk",
+              "requireFlags": {
+                "hallSuitTalked": true
+              },
+              "resultText": "Посетитель отворачивается к окну и не идёт на разговор. Вы уже взяли его на заметку."
             }
           ]
         }
@@ -494,10 +517,10 @@
         {
           "id": "layer_counter_usb",
           "image": "/rooms/layer-usb.svg",
-          "x": 31.0,
-          "y": 66.0,
-          "width": 6.2,
-          "height": 7.0,
+          "x": 33.5,
+          "y": 69.2,
+          "width": 5.2,
+          "height": 5.8,
           "visibleWhen": {
             "usbPlanted": true
           }
@@ -510,14 +533,14 @@
           "kind": "npc",
           "interactType": "talk",
           "npcId": "cashier_oleg",
-          "x": 0.5,
-          "y": 13.0,
-          "width": 18.0,
-          "height": 53.0,
+          "x": 0.2,
+          "y": 14.5,
+          "width": 17.8,
+          "height": 45.0,
           "spriteFit": {
-            "heightPercent": 185.0,
-            "topPercent": -8.3,
-            "leftOffsetPercent": -2.0
+            "heightPercent": 188.0,
+            "topPercent": -8.5,
+            "leftOffsetPercent": -1.5
           },
           "actions": [
             {
@@ -537,14 +560,14 @@
           "kind": "npc",
           "interactType": "talk",
           "npcId": "client_danya",
-          "x": 18.8,
-          "y": 12.0,
-          "width": 19.8,
-          "height": 50.0,
+          "x": 18.2,
+          "y": 14.0,
+          "width": 20.8,
+          "height": 49.0,
           "spriteFit": {
-            "heightPercent": 239.0,
-            "topPercent": -12.4,
-            "leftOffsetPercent": -8.0
+            "heightPercent": 235.7,
+            "topPercent": -12.3,
+            "leftOffsetPercent": -6.2
           },
           "visibleWhen": {
             "activeRole": "manager",
@@ -564,14 +587,14 @@
           "kind": "npc",
           "interactType": "talk",
           "npcId": "client_elderly",
-          "x": 18.8,
-          "y": 12.0,
-          "width": 19.8,
-          "height": 50.0,
+          "x": 18.2,
+          "y": 14.0,
+          "width": 20.8,
+          "height": 49.0,
           "spriteFit": {
-            "heightPercent": 185.0,
-            "topPercent": -25.5,
-            "leftOffsetPercent": 10.0
+            "heightPercent": 261.6,
+            "topPercent": -36.1,
+            "leftOffsetPercent": 10.5
           },
           "visibleWhen": {
             "activeRole": "manager",
@@ -592,14 +615,14 @@
           "kind": "npc",
           "interactType": "talk",
           "npcId": "client_orlov",
-          "x": 18.8,
-          "y": 12.0,
-          "width": 19.8,
-          "height": 50.0,
+          "x": 18.2,
+          "y": 14.0,
+          "width": 20.8,
+          "height": 49.0,
           "spriteFit": {
-            "heightPercent": 192.0,
-            "topPercent": -2.3,
-            "leftOffsetPercent": 5.0
+            "heightPercent": 220.3,
+            "topPercent": -2.6,
+            "leftOffsetPercent": 5.2
           },
           "visibleWhen": {
             "activeRole": "manager",
@@ -620,14 +643,14 @@
           "kind": "npc",
           "interactType": "talk",
           "npcId": "client_lena",
-          "x": 18.8,
-          "y": 12.0,
-          "width": 19.8,
-          "height": 50.0,
+          "x": 18.2,
+          "y": 14.0,
+          "width": 20.8,
+          "height": 49.0,
           "spriteFit": {
-            "heightPercent": 255.0,
-            "topPercent": -35.2,
-            "leftOffsetPercent": 5.0
+            "heightPercent": 262.5,
+            "topPercent": -36.2,
+            "leftOffsetPercent": 3.9
           },
           "visibleWhen": {
             "activeRole": "manager",
@@ -648,14 +671,14 @@
           "kind": "npc",
           "interactType": "talk",
           "npcId": "director_anna",
-          "x": 18.8,
-          "y": 12.0,
-          "width": 19.8,
-          "height": 50.0,
+          "x": 18.2,
+          "y": 14.0,
+          "width": 20.8,
+          "height": 49.0,
           "spriteFit": {
-            "heightPercent": 243.0,
+            "heightPercent": 241.8,
             "topPercent": -13.1,
-            "leftOffsetPercent": 0.5
+            "leftOffsetPercent": 1.0
           },
           "visibleWhen": {
             "activeRole": "manager",
@@ -693,10 +716,21 @@
               "label": "Проверить фишинговое письмо",
               "sfx": "keyboard",
               "requireFlags": {
-                "activeRole": "manager"
+                "activeRole": "manager",
+                "phishingChecked": false
               },
               "miniGameId": "phishing_letter_check",
               "resultText": "Учебная проверка фишингового письма пройдена."
+            },
+            {
+              "type": "use",
+              "label": "Письмо уже проверено",
+              "sfx": "keyboard",
+              "requireFlags": {
+                "activeRole": "manager",
+                "phishingChecked": true
+              },
+              "resultText": "Разбор подозрительного письма уже зафиксирован в этой смене."
             }
           ]
         },
@@ -739,10 +773,10 @@
           "label": "Забытая флешка",
           "kind": "object",
           "interactType": "inspect",
-          "x": 31.0,
-          "y": 66.0,
-          "width": 6.2,
-          "height": 7.0,
+          "x": 33.5,
+          "y": 69.2,
+          "width": 5.2,
+          "height": 5.8,
           "visibleWhen": {
             "usbPlanted": true
           },
@@ -798,7 +832,8 @@
               "label": "Оставить учебную флешку",
               "sfx": "usb",
               "requireFlags": {
-                "activeRole": "pentester"
+                "activeRole": "pentester",
+                "usbPlanted": false
               },
               "setFlags": {
                 "usbPlanted": true,
@@ -890,7 +925,8 @@
               "label": "Оставить копию у окна обслуживания",
               "sfx": "paper",
               "requireFlags": {
-                "activeRole": "pentester"
+                "activeRole": "pentester",
+                "stickyPasswordLeft": false
               },
               "setFlags": {
                 "stickyPasswordFound": true,
@@ -977,14 +1013,14 @@
           "kind": "npc",
           "interactType": "talk",
           "npcId": "director_anna",
-          "x": 54.0,
-          "y": 36.0,
-          "width": 10.6,
-          "height": 59.0,
+          "x": 54.4,
+          "y": 42.0,
+          "width": 9.4,
+          "height": 52.0,
           "spriteFit": {
-            "heightPercent": 112.6,
+            "heightPercent": 112.5,
             "topPercent": -6.1,
-            "leftOffsetPercent": 0.5
+            "leftOffsetPercent": 1.0
           },
           "actions": [
             {
@@ -1004,14 +1040,14 @@
           "kind": "npc",
           "interactType": "talk",
           "npcId": "sysadmin_igor",
-          "x": 67.8,
-          "y": 27.0,
-          "width": 12.8,
-          "height": 60.0,
+          "x": 68.0,
+          "y": 33.5,
+          "width": 12.0,
+          "height": 53.0,
           "spriteFit": {
-            "heightPercent": 106.0,
+            "heightPercent": 105.9,
             "topPercent": -3.6,
-            "leftOffsetPercent": -3.5
+            "leftOffsetPercent": -2.8
           },
           "actions": [
             {
@@ -1137,6 +1173,9 @@
             {
               "type": "use",
               "sfx": "keyboard",
+              "requireFlags": {
+                "wifiChecked": false
+              },
               "setFlags": {
                 "wifiChecked": true,
                 "wifiWeak": true
@@ -1145,6 +1184,15 @@
                 "suspicion": 10
               },
               "resultText": "На панели сети BankGuest обнаружено устаревшее шифрование. Проверка Wi-Fi отмечена в задачах!"
+            },
+            {
+              "type": "use",
+              "label": "Посмотреть результат проверки",
+              "sfx": "keyboard",
+              "requireFlags": {
+                "wifiChecked": true
+              },
+              "resultText": "Вы уже проверили роутер: в гостевой сети BankGuest используется устаревшее шифрование."
             }
           ]
         }
@@ -1313,11 +1361,23 @@
               "type": "use",
               "label": "Собрать и сдать отчёт",
               "sfx": "keyboard",
+              "requireFlags": {
+                "reportDelivered": false
+              },
               "miniGameId": "pentest_report_audit",
               "setFlags": {
                 "reportDelivered": true
               },
               "resultText": "Вы подключились к терминалу серверной и зафиксировали результаты проверки безопасности в отчёте!"
+            },
+            {
+              "type": "use",
+              "label": "Отчёт уже отправлен Кире",
+              "sfx": "keyboard",
+              "requireFlags": {
+                "reportDelivered": true
+              },
+              "resultText": "Итоговый отчёт уже отправлен куратору Кире. Можно завершать смену и смотреть разбор."
             }
           ]
         }

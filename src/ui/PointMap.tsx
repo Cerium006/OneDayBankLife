@@ -159,12 +159,12 @@ export function PointMap({
                       ? ui.room.mapConnectedHint
                       : ui.room.mapFarHint
                 }
-                className="absolute -translate-x-1/2 -translate-y-1/2 border px-3 py-2 text-center transition-transform hover:scale-[1.03] disabled:hover:scale-100"
+                className="absolute -translate-x-1/2 -translate-y-1/2 border px-2.5 py-1.5 text-center transition-transform hover:scale-[1.03] disabled:hover:scale-100 sm:px-3 sm:py-2"
                 style={{
                   left: `${point.mapCoords.x}%`,
                   top: `${point.mapCoords.y}%`,
-                  minWidth: '128px',
-                  maxWidth: '170px',
+                  minWidth: '94px',
+                  maxWidth: '158px',
                   borderRadius: 'var(--radius-control)',
                   backgroundColor: isCurrent
                     ? 'var(--accent-primary)'

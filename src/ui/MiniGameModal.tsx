@@ -4,16 +4,16 @@
  * и передаёт выбранные пункты в miniGameEngine.
  */
 
-import { CheckSquare, ShieldCheck, Square, X } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import { getVisibleMiniGameOptions } from '../engine/miniGameEngine';
+import { CheckSquare, ShieldCheck, Shuffle, Square, X } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { pickRandomizedMiniGameOptions } from '../engine/miniGameEngine';
 import type { DifficultyProfile, MiniGameDef, UiTexts } from '../engine/types';
 
 interface MiniGameModalProps {
   miniGame: MiniGameDef | null;
   difficulty: DifficultyProfile;
   ui: UiTexts;
-  onSubmit: (selectedIds: string[]) => void;
+  onSubmit: (selectedIds: string[], presentedOptionIds: string[]) => void;
   onClose: () => void;
 }
 
@@ -25,21 +25,36 @@ export function MiniGameModal({
   onClose,
 }: MiniGameModalProps) {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [rerollNonce, setRerollNonce] = useState<number>(0);
 
   useEffect(() => {
     setSelectedIds([]);
+    if (miniGame) {
+      setRerollNonce((prev) => prev + 1);
+    }
   }, [miniGame?.id]);
+
+  const options = useMemo(() => {
+    if (!miniGame) {
+      return [];
+    }
+    return pickRandomizedMiniGameOptions(miniGame, difficulty.id);
+    // rerollNonce намеренно пересчитывает случайный набор вариантов при открытии и реролле
+  }, [miniGame, difficulty.id, rerollNonce]);
 
   if (!miniGame) {
     return null;
   }
 
-  const options = getVisibleMiniGameOptions(miniGame, difficulty.id);
-
   function toggleOption(optionId: string) {
     setSelectedIds((prev) =>
       prev.includes(optionId) ? prev.filter((id) => id !== optionId) : [...prev, optionId],
     );
+  }
+
+  function handleReroll() {
+    setSelectedIds([]);
+    setRerollNonce((prev) => prev + 1);
   }
 
   return (
@@ -86,7 +101,7 @@ export function MiniGameModal({
           <button
             type="button"
             onClick={onClose}
-            className="inline-flex min-h-[40px] items-center gap-1.5 border px-3 py-1.5 text-sm font-medium whitespace-nowrap transition-colors hover:bg-white/10"
+            className="inline-flex min-h-[40px] cursor-pointer items-center gap-1.5 border px-3 py-1.5 text-sm font-medium whitespace-nowrap transition-colors hover:bg-white/10"
             style={{
               borderColor: 'var(--border-default)',
               borderRadius: 'var(--radius-control)',
@@ -148,15 +163,36 @@ export function MiniGameModal({
           className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t pt-4"
           style={{ borderColor: 'var(--border-default)' }}
         >
-          <span className="text-xs tabular-nums" style={{ color: 'var(--text-secondary)' }}>
-            Выбрано пунктов: {selectedIds.length}
-          </span>
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="text-xs tabular-nums" style={{ color: 'var(--text-secondary)' }}>
+              Выбрано пунктов: {selectedIds.length}
+            </span>
+
+            <button
+              type="button"
+              onClick={handleReroll}
+              className="inline-flex min-h-[36px] cursor-pointer items-center gap-1.5 border px-3 py-1.5 text-xs font-medium whitespace-nowrap transition-colors hover:bg-white/10"
+              style={{
+                borderColor: 'var(--border-default)',
+                borderRadius: 'var(--radius-control)',
+                color: 'var(--text-secondary)',
+              }}
+            >
+              <Shuffle className="h-3.5 w-3.5" aria-hidden="true" />
+              <span>Другие варианты</span>
+            </button>
+          </div>
 
           <button
             type="button"
             disabled={selectedIds.length === 0}
-            onClick={() => onSubmit(selectedIds)}
-            className="min-h-[42px] px-5 py-2 text-sm font-semibold whitespace-nowrap transition-all hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
+            onClick={() =>
+              onSubmit(
+                selectedIds,
+                options.map((opt) => opt.id),
+              )
+            }
+            className="min-h-[42px] cursor-pointer px-5 py-2 text-sm font-semibold whitespace-nowrap transition-all hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
             style={{
               backgroundColor: 'var(--accent-primary)',
               color: 'var(--accent-text)',

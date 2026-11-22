@@ -114,6 +114,8 @@ export interface MiniGameDef {
   confirmButton: string;
   successMessage: string;
   mistakeMessage: string;
+  onceFlag?: string;
+  sampleSizeByDifficulty?: Partial<Record<'easy' | 'normal' | 'hard', number>>;
   setFlagsOnComplete?: Record<string, WorldFlagValue>;
   successMetricChanges?: Record<string, number>;
   mistakeMetricChanges?: Record<string, number>;

@@ -348,7 +348,7 @@ export function ShiftReportModal({
             <button
               type="button"
               onClick={onStayInRoom}
-              className="min-h-[40px] border px-3.5 py-2 text-xs font-medium whitespace-nowrap transition-colors hover:bg-white/10 sm:text-sm"
+              className="min-h-[40px] cursor-pointer border px-3.5 py-2 text-xs font-medium whitespace-nowrap transition-colors hover:bg-white/10 sm:text-sm"
               style={{
                 borderColor: 'var(--border-default)',
                 borderRadius: 'var(--radius-control)',
@@ -361,7 +361,7 @@ export function ShiftReportModal({
             <button
               type="button"
               onClick={onBackToMenu}
-              className="inline-flex min-h-[40px] items-center gap-1.5 border px-3.5 py-2 text-xs font-medium whitespace-nowrap transition-colors hover:bg-white/10 sm:text-sm"
+              className="inline-flex min-h-[40px] cursor-pointer items-center gap-1.5 border px-3.5 py-2 text-xs font-medium whitespace-nowrap transition-colors hover:bg-white/10 sm:text-sm"
               style={{
                 borderColor: 'var(--border-default)',
                 borderRadius: 'var(--radius-control)',
@@ -376,7 +376,7 @@ export function ShiftReportModal({
               <button
                 type="button"
                 onClick={() => onSwitchRole(otherRole.id)}
-                className="inline-flex min-h-[40px] items-center gap-2 px-4 py-2 text-xs font-semibold whitespace-nowrap transition-all hover:brightness-110 sm:text-sm"
+                className="inline-flex min-h-[40px] cursor-pointer items-center gap-2 px-4 py-2 text-xs font-semibold whitespace-nowrap transition-all hover:brightness-110 sm:text-sm"
                 style={{
                   backgroundColor: 'var(--accent-primary)',
                   color: 'var(--accent-text)',

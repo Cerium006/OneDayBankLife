@@ -121,7 +121,7 @@ export function MainMenu({
           <button
             type="button"
             onClick={() => setIsTutorialOpen(true)}
-            className="inline-flex min-h-[40px] shrink-0 items-center gap-2 self-start border px-4 py-2 text-sm font-medium whitespace-nowrap transition-colors hover:bg-white/10"
+            className="inline-flex min-h-[40px] shrink-0 cursor-pointer items-center gap-2 self-start border px-4 py-2 text-sm font-medium whitespace-nowrap transition-colors hover:bg-white/10"
             style={{
               backgroundColor: 'var(--bg-surface)',
               borderColor: 'var(--border-default)',
@@ -167,7 +167,7 @@ export function MainMenu({
                 <button
                   type="button"
                   onClick={onContinueGame}
-                  className="min-h-[42px] px-5 py-2 text-sm font-semibold whitespace-nowrap transition-all hover:brightness-110"
+                  className="min-h-[42px] cursor-pointer px-5 py-2 text-sm font-semibold whitespace-nowrap transition-all hover:brightness-110"
                   style={{
                     backgroundColor: 'var(--accent-primary)',
                     color: 'var(--accent-text)',
@@ -179,7 +179,7 @@ export function MainMenu({
                 <button
                   type="button"
                   onClick={() => setIsResetModalOpen(true)}
-                  className="min-h-[42px] border px-4 py-2 text-sm font-medium whitespace-nowrap transition-colors hover:bg-white/10"
+                  className="min-h-[42px] cursor-pointer border px-4 py-2 text-sm font-medium whitespace-nowrap transition-colors hover:bg-white/10"
                   style={{
                     borderColor: 'var(--border-default)',
                     color: 'var(--danger-text)',

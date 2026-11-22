@@ -152,7 +152,7 @@ export function JournalModal({
           <button
             type="button"
             onClick={onClose}
-            className="inline-flex min-h-[40px] items-center gap-1.5 border px-3 py-1.5 text-sm font-medium whitespace-nowrap transition-colors hover:bg-white/10"
+            className="inline-flex min-h-[40px] cursor-pointer items-center gap-1.5 border px-3 py-1.5 text-sm font-medium whitespace-nowrap transition-colors hover:bg-white/10"
             style={{
               borderColor: 'var(--border-default)',
               borderRadius: 'var(--radius-control)',
@@ -176,7 +176,7 @@ export function JournalModal({
             role="tab"
             aria-selected={activeTab === 'tasks'}
             onClick={() => setActiveTab('tasks')}
-            className="inline-flex min-h-[38px] items-center gap-2 border px-3.5 py-1.5 text-sm font-medium whitespace-nowrap tabular-nums transition-colors"
+            className="inline-flex min-h-[38px] cursor-pointer items-center gap-2 border px-3.5 py-1.5 text-sm font-medium whitespace-nowrap tabular-nums transition-colors"
             style={{
               backgroundColor:
                 activeTab === 'tasks' ? 'var(--accent-primary)' : 'var(--bg-surface-muted)',
@@ -197,7 +197,7 @@ export function JournalModal({
             role="tab"
             aria-selected={activeTab === 'inventory'}
             onClick={() => setActiveTab('inventory')}
-            className="inline-flex min-h-[38px] items-center gap-2 border px-3.5 py-1.5 text-sm font-medium whitespace-nowrap tabular-nums transition-colors"
+            className="inline-flex min-h-[38px] cursor-pointer items-center gap-2 border px-3.5 py-1.5 text-sm font-medium whitespace-nowrap tabular-nums transition-colors"
             style={{
               backgroundColor:
                 activeTab === 'inventory' ? 'var(--accent-primary)' : 'var(--bg-surface-muted)',
@@ -369,7 +369,7 @@ export function JournalModal({
               onClose();
               onRestartCheckpoint();
             }}
-            className="inline-flex min-h-[38px] items-center gap-1.5 border px-3 py-1.5 text-xs font-medium whitespace-nowrap transition-colors hover:bg-white/10"
+            className="inline-flex min-h-[38px] cursor-pointer items-center gap-1.5 border px-3 py-1.5 text-xs font-medium whitespace-nowrap transition-colors hover:bg-white/10"
             style={{
               borderColor: 'var(--border-default)',
               borderRadius: 'var(--radius-control)',
