@@ -93,7 +93,17 @@
     "reportStayButton": "Остаться в отделении",
     "reportSharedWorldNotice": "События этой смены сохранены в общем мире банка.",
     "miniGameCloseButton": "Отмена",
-    "miniGameDifficultyNote": "Сложность проверки"
+    "miniGameDifficultyNote": "Сложность проверки",
+    "soundOnButton": "Звук вкл",
+    "soundOffButton": "Звук выкл",
+    "clientTimerLabel": "Терпение клиента",
+    "clientTimerTimeoutNote": "Клиент заждался и занервничал: доверие −5%. Примите решение по правилам банка.",
+    "mapVisitedLabel": "Осмотрено",
+    "metricStatusLabels": {
+      "safe": "В норме",
+      "warning": "Внимание",
+      "critical": "Критично"
+    }
   },
   "errors": {
     "contentLoadTitle": "Не удалось загрузить файлы игры",

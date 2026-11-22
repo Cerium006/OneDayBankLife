@@ -834,6 +834,10 @@ function validateTutorial(raw: unknown): TutorialConfig {
       title: assertNonEmptyString(s.title, `tutorial.steps[${id}].title`),
       description: assertNonEmptyString(s.description, `tutorial.steps[${id}].description`),
       tip: typeof s.tip === 'string' && s.tip.trim().length > 0 ? s.tip : undefined,
+      practice:
+        typeof s.practice === 'object' && s.practice !== null
+          ? (s.practice as TutorialStep['practice'])
+          : undefined,
     };
   });
 
@@ -845,6 +849,10 @@ function validateTutorial(raw: unknown): TutorialConfig {
     finishButton: assertNonEmptyString(data.finishButton, 'tutorial.finishButton'),
     skipButton: assertNonEmptyString(data.skipButton, 'tutorial.skipButton'),
     stepCounterLabel: assertNonEmptyString(data.stepCounterLabel, 'tutorial.stepCounterLabel'),
+    practicePromptLabel:
+      typeof data.practicePromptLabel === 'string' ? data.practicePromptLabel : undefined,
+    practiceDoneLabel:
+      typeof data.practiceDoneLabel === 'string' ? data.practiceDoneLabel : undefined,
     steps,
   };
 }

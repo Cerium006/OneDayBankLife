@@ -370,6 +370,16 @@ export interface UiTexts {
     reportSharedWorldNotice: string;
     miniGameCloseButton: string;
     miniGameDifficultyNote: string;
+    soundOnButton: string;
+    soundOffButton: string;
+    clientTimerLabel: string;
+    clientTimerTimeoutNote: string;
+    mapVisitedLabel: string;
+    metricStatusLabels: {
+      safe: string;
+      warning: string;
+      critical: string;
+    };
   };
   errors: {
     contentLoadTitle: string;
@@ -415,6 +425,65 @@ export interface GameSaveState {
 /** Иконка шага интерактивного обучения */
 export type TutorialStepIcon = 'mouse' | 'map' | 'briefcase' | 'gauge' | 'roles';
 
+/** Интерактивная мини-практика внутри шага обучения */
+export type TutorialPracticeConfig =
+  | {
+      kind: 'hotspot_demo';
+      title: string;
+      instruction: string;
+      hotspotLabel: string;
+      inspectLabel: string;
+      inspectResult: string;
+      actionLabel: string;
+      actionResult: string;
+    }
+  | {
+      kind: 'map_demo';
+      title: string;
+      instruction: string;
+      roomFrom: string;
+      roomTo: string;
+      unlockButton: string;
+      unlockedBadge: string;
+      lockedMessage: string;
+      movedMessage: string;
+    }
+  | {
+      kind: 'journal_demo';
+      title: string;
+      instruction: string;
+      tasksTabLabel: string;
+      inventoryTabLabel: string;
+      sampleQuestTitle: string;
+      sampleItemName: string;
+      sampleItemImage: string;
+      pickupButton: string;
+      statusActive: string;
+      statusDone: string;
+    }
+  | {
+      kind: 'metrics_demo';
+      title: string;
+      instruction: string;
+      safeChoiceLabel: string;
+      riskChoiceLabel: string;
+      suspicionLabel: string;
+      securityLabel: string;
+      safeResult: string;
+      riskResult: string;
+    }
+  | {
+      kind: 'shared_world_demo';
+      title: string;
+      instruction: string;
+      roleOneLabel: string;
+      roleTwoLabel: string;
+      togglePlantLabel: string;
+      cleanStateText: string;
+      plantedStateText: string;
+      plantedItemImage: string;
+    };
+
 /** Один шаг обучения из content/tutorial.json */
 export interface TutorialStep {
   id: string;
@@ -422,6 +491,7 @@ export interface TutorialStep {
   title: string;
   description: string;
   tip?: string;
+  practice?: TutorialPracticeConfig;
 }
 
 /** Конфигурация окна обучения из content/tutorial.json */
@@ -433,6 +503,8 @@ export interface TutorialConfig {
   finishButton: string;
   skipButton: string;
   stepCounterLabel: string;
+  practicePromptLabel?: string;
+  practiceDoneLabel?: string;
   steps: TutorialStep[];
 }
 

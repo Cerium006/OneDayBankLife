@@ -52,7 +52,7 @@ export function ShiftReportModal({
       aria-labelledby="shift-report-title"
     >
       <div
-        className="flex max-h-[90vh] w-full max-w-3xl flex-col border p-6 shadow-2xl sm:p-8"
+        className="ui-pop-in flex max-h-[90vh] w-full max-w-3xl flex-col border p-6 shadow-2xl sm:p-8"
         style={{
           backgroundColor: 'var(--bg-surface)',
           borderColor: 'var(--border-default)',

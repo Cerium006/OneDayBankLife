@@ -1,10 +1,11 @@
 /**
- * Окно ветвящегося диалога с персонажем (Шаг 4).
- * Показывает имя, должность и реплику собеседника, подставляя никнейм игрока,
- * и предлагает только те варианты ответа, которые разрешены текущими флагами и инвентарём.
+ * Окно ветвящегося диалога с персонажем.
+ * Показывает имя, должность, портрет, реплику собеседника с подстановкой никнейма,
+ * доступные варианты ответа (поддерживает выбор цифрами 1–4) и таймер ожидания клиента
+ * на нормальном и сложном уровне сложности.
  */
 
-import { MessageSquare, X } from 'lucide-react';
+import { Clock, MessageSquare, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { getAvailableDialogChoices, resolveDialogText } from '../engine/dialogEngine';
 import type {
@@ -22,17 +23,33 @@ interface DialogModalProps {
   worldState: WorldState;
   inventory: string[];
   ui: UiTexts;
+  clientTimerSeconds?: number;
+  onClientTimeout?: () => void;
   onSelectChoice: (choice: DialogChoice) => void;
   onClose: () => void;
 }
 
-/** Возвращает 1–2 первые буквы имени для временного квадратного портрета */
+const CLIENT_TIMED_DIALOG_IDS = new Set([
+  'danya_client',
+  'nina_client',
+  'orlov_client',
+  'lena_client',
+  'anna_client',
+]);
+
 function getSpeakerInitials(name: string): string {
   const parts = name.trim().split(/\s+/);
   if (parts.length >= 2) {
     return `${parts[0][0] ?? ''}${parts[1][0] ?? ''}`.toUpperCase();
   }
   return (parts[0]?.slice(0, 2) ?? '?').toUpperCase();
+}
+
+function formatTimerClock(seconds: number): string {
+  const safe = Math.max(0, seconds);
+  const mins = Math.floor(safe / 60);
+  const secs = safe % 60;
+  return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
 }
 
 export function DialogModal({
@@ -43,14 +60,71 @@ export function DialogModal({
   worldState,
   inventory,
   ui,
+  clientTimerSeconds = 0,
+  onClientTimeout,
   onSelectChoice,
   onClose,
 }: DialogModalProps) {
   const [avatarFailed, setAvatarFailed] = useState<boolean>(false);
+  const isTimedClientDialog = Boolean(
+    dialog && clientTimerSeconds > 0 && CLIENT_TIMED_DIALOG_IDS.has(dialog.id),
+  );
+  const [remainingSeconds, setRemainingSeconds] = useState<number>(clientTimerSeconds);
+  const [timedOutOnce, setTimedOutOnce] = useState<boolean>(false);
 
   useEffect(() => {
     setAvatarFailed(false);
-  }, [dialog?.id, speakerAvatar]);
+    setRemainingSeconds(clientTimerSeconds);
+    setTimedOutOnce(false);
+  }, [dialog?.id, speakerAvatar, clientTimerSeconds]);
+
+  // Отсчёт таймера терпения клиента, если он задан профилем сложности
+  useEffect(() => {
+    if (!isTimedClientDialog || timedOutOnce) {
+      return;
+    }
+
+    const timerId = window.setInterval(() => {
+      setRemainingSeconds((prev) => {
+        if (prev <= 1) {
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => window.clearInterval(timerId);
+  }, [isTimedClientDialog, timedOutOnce]);
+
+  useEffect(() => {
+    if (isTimedClientDialog && remainingSeconds === 0 && !timedOutOnce) {
+      setTimedOutOnce(true);
+      onClientTimeout?.();
+    }
+  }, [isTimedClientDialog, remainingSeconds, timedOutOnce, onClientTimeout]);
+
+  // Быстрый выбор ответа цифрами 1..9 с клавиатуры
+  useEffect(() => {
+    if (!dialog || !currentNodeId) {
+      return;
+    }
+    const activeNode = dialog.nodes[currentNodeId];
+    if (!activeNode) {
+      return;
+    }
+    const visibleChoices = getAvailableDialogChoices(activeNode, worldState, inventory);
+
+    function handleKeyDown(event: KeyboardEvent) {
+      const num = Number.parseInt(event.key, 10);
+      if (!Number.isNaN(num) && num >= 1 && num <= visibleChoices.length) {
+        event.preventDefault();
+        onSelectChoice(visibleChoices[num - 1]);
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [dialog, currentNodeId, worldState, inventory, onSelectChoice]);
 
   if (!dialog || !currentNodeId) {
     return null;
@@ -65,6 +139,11 @@ export function DialogModal({
   const replicaText = resolveDialogText(node.text, nickname);
   const initials = getSpeakerInitials(dialog.speakerName);
   const showAvatar = Boolean(speakerAvatar && !avatarFailed);
+  const timerPercent =
+    isTimedClientDialog && clientTimerSeconds > 0
+      ? Math.round((remainingSeconds / clientTimerSeconds) * 100)
+      : 100;
+  const isTimerLow = isTimedClientDialog && remainingSeconds <= 20;
 
   return (
     <div
@@ -75,7 +154,7 @@ export function DialogModal({
       onClick={onClose}
     >
       <div
-        className="w-full max-w-2xl border p-5 shadow-2xl sm:p-6"
+        className="ui-pop-in w-full max-w-2xl border p-5 shadow-2xl sm:p-6"
         style={{
           backgroundColor: 'var(--bg-surface)',
           borderColor: 'var(--border-default)',
@@ -83,7 +162,7 @@ export function DialogModal({
         }}
         onClick={(event) => event.stopPropagation()}
       >
-        {/* Шапка собеседника: портрет персонажа (или инициалы), имя, роль и кнопка выхода */}
+        {/* Шапка собеседника */}
         <div
           className="flex items-start justify-between gap-4 border-b pb-4"
           style={{ borderColor: 'var(--border-default)' }}
@@ -129,7 +208,7 @@ export function DialogModal({
             type="button"
             onClick={onClose}
             aria-label={ui.room.dialogCloseButton}
-            className="inline-flex min-h-[38px] items-center gap-1.5 border px-3 py-1.5 text-xs font-medium whitespace-nowrap transition-colors hover:bg-white/10"
+            className="inline-flex min-h-[38px] cursor-pointer items-center gap-1.5 border px-3 py-1.5 text-xs font-medium whitespace-nowrap transition-colors hover:bg-white/10"
             style={{
               borderColor: 'var(--border-default)',
               borderRadius: 'var(--radius-control)',
@@ -141,6 +220,51 @@ export function DialogModal({
           </button>
         </div>
 
+        {/* Полоса таймера терпения клиента (работает на нормальной и сложной сложности) */}
+        {isTimedClientDialog && (
+          <div className="mt-3">
+            <div className="flex items-center justify-between gap-2 text-xs tabular-nums">
+              <span
+                className="inline-flex items-center gap-1.5 font-medium"
+                style={{
+                  color: timedOutOnce
+                    ? 'var(--danger-text)'
+                    : isTimerLow
+                      ? 'var(--warning-primary)'
+                      : 'var(--text-secondary)',
+                }}
+              >
+                <Clock className="h-3.5 w-3.5" aria-hidden="true" />
+                <span>{ui.room.clientTimerLabel}</span>
+              </span>
+              <span
+                className="font-semibold"
+                style={{ color: isTimerLow ? 'var(--warning-primary)' : 'var(--text-primary)' }}
+              >
+                {formatTimerClock(remainingSeconds)}
+              </span>
+            </div>
+            <div className="mt-1 h-1.5 w-full overflow-hidden rounded-sm bg-white/15">
+              <div
+                className="h-full transition-all duration-300"
+                style={{
+                  width: `${timerPercent}%`,
+                  backgroundColor: timedOutOnce
+                    ? 'var(--danger-primary)'
+                    : isTimerLow
+                      ? 'var(--warning-primary)'
+                      : 'var(--accent-primary)',
+                }}
+              />
+            </div>
+            {timedOutOnce && (
+              <p className="mt-1.5 text-xs" style={{ color: 'var(--danger-text)' }}>
+                {ui.room.clientTimerTimeoutNote}
+              </p>
+            )}
+          </div>
+        )}
+
         {/* Реплика персонажа */}
         <div
           className="mt-4 border p-4 text-base leading-relaxed"
@@ -151,7 +275,10 @@ export function DialogModal({
             color: 'var(--text-primary)',
           }}
         >
-          <div className="mb-1.5 flex items-center gap-1.5 text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>
+          <div
+            className="mb-1.5 flex items-center gap-1.5 text-xs font-medium"
+            style={{ color: 'var(--text-secondary)' }}
+          >
             <MessageSquare className="h-3.5 w-3.5" aria-hidden="true" />
             <span>{dialog.speakerName}</span>
           </div>

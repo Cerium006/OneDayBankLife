@@ -19,22 +19,27 @@ import {
   Hand,
   HelpCircle,
   KeyRound,
+  Lock,
   LogOut,
   Map as MapIcon,
   MessageSquare,
   RotateCcw,
   ShieldAlert,
+  Volume2,
+  VolumeX,
   X,
 } from 'lucide-react';
-import { useEffect, useMemo, useRef, useState, type MouseEvent } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type MouseEvent } from 'react';
 import { executeDialogChoice } from '../engine/dialogEngine';
 import { evaluateMiniGameSubmission } from '../engine/miniGameEngine';
 import {
   advanceDayTimer,
+  applyMetricChanges,
   checkRoleFailure,
   restoreSaveFromCheckpoint,
   syncQuestsAndCheckpoint,
 } from '../engine/questEngine';
+import { loadSoundEnabled, playSoundEffect, saveSoundEnabled } from '../engine/soundEffects';
 import { hasCompletedTutorial, markTutorialCompleted } from '../engine/storage';
 import { getFlag, setFlag } from '../engine/worldFlags';
 import {
@@ -181,6 +186,7 @@ export function RoomScreen({
   const [notice, setNotice] = useState<InspectNotice | null>(null);
   const [noticeImageFailed, setNoticeImageFailed] = useState<boolean>(false);
   const [failedNpcImages, setFailedNpcImages] = useState<Record<string, boolean>>({});
+  const [isSoundEnabled, setIsSoundEnabled] = useState<boolean>(() => loadSoundEnabled());
 
   const npcById = useMemo(
     () => new Map(world.npcs.map((npc) => [npc.id, npc])),
@@ -511,6 +517,7 @@ export function RoomScreen({
 
   /** Возвращает игрока к последнему сохранённому чекпоинту (например, после ошибки) */
   function handleRestoreCheckpoint() {
+    playSoundEffect('click', isSoundEnabled);
     const restored = restoreSaveFromCheckpoint(saveState, role);
     setSelectedHotspotId(null);
     onSaveUpdate(restored);
@@ -531,6 +538,7 @@ export function RoomScreen({
     );
 
     if (!access.allowed) {
+      playSoundEffect('locked', isSoundEnabled);
       setNotice({
         title: ui.room.kindLabels.door,
         subtitle: currentPoint.title,
@@ -539,6 +547,8 @@ export function RoomScreen({
       });
       return;
     }
+
+    playSoundEffect('move', isSoundEnabled);
 
     let nextWorld = setFlag(saveState.worldState, `visited_${targetPointId}`, true);
     if (targetPointId === 'server_room') {
@@ -558,6 +568,9 @@ export function RoomScreen({
     onSaveUpdate(nextSave);
 
     if (newlyCompleted.length > 0 || newlyActivated.length > 0) {
+      if (newlyCompleted.length > 0) {
+        playSoundEffect('success', isSoundEnabled);
+      }
       const questParts: string[] = [];
       if (newlyCompleted.length > 0) {
         questParts.push(`Выполнена задача: ${newlyCompleted.map((q) => q.title).join(', ')}`);
@@ -578,6 +591,7 @@ export function RoomScreen({
   /** Клик по зоне: открываем маленькое меню доступных действий */
   function handleHotspotClick(event: MouseEvent<HTMLButtonElement>, hotspot: WorldHotspot) {
     event.stopPropagation();
+    playSoundEffect('click', isSoundEnabled);
     setSelectedHotspotId((prev) => (prev === hotspot.id ? null : hotspot.id));
   }
 
@@ -589,6 +603,7 @@ export function RoomScreen({
     if (action.miniGameId) {
       const game = miniGames.find((m) => m.id === action.miniGameId);
       if (game) {
+        playSoundEffect('click', isSoundEnabled);
         setNotice(null);
         setActiveMiniGameId(game.id);
         return;
@@ -599,6 +614,7 @@ export function RoomScreen({
     if (action.dialogId) {
       const dialog = dialogs.find((d) => d.id === action.dialogId);
       if (dialog) {
+        playSoundEffect('click', isSoundEnabled);
         setNotice(null);
         setActiveDialogId(dialog.id);
         setActiveDialogNodeId(dialog.startNodeId);
@@ -617,6 +633,16 @@ export function RoomScreen({
 
     if (result.nextSave !== saveState) {
       onSaveUpdate(result.nextSave);
+    }
+
+    if (result.isLocked) {
+      playSoundEffect('locked', isSoundEnabled);
+    } else if (result.newlyCompletedQuests.length > 0) {
+      playSoundEffect('success', isSoundEnabled);
+    } else if (action.giveItemId) {
+      playSoundEffect('pickup', isSoundEnabled);
+    } else {
+      playSoundEffect('click', isSoundEnabled);
     }
 
     const npcInfo = hotspot.npcId ? npcById.get(hotspot.npcId) : undefined;
@@ -661,6 +687,7 @@ export function RoomScreen({
 
     onSaveUpdate(result.nextSave);
     setActiveMiniGameId(null);
+    playSoundEffect(result.isPerfect ? 'success' : 'alert', isSoundEnabled);
 
     const questParts: string[] = [];
     if (result.newlyCompletedQuests.length > 0) {
@@ -683,53 +710,87 @@ export function RoomScreen({
   }
 
   /** Обработка выбранного ответа в ветвящемся диалоге */
-  function handleSelectDialogChoice(choice: DialogChoice) {
-    if (!activeDialog) {
-      return;
-    }
-
-    const result = executeDialogChoice({
-      dialog: activeDialog,
-      choice,
-      saveState,
-      role,
-      difficulty,
-    });
-
-    onSaveUpdate(result.nextSave);
-
-    const questParts: string[] = [];
-    if (result.newlyCompletedQuests.length > 0) {
-      questParts.push(
-        `Выполнена задача: ${result.newlyCompletedQuests.map((q) => q.title).join(', ')}`,
-      );
-    }
-    if (result.newlyActivatedQuests.length > 0) {
-      questParts.push(
-        `Новая задача: ${result.newlyActivatedQuests.map((q) => q.title).join(', ')}`,
-      );
-    }
-
-    if (result.isFinished) {
-      const speakerName = activeDialog.speakerName;
-      const speakerRole = activeDialog.speakerRole;
-      const speakerAvatar = activeDialog.npcId ? npcById.get(activeDialog.npcId)?.avatar : undefined;
-      setActiveDialogId(null);
-      setActiveDialogNodeId(null);
-
-      if (result.feedbackText || questParts.length > 0) {
-        setNotice({
-          title: speakerName,
-          subtitle: speakerRole,
-          body: result.feedbackText ?? 'Разговор завершён.',
-          questNote: questParts.length > 0 ? questParts.join(' · ') : undefined,
-          image: speakerAvatar,
-          imageAlt: speakerName,
-        });
+  const handleSelectDialogChoice = useCallback(
+    (choice: DialogChoice) => {
+      if (!activeDialog) {
+        return;
       }
-    } else {
-      setActiveDialogNodeId(result.nextNodeId);
-    }
+
+      const result = executeDialogChoice({
+        dialog: activeDialog,
+        choice,
+        saveState,
+        role,
+        difficulty,
+      });
+
+      onSaveUpdate(result.nextSave);
+
+      if (result.newlyCompletedQuests.length > 0) {
+        playSoundEffect('success', isSoundEnabled);
+      } else if (choice.giveItemId) {
+        playSoundEffect('pickup', isSoundEnabled);
+      } else {
+        playSoundEffect('click', isSoundEnabled);
+      }
+
+      const questParts: string[] = [];
+      if (result.newlyCompletedQuests.length > 0) {
+        questParts.push(
+          `Выполнена задача: ${result.newlyCompletedQuests.map((q) => q.title).join(', ')}`,
+        );
+      }
+      if (result.newlyActivatedQuests.length > 0) {
+        questParts.push(
+          `Новая задача: ${result.newlyActivatedQuests.map((q) => q.title).join(', ')}`,
+        );
+      }
+
+      if (result.isFinished) {
+        const speakerName = activeDialog.speakerName;
+        const speakerRole = activeDialog.speakerRole;
+        const speakerAvatar = activeDialog.npcId
+          ? npcById.get(activeDialog.npcId)?.avatar
+          : undefined;
+        setActiveDialogId(null);
+        setActiveDialogNodeId(null);
+
+        if (result.feedbackText || questParts.length > 0) {
+          setNotice({
+            title: speakerName,
+            subtitle: speakerRole,
+            body: result.feedbackText ?? 'Разговор завершён.',
+            questNote: questParts.length > 0 ? questParts.join(' · ') : undefined,
+            image: speakerAvatar,
+            imageAlt: speakerName,
+          });
+        }
+      } else {
+        setActiveDialogNodeId(result.nextNodeId);
+      }
+    },
+    [activeDialog, saveState, role, difficulty, onSaveUpdate, isSoundEnabled, npcById],
+  );
+
+  /** Срабатывает при истечении таймера терпения клиента на нормальной/сложной сложности */
+  const handleClientTimeout = useCallback(() => {
+    playSoundEffect('alert', isSoundEnabled);
+    const nextMetrics = applyMetricChanges(role, saveState.metrics, { trust: -5 }, difficulty);
+    onSaveUpdate({
+      ...saveState,
+      metrics: nextMetrics,
+    });
+  }, [role, saveState, difficulty, onSaveUpdate, isSoundEnabled]);
+
+  function handleToggleSound() {
+    setIsSoundEnabled((prev) => {
+      const next = !prev;
+      saveSoundEnabled(next);
+      if (next) {
+        playSoundEffect('click', true);
+      }
+      return next;
+    });
   }
 
   const roomBackdropColor = theme.roomColors[currentPoint.id] ?? theme.colors.surfaceMuted;
@@ -888,8 +949,27 @@ export function RoomScreen({
 
             <button
               type="button"
+              onClick={handleToggleSound}
+              aria-label={isSoundEnabled ? ui.room.soundOnButton : ui.room.soundOffButton}
+              title={isSoundEnabled ? ui.room.soundOnButton : ui.room.soundOffButton}
+              className="inline-flex min-h-[36px] cursor-pointer items-center justify-center border px-2.5 py-1 text-xs font-medium whitespace-nowrap transition-colors hover:bg-white/10"
+              style={{
+                borderColor: 'var(--hud-border)',
+                borderRadius: 'var(--radius-control)',
+                color: isSoundEnabled ? 'var(--accent-lime)' : 'var(--text-secondary)',
+              }}
+            >
+              {isSoundEnabled ? (
+                <Volume2 className="h-4 w-4" aria-hidden="true" />
+              ) : (
+                <VolumeX className="h-4 w-4" aria-hidden="true" />
+              )}
+            </button>
+
+            <button
+              type="button"
               onClick={onBackToMenu}
-              className="inline-flex min-h-[36px] items-center gap-1.5 border px-2.5 py-1 text-xs font-medium whitespace-nowrap transition-colors hover:bg-white/10"
+              className="inline-flex min-h-[36px] cursor-pointer items-center gap-1.5 border px-2.5 py-1 text-xs font-medium whitespace-nowrap transition-colors hover:bg-white/10"
               style={{
                 borderColor: 'var(--hud-border)',
                 borderRadius: 'var(--radius-control)',
@@ -1085,7 +1165,9 @@ export function RoomScreen({
                     {/* Подпись названия объекта или имени персонажа при наведении (если меню действий не открыто) */}
                     {isHovered && !isSelected && (
                       <span
-                        className="pointer-events-none absolute -top-9 left-1/2 z-30 -translate-x-1/2 px-2.5 py-1 text-xs font-semibold whitespace-nowrap shadow-md"
+                        className={`pointer-events-none absolute left-1/2 z-30 -translate-x-1/2 px-2.5 py-1 text-xs font-semibold whitespace-nowrap shadow-lg backdrop-blur-sm ${
+                          hotspot.y < 14 ? '-bottom-9' : '-top-9'
+                        }`}
                         style={{
                           backgroundColor: 'var(--hud-overlay)',
                           color: 'var(--hud-text)',
@@ -1104,16 +1186,29 @@ export function RoomScreen({
               })}
             </div>
 
+            {/* Кинематографическая виньетка по краям комнаты для плавного вписывания интерфейса */}
+            <div
+              className="pointer-events-none absolute inset-0 z-10"
+              style={{
+                background:
+                  'radial-gradient(ellipse at center, transparent 62%, rgba(16, 20, 17, 0.44) 100%)',
+                boxShadow: 'inset 0 0 0 1px rgba(233, 198, 156, 0.14)',
+              }}
+              aria-hidden="true"
+            />
+
             {/* Маленькое меню действий (Осмотреть / Взять / Использовать / Поговорить) рядом с выбранным объектом */}
             {selectedHotspot && (
               <div
                 role="menu"
                 aria-label={selectedHotspot.label}
                 onClick={(event) => event.stopPropagation()}
-                className="absolute z-30 min-w-[210px] max-w-[270px] -translate-x-1/2 border p-2 shadow-2xl backdrop-blur-sm"
+                className="ui-pop-in absolute z-30 min-w-[215px] max-w-[280px] -translate-x-1/2 border p-2 shadow-2xl backdrop-blur-md"
                 style={{
-                  left: `${Math.max(15, Math.min(85, selectedHotspot.x + selectedHotspot.width / 2))}%`,
-                  top: `${Math.max(12, Math.min(68, selectedHotspot.y + selectedHotspot.height + 2))}%`,
+                  left: `${Math.max(16, Math.min(84, selectedHotspot.x + selectedHotspot.width / 2))}%`,
+                  ...(selectedHotspot.y + selectedHotspot.height > 62
+                    ? { bottom: `${Math.max(8, 100 - selectedHotspot.y + 1.5)}%` }
+                    : { top: `${Math.max(10, selectedHotspot.y + selectedHotspot.height + 1.5)}%` }),
                   backgroundColor: 'var(--hud-overlay)',
                   borderColor: 'var(--hud-border)',
                   color: 'var(--hud-text)',
@@ -1126,7 +1221,7 @@ export function RoomScreen({
                     type="button"
                     onClick={() => setSelectedHotspotId(null)}
                     aria-label={ui.room.actionMenuClose}
-                    className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded hover:bg-white/10"
+                    className="inline-flex h-6 w-6 shrink-0 cursor-pointer items-center justify-center rounded hover:bg-white/10"
                   >
                     <X className="h-3.5 w-3.5" aria-hidden="true" />
                   </button>
@@ -1164,6 +1259,15 @@ export function RoomScreen({
                       ? 'top-3 left-1/2 -translate-x-1/2'
                       : 'bottom-3 left-1/2 -translate-x-1/2';
 
+              const isLockedExit =
+                Boolean(exit.condition) &&
+                !checkTransitionAccess(
+                  exit.condition,
+                  saveState.worldState,
+                  saveState.inventory,
+                  ui.room.lockedDefaultMessage,
+                ).allowed;
+
               return (
                 <button
                   key={`${exit.direction}-${exit.targetPointId}`}
@@ -1173,15 +1277,19 @@ export function RoomScreen({
                     setSelectedHotspotId(null);
                     tryMoveToPoint(exit.targetPointId, exit.condition);
                   }}
-                  className={`absolute z-20 inline-flex min-h-[40px] cursor-pointer items-center gap-2 border px-3.5 py-2 text-xs font-semibold whitespace-nowrap shadow-lg backdrop-blur-xs transition-all hover:brightness-110 ${positionClass}`}
+                  className={`absolute z-20 inline-flex min-h-[40px] cursor-pointer items-center gap-2 border px-3.5 py-2 text-xs font-semibold whitespace-nowrap shadow-lg backdrop-blur-sm transition-transform hover:scale-[1.03] ${positionClass}`}
                   style={{
                     backgroundColor: 'var(--hud-overlay)',
-                    borderColor: 'var(--hud-border)',
-                    color: 'var(--hud-text)',
+                    borderColor: isLockedExit ? 'rgba(252, 165, 165, 0.45)' : 'var(--hud-border)',
+                    color: isLockedExit ? 'var(--danger-text)' : 'var(--hud-text)',
                     borderRadius: 'var(--radius-control)',
                   }}
                 >
-                  <DirectionIcon direction={exit.direction} />
+                  {isLockedExit ? (
+                    <Lock className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                  ) : (
+                    <DirectionIcon direction={exit.direction} />
+                  )}
                   <span>{exit.label}</span>
                 </button>
               );
@@ -1192,10 +1300,14 @@ export function RoomScreen({
               <div
                 role="status"
                 onClick={(event) => event.stopPropagation()}
-                className="absolute bottom-14 left-1/2 z-30 w-[min(92%,560px)] -translate-x-1/2 border p-4 shadow-xl backdrop-blur-sm"
+                className="ui-pop-in absolute bottom-14 left-1/2 z-30 w-[min(92%,560px)] -translate-x-1/2 border p-4 shadow-2xl backdrop-blur-md"
                 style={{
                   backgroundColor: 'var(--hud-overlay)',
-                  borderColor: notice.isLocked ? 'var(--danger-primary)' : 'var(--hud-border)',
+                  borderColor: notice.isLocked
+                    ? 'var(--danger-primary)'
+                    : notice.questNote
+                      ? 'var(--accent-primary)'
+                      : 'var(--hud-border)',
                   color: 'var(--hud-text)',
                   borderRadius: 'var(--radius-card)',
                 }}
@@ -1241,7 +1353,7 @@ export function RoomScreen({
                             setNotice(null);
                             setIsReportOpen(true);
                           }}
-                          className="mt-3 inline-flex min-h-[36px] items-center gap-1.5 px-3 py-1.5 text-xs font-semibold whitespace-nowrap transition-colors"
+                          className="mt-3 inline-flex min-h-[36px] cursor-pointer items-center gap-1.5 px-3 py-1.5 text-xs font-semibold whitespace-nowrap transition-all hover:brightness-110"
                           style={{
                             backgroundColor: 'var(--success-primary)',
                             color: 'var(--accent-text)',
@@ -1259,7 +1371,7 @@ export function RoomScreen({
                     type="button"
                     onClick={() => setNotice(null)}
                     aria-label="Закрыть сообщение"
-                    className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded hover:bg-white/10"
+                    className="inline-flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded hover:bg-white/10"
                   >
                     <X className="h-4 w-4" aria-hidden="true" />
                   </button>
@@ -1276,6 +1388,8 @@ export function RoomScreen({
         ui={ui}
         world={world}
         currentPoint={currentPoint}
+        worldState={saveState.worldState}
+        inventory={saveState.inventory}
         onNavigateToPoint={(targetId) => {
           const matchingExit = currentPoint.exits.find((e) => e.targetPointId === targetId);
           tryMoveToPoint(targetId, matchingExit?.condition);
@@ -1306,6 +1420,8 @@ export function RoomScreen({
         worldState={saveState.worldState}
         inventory={saveState.inventory}
         ui={ui}
+        clientTimerSeconds={role.id === 'manager' ? difficulty.params.clientTimeSeconds : 0}
+        onClientTimeout={handleClientTimeout}
         onSelectChoice={handleSelectDialogChoice}
         onClose={() => {
           setActiveDialogId(null);

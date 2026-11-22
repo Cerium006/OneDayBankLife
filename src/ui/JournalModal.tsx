@@ -123,7 +123,7 @@ export function JournalModal({
       onClick={onClose}
     >
       <div
-        className="flex max-h-[86vh] w-full max-w-2xl flex-col border p-6 shadow-2xl"
+        className="ui-pop-in flex max-h-[86vh] w-full max-w-2xl flex-col border p-6 shadow-2xl"
         style={{
           backgroundColor: 'var(--bg-surface)',
           borderColor: 'var(--border-default)',
