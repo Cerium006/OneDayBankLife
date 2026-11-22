@@ -6,7 +6,7 @@
       "roleTitle": "Куратор пентеста",
       "pointId": "entrance",
       "description": "Руководитель проверки безопасности. На связи по телефону.",
-      "avatar": "/media/npcs/client_anna.png"
+      "avatar": "/media/npcs/client_anna.webp"
     },
     {
       "id": "guard_viktor",
@@ -14,7 +14,7 @@
       "roleTitle": "Служба охраны",
       "pointId": "entrance",
       "description": "Следит за турникетом на входе и проверяет пропуска посетителей.",
-      "avatar": "/media/npcs/guard_viktor.png"
+      "avatar": "/media/npcs/guard_viktor.webp"
     },
     {
       "id": "admin_marina",
@@ -22,7 +22,7 @@
       "roleTitle": "Администратор зала",
       "pointId": "hall",
       "description": "Встречает посетителей в операционном зале и выдаёт гостевые бейджи.",
-      "avatar": "/media/npcs/admin_marina.png"
+      "avatar": "/media/npcs/admin_marina.webp"
     },
     {
       "id": "client_elderly",
@@ -30,7 +30,7 @@
       "roleTitle": "Посетительница",
       "pointId": "hall",
       "description": "Держит телефон у уха и выглядит взволнованной.",
-      "avatar": "/media/npcs/client_elderly.png"
+      "avatar": "/media/npcs/client_elderly.webp"
     },
     {
       "id": "client_young",
@@ -38,7 +38,7 @@
       "roleTitle": "Клиент в очереди",
       "pointId": "hall",
       "description": "Оформляет карту и изучает памятку у терминала.",
-      "avatar": "/media/npcs/client_young.png"
+      "avatar": "/media/npcs/client_young.webp"
     },
     {
       "id": "client_suit",
@@ -46,7 +46,7 @@
       "roleTitle": "Подозрительный посетитель",
       "pointId": "hall",
       "description": "Осматривается по сторонам и наблюдает за дверью в служебный офис.",
-      "avatar": "/media/npcs/client_suit.png"
+      "avatar": "/media/npcs/client_suit.webp"
     },
     {
       "id": "cashier_oleg",
@@ -54,7 +54,7 @@
       "roleTitle": "Клиентский отдел",
       "pointId": "counter",
       "description": "Работает за соседним окном обслуживания, поддерживает новичков.",
-      "avatar": "/media/npcs/cashier_oleg.png"
+      "avatar": "/media/npcs/cashier_oleg.webp"
     },
     {
       "id": "client_danya",
@@ -62,7 +62,7 @@
       "roleTitle": "Первый клиент",
       "pointId": "counter",
       "description": "Торопится перевести деньги маме на лекарства.",
-      "avatar": "/media/npcs/client_anna.png"
+      "avatar": "/media/npcs/client_anna.webp"
     },
     {
       "id": "client_orlov",
@@ -70,7 +70,7 @@
       "roleTitle": "Третий клиент",
       "pointId": "counter",
       "description": "Уверенный мужчина, представляющийся сотрудником надзорного органа.",
-      "avatar": "/media/npcs/client_suit.png"
+      "avatar": "/media/npcs/client_suit.webp"
     },
     {
       "id": "client_lena",
@@ -78,7 +78,7 @@
       "roleTitle": "Четвёртый клиент",
       "pointId": "counter",
       "description": "Расстроенная клиентка, перешедшая по подозрительной ссылке из письма.",
-      "avatar": "/media/npcs/client_lena.png"
+      "avatar": "/media/npcs/client_lena.webp"
     },
     {
       "id": "director_anna",
@@ -86,7 +86,7 @@
       "roleTitle": "Директор отделения",
       "pointId": "office",
       "description": "Контролирует работу отделения и проверяет соблюдение регламентов безопасности.",
-      "avatar": "/media/npcs/director_darya.png"
+      "avatar": "/media/npcs/director_darya.webp"
     },
     {
       "id": "sysadmin_igor",
@@ -94,7 +94,7 @@
       "roleTitle": "ИТ-отдел",
       "pointId": "office",
       "description": "Настраивает компьютеры сотрудников, Wi-Fi в переговорной и серверную.",
-      "avatar": "/media/npcs/sysadmin_igor.png"
+      "avatar": "/media/npcs/sysadmin_igor.webp"
     }
   ],
   "points": [
@@ -102,7 +102,7 @@
       "id": "entrance",
       "title": "Вход и холл",
       "subtitle": "Пост охраны, стеклянный вход и стойка администратора",
-      "background": "/rooms/entrance.jpg",
+      "background": "/rooms/entrance.webp",
       "mapCoords": { "x": 14, "y": 50 },
       "exits": [
         {
@@ -257,7 +257,7 @@
       "id": "hall",
       "title": "Операционный зал",
       "subtitle": "Клиентские окна, зона ожидания, терминал и служебные двери",
-      "background": "/rooms/hall.jpg",
+      "background": "/rooms/hall.webp",
       "mapCoords": { "x": 38, "y": 50 },
       "exits": [
         {
@@ -493,7 +493,7 @@
       "id": "counter",
       "title": "Окно обслуживания",
       "subtitle": "Рабочее место клиентского менеджера",
-      "background": "/rooms/counter.jpg",
+      "background": "/rooms/counter.webp",
       "mapCoords": { "x": 38, "y": 20 },
       "exits": [
         {
@@ -869,7 +869,7 @@
       "id": "office",
       "title": "Офис сотрудников",
       "subtitle": "Рабочие столы, мониторы и стеклянная перегородка в служебную зону",
-      "background": "/rooms/office.jpg",
+      "background": "/rooms/office.webp",
       "mapCoords": { "x": 62, "y": 50 },
       "exits": [
         {
@@ -1113,7 +1113,7 @@
       "id": "meeting",
       "title": "Переговорная",
       "subtitle": "Комната для встреч с маркерной доской и гостевым Wi-Fi",
-      "background": "/rooms/meeting.jpg",
+      "background": "/rooms/meeting.webp",
       "mapCoords": { "x": 62, "y": 80 },
       "exits": [
         {
@@ -1202,7 +1202,7 @@
       "id": "corridor",
       "title": "Коридор",
       "subtitle": "Закрытая служебная зона с доступом по бейджу",
-      "background": "/rooms/corridor.jpg",
+      "background": "/rooms/corridor.webp",
       "mapCoords": { "x": 84, "y": 50 },
       "exits": [
         {
@@ -1315,7 +1315,7 @@
       "id": "server_room",
       "title": "Серверная",
       "subtitle": "Серверные стойки и терминал администратора (цель пентестера)",
-      "background": "/rooms/server_room.jpg",
+      "background": "/rooms/server_room.webp",
       "ambientAudio": "/media/sfx/server_ambient.mp3",
       "mapCoords": { "x": 84, "y": 20 },
       "exits": [

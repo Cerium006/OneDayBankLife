@@ -5,7 +5,7 @@
       "id": "easy",
       "title": "Лёгкий",
       "description": "Спокойный режим для первого знакомства: подсказки всегда видны, время не поджимает.",
-      "icon": "/media/icons/diff_easy.png",
+      "icon": "/media/icons/diff_easy.webp",
       "params": {
         "hintsMode": "постоянные",
         "suspicionGrowthLabel": "медленный",
@@ -20,7 +20,7 @@
       "id": "normal",
       "title": "Нормальный",
       "description": "Сбалансированная смена: подсказки по кнопке, умеренный контроль времени и внимания.",
-      "icon": "/media/icons/diff_normal.png",
+      "icon": "/media/icons/diff_normal.webp",
       "params": {
         "hintsMode": "по кнопке",
         "suspicionGrowthLabel": "средний",
@@ -35,7 +35,7 @@
       "id": "hard",
       "title": "Сложный",
       "description": "Испытание без подсказок и подсветки: охрана внимательнее, а клиенты не любят ждать.",
-      "icon": "/media/icons/diff_hard.png",
+      "icon": "/media/icons/diff_hard.webp",
       "params": {
         "hintsMode": "выключены",
         "suspicionGrowthLabel": "быстрый",
