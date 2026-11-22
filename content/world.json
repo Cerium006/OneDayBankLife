@@ -6,7 +6,7 @@
       "roleTitle": "Куратор пентеста",
       "pointId": "entrance",
       "description": "Руководитель проверки безопасности. На связи по телефону.",
-      "avatar": "/npcs/kira.svg"
+      "avatar": "/media/npcs/client_anna.png"
     },
     {
       "id": "guard_viktor",
@@ -14,7 +14,7 @@
       "roleTitle": "Служба охраны",
       "pointId": "entrance",
       "description": "Следит за турникетом на входе и проверяет пропуска посетителей.",
-      "avatar": "/assets/aistudio/_______d6402031.png"
+      "avatar": "/media/npcs/guard_viktor.png"
     },
     {
       "id": "admin_marina",
@@ -22,7 +22,7 @@
       "roleTitle": "Администратор зала",
       "pointId": "hall",
       "description": "Встречает посетителей в операционном зале и выдаёт гостевые бейджи.",
-      "avatar": "/assets/aistudio/______________f870ecf7.png"
+      "avatar": "/media/npcs/admin_marina.png"
     },
     {
       "id": "client_elderly",
@@ -30,7 +30,7 @@
       "roleTitle": "Посетительница",
       "pointId": "hall",
       "description": "Держит телефон у уха и выглядит взволнованной.",
-      "avatar": "/assets/aistudio/________9536b8b4.png"
+      "avatar": "/media/npcs/client_elderly.png"
     },
     {
       "id": "client_young",
@@ -38,7 +38,7 @@
       "roleTitle": "Клиент в очереди",
       "pointId": "hall",
       "description": "Оформляет карту и изучает памятку у терминала.",
-      "avatar": "/assets/aistudio/_______________9bd6c355.png"
+      "avatar": "/media/npcs/client_young.png"
     },
     {
       "id": "client_suit",
@@ -46,7 +46,7 @@
       "roleTitle": "Подозрительный посетитель",
       "pointId": "hall",
       "description": "Осматривается по сторонам и наблюдает за дверью в служебный офис.",
-      "avatar": "/assets/aistudio/__________________c3d3fe19.png"
+      "avatar": "/media/npcs/client_suit.png"
     },
     {
       "id": "cashier_oleg",
@@ -54,7 +54,7 @@
       "roleTitle": "Клиентский отдел",
       "pointId": "counter",
       "description": "Работает за соседним окном обслуживания, поддерживает новичков.",
-      "avatar": "/npcs/cashier_oleg.svg"
+      "avatar": "/media/npcs/cashier_oleg.png"
     },
     {
       "id": "client_danya",
@@ -62,7 +62,7 @@
       "roleTitle": "Первый клиент",
       "pointId": "counter",
       "description": "Торопится перевести деньги маме на лекарства.",
-      "avatar": "/npcs/client_danya.svg"
+      "avatar": "/media/npcs/client_anna.png"
     },
     {
       "id": "client_orlov",
@@ -70,7 +70,7 @@
       "roleTitle": "Третий клиент",
       "pointId": "counter",
       "description": "Уверенный мужчина, представляющийся сотрудником надзорного органа.",
-      "avatar": "/assets/aistudio/__________________c3d3fe19.png"
+      "avatar": "/media/npcs/client_suit.png"
     },
     {
       "id": "client_lena",
@@ -78,7 +78,7 @@
       "roleTitle": "Четвёртый клиент",
       "pointId": "counter",
       "description": "Расстроенная клиентка, перешедшая по подозрительной ссылке из письма.",
-      "avatar": "/npcs/client_lena.svg"
+      "avatar": "/media/npcs/client_lena.png"
     },
     {
       "id": "director_anna",
@@ -86,7 +86,7 @@
       "roleTitle": "Директор отделения",
       "pointId": "office",
       "description": "Контролирует работу отделения и проверяет соблюдение регламентов безопасности.",
-      "avatar": "/assets/aistudio/__________7a265a76.png"
+      "avatar": "/media/npcs/director_darya.png"
     },
     {
       "id": "sysadmin_igor",
@@ -94,7 +94,7 @@
       "roleTitle": "ИТ-отдел",
       "pointId": "office",
       "description": "Настраивает компьютеры сотрудников, Wi-Fi в переговорной и серверную.",
-      "avatar": "/assets/aistudio/__________2083c104.png"
+      "avatar": "/media/npcs/sysadmin_igor.png"
     }
   ],
   "points": [
@@ -511,9 +511,14 @@
           "interactType": "talk",
           "npcId": "cashier_oleg",
           "x": 0.5,
-          "y": 23.0,
+          "y": 13.0,
           "width": 18.0,
-          "height": 43.0,
+          "height": 53.0,
+          "spriteFit": {
+            "heightPercent": 185.0,
+            "topPercent": -8.3,
+            "leftOffsetPercent": -2.0
+          },
           "actions": [
             {
               "type": "inspect",
@@ -533,9 +538,14 @@
           "interactType": "talk",
           "npcId": "client_danya",
           "x": 18.8,
-          "y": 15.0,
+          "y": 12.0,
           "width": 19.8,
-          "height": 47.0,
+          "height": 50.0,
+          "spriteFit": {
+            "heightPercent": 239.0,
+            "topPercent": -12.4,
+            "leftOffsetPercent": -8.0
+          },
           "visibleWhen": {
             "activeRole": "manager",
             "clientDanyaServed": false
@@ -611,9 +621,14 @@
           "interactType": "talk",
           "npcId": "client_lena",
           "x": 18.8,
-          "y": 15.0,
+          "y": 12.0,
           "width": 19.8,
-          "height": 47.0,
+          "height": 50.0,
+          "spriteFit": {
+            "heightPercent": 255.0,
+            "topPercent": -35.2,
+            "leftOffsetPercent": 5.0
+          },
           "visibleWhen": {
             "activeRole": "manager",
             "clientOrlovServed": true,
@@ -638,9 +653,9 @@
           "width": 19.8,
           "height": 50.0,
           "spriteFit": {
-            "heightPercent": 230.0,
-            "topPercent": -66.0,
-            "leftOffsetPercent": -9.0
+            "heightPercent": 243.0,
+            "topPercent": -13.1,
+            "leftOffsetPercent": 0.5
           },
           "visibleWhen": {
             "activeRole": "manager",
@@ -962,14 +977,14 @@
           "kind": "npc",
           "interactType": "talk",
           "npcId": "director_anna",
-          "x": 52.0,
+          "x": 54.0,
           "y": 36.0,
-          "width": 15.2,
+          "width": 10.6,
           "height": 59.0,
           "spriteFit": {
-            "heightPercent": 145.0,
-            "topPercent": -41.6,
-            "leftOffsetPercent": -7.5
+            "heightPercent": 112.6,
+            "topPercent": -6.1,
+            "leftOffsetPercent": 0.5
           },
           "actions": [
             {
@@ -1253,7 +1268,7 @@
       "title": "Серверная",
       "subtitle": "Серверные стойки и терминал администратора (цель пентестера)",
       "background": "/rooms/server_room.jpg",
-      "ambientAudio": "/assets/aistudio/______________2717f77f.mp3",
+      "ambientAudio": "/media/sfx/server_ambient.mp3",
       "mapCoords": { "x": 84, "y": 20 },
       "exits": [
         {

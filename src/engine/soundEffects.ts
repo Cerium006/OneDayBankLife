@@ -30,46 +30,46 @@ interface SfxAssetSpec {
 
 const SFX_ASSETS: Partial<Record<SoundEffectKind, SfxAssetSpec>> = {
   move: {
-    url: '/assets/aistudio/_____________________________21e0675a.mp3',
+    url: '/media/sfx/footsteps.mp3',
     volume: 0.34,
     maxDurationMs: 1350,
   },
   locked: {
-    url: '/assets/aistudio/_______________________________e44ed274.mp3',
+    url: '/media/sfx/door_close.mp3',
     volume: 0.45,
     maxDurationMs: 1200,
   },
   paper: {
-    url: '/assets/aistudio/___________________________f019b12d.mp3',
+    url: '/media/sfx/paper.mp3',
     volume: 0.48,
     maxDurationMs: 1400,
   },
   keyboard: {
-    url: '/assets/aistudio/________________6af85dc6.mp3',
+    url: '/media/sfx/keyboard.mp3',
     volume: 0.38,
     maxDurationMs: 1500,
   },
   door: {
-    url: '/assets/aistudio/door_open_173e1cfa.mp3',
+    url: '/media/sfx/door_open.mp3',
     volume: 0.45,
     maxDurationMs: 1600,
   },
   woodenDoor: {
-    url: '/assets/aistudio/_____________________________39251095.mp3',
+    url: '/media/sfx/wooden_door.mp3',
     volume: 0.45,
     maxDurationMs: 1500,
   },
   usb: {
-    url: '/assets/aistudio/__________________914e3de4.mp3',
+    url: '/media/sfx/usb.mp3',
     volume: 0.52,
   },
   badgeReader: {
-    url: '/assets/aistudio/_____________________________________a9198837.mp3',
+    url: '/media/sfx/badge_reader.mp3',
     volume: 0.48,
     maxDurationMs: 2200,
   },
   sms: {
-    url: '/assets/aistudio/____d84fd408.mp3',
+    url: '/media/sfx/sms.mp3',
     volume: 0.48,
   },
 };

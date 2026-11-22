@@ -52,7 +52,7 @@
         "viktor_1": {
           "id": "viktor_1",
           "text": "Доброе утро! Пропуск или записаны на приём?",
-          "voiceUrl": "/assets/aistudio/___________________________________________7b17e025.mp3",
+          "voiceUrl": "/media/voices/viktor_1.mp3",
           "choices": [
             {
               "id": "viktor_1_courier",
@@ -74,7 +74,7 @@
         "viktor_2a": {
           "id": "viktor_2a",
           "text": "Курьер? Обычно курьеры звонят заранее. Кому именно?",
-          "voiceUrl": "/assets/aistudio/_________________________________________________375a915b.mp3",
+          "voiceUrl": "/media/voices/viktor_2a.mp3",
           "choices": [
             {
               "id": "viktor_2a_marina",
@@ -111,7 +111,7 @@
         "viktor_2b": {
           "id": "viktor_2b",
           "text": "Кондиционеры? Заявок на сегодня не видел.",
-          "voiceUrl": "/assets/aistudio/________________________________________71682bff.mp3",
+          "voiceUrl": "/media/voices/viktor_2b.mp3",
           "choices": [
             {
               "id": "viktor_2b_call",
@@ -148,7 +148,7 @@
         "viktor_2c": {
           "id": "viktor_2c",
           "text": "Проверка? Мне никто не говорил. Подождите, позвоню Дарье Лисичкиной.",
-          "voiceUrl": "/assets/aistudio/__________________________________________________________________52d7949b.mp3",
+          "voiceUrl": "/media/voices/viktor_2c.mp3",
           "choices": [
             {
               "id": "viktor_2c_permit",
@@ -168,7 +168,7 @@
         "viktor_3": {
           "id": "viktor_3",
           "text": "А, Марина, да, про курьера говорила. Проходите, вторая дверь налево. И распишитесь на обороте.",
-          "voiceUrl": "/assets/aistudio/___________________________________________________________________13713649.mp3",
+          "voiceUrl": "/media/voices/viktor_3.mp3",
           "choices": [
             {
               "id": "viktor_3_thanks",
@@ -194,7 +194,7 @@
         "marina_1": {
           "id": "marina_1",
           "text": "Здравствуйте! Вам помочь? Я немного тороплюсь.",
-          "voiceUrl": "/assets/aistudio/mur_2026_11_21_19_46______________________________________________5c91dbea.mp3",
+          "voiceUrl": "/media/voices/marina_1.mp3",
           "choices": [
             {
               "id": "marina_1_ticket",
@@ -217,7 +217,7 @@
         "marina_2": {
           "id": "marina_2",
           "text": "Ой, да, заявка есть. Вот гостевой бейдж, только верните до обеда!",
-          "voiceUrl": "/assets/aistudio/mur_2026_11_21_19_46________________________________________________29f93281.mp3",
+          "voiceUrl": "/media/voices/marina_2.mp3",
           "choices": [
             {
               "id": "marina_2_sure",
@@ -242,7 +242,7 @@
         "igor_1": {
           "id": "igor_1",
           "text": "Слушай, там у кого-то на мониторе стикер с паролем. Я говорил, что защита идеальна, но не для стикеров.",
-          "voiceUrl": "/assets/aistudio/__________2026_11_21_19_47__________________________________________791e688e.mp3",
+          "voiceUrl": "/media/voices/igor_1.mp3",
           "choices": [
             {
               "id": "igor_1_remove",
@@ -281,7 +281,7 @@
         "anna_1": {
           "id": "anna_1",
           "text": "Доброе утро, {ник}! Сегодня много клиентов. Если что-то кажется странным, сначала остановись, потом решай.",
-          "voiceUrl": "/assets/aistudio/_________________......____._28bceaa4.mp3",
+          "voiceUrl": "/media/voices/darya_1.mp3",
           "choices": [
             {
               "id": "anna_1_ok",
@@ -301,7 +301,7 @@
         "anna_2": {
           "id": "anna_2",
           "text": "Тогда передай в службу безопасности. Это нормальная работа, а не слабость.",
-          "voiceUrl": "/assets/aistudio/_________________......____._2012d715.mp3",
+          "voiceUrl": "/media/voices/darya_2.mp3",
           "choices": [
             {
               "id": "anna_2_good",
@@ -345,7 +345,7 @@
         "danya_1": {
           "id": "danya_1",
           "text": "Привет! Мне надо маме денег перевести, она ждёт. Быстрее можно?",
-          "voiceUrl": "/assets/aistudio/_____________________2026_11_21_19_49_____________________________faf1f1d8.mp3",
+          "voiceUrl": "/media/voices/anna_1.mp3",
           "choices": [
             {
               "id": "danya_1_check",
@@ -362,7 +362,7 @@
         "danya_2": {
           "id": "danya_2",
           "text": "А, паспорт. Держите. Сумма — пять тысяч, ей на лекарства.",
-          "voiceUrl": "/assets/aistudio/_____________________2026_11_21_19_50____________________________8a0a013f.mp3",
+          "voiceUrl": "/media/voices/anna_2.mp3",
           "choices": [
             {
               "id": "danya_2_done",
@@ -380,7 +380,7 @@
         "danya_3": {
           "id": "danya_3",
           "text": "Круто! Только... а зачем паспорт? Я же просто перевожу.",
-          "voiceUrl": "/assets/aistudio/_____________________2026_11_21_19_50_______________________________37fe78b4.mp3",
+          "voiceUrl": "/media/voices/anna_3.mp3",
           "choices": [
             {
               "id": "danya_3_rules",
@@ -413,7 +413,7 @@
         "nina_1": {
           "id": "nina_1",
           "text": "Милочка, мне нужно снять триста тысяч, срочно! Внук в аварии, ему нужно на лечение. Мне звонил следователь.",
-          "voiceUrl": "/assets/aistudio/______________......____._53ac4ed8.mp3",
+          "voiceUrl": "/media/voices/nina_1.mp3",
           "choices": [
             {
               "id": "nina_1_give",
@@ -459,7 +459,7 @@
         "nina_2": {
           "id": "nina_2",
           "text": "Но он же просил молчать... Хорошо, я позвоню. Ой, трубку не берёт... Может, правда это обман?",
-          "voiceUrl": "/assets/aistudio/______________......______7153c215.mp3",
+          "voiceUrl": "/media/voices/nina_2.mp3",
           "choices": [
             {
               "id": "nina_2_contacts",
@@ -474,7 +474,7 @@
         "nina_3": {
           "id": "nina_3",
           "text": "Он дома, всё хорошо! Какой кошмар. Спасибо вам, дорогая.",
-          "voiceUrl": "/assets/aistudio/______________......____._fe729725.mp3",
+          "voiceUrl": "/media/voices/nina_3.mp3",
           "choices": [
             {
               "id": "nina_3_done",
@@ -503,7 +503,7 @@
         "orlov_1": {
           "id": "orlov_1",
           "text": "Я из надзорного органа, мне нужен доступ за стойку. Время дорого.",
-          "voiceUrl": "/assets/aistudio/_____________......____._e25f0fb0.mp3",
+          "voiceUrl": "/media/voices/orlov_1.mp3",
           "choices": [
             {
               "id": "orlov_1_pass",
@@ -527,7 +527,7 @@
         "orlov_2": {
           "id": "orlov_2",
           "text": "Хм. Удостоверение дома забыл. Не будем тратить время.",
-          "voiceUrl": "/assets/aistudio/__________.__......____._0d37f182.mp3",
+          "voiceUrl": "/media/voices/orlov_2.mp3",
           "choices": [
             {
               "id": "orlov_2_guard",
@@ -556,7 +556,7 @@
         "lena_1": {
           "id": "lena_1",
           "text": "Мне пришло письмо, что карта заблокирована. Я перешла по ссылке и ввела данные... Теперь боюсь.",
-          "voiceUrl": "/assets/aistudio/______________......____._4aff9b04.mp3",
+          "voiceUrl": "/media/voices/lena_1.mp3",
           "choices": [
             {
               "id": "lena_1_block",
@@ -581,7 +581,7 @@
         "lena_2": {
           "id": "lena_2",
           "text": "Спасибо! А как понять, что письмо было от мошенников?",
-          "voiceUrl": "/assets/aistudio/______________......______d11caa63.mp3",
+          "voiceUrl": "/media/voices/lena_2.mp3",
           "choices": [
             {
               "id": "lena_2_explain",
@@ -596,7 +596,7 @@
         "lena_3": {
           "id": "lena_3",
           "text": "Теперь буду внимательнее. Спасибо, что объяснили.",
-          "voiceUrl": "/assets/aistudio/______________......__.___b44ac6fa.mp3",
+          "voiceUrl": "/media/voices/lena_3.mp3",
           "choices": [
             {
               "id": "lena_3_done",
@@ -646,7 +646,7 @@
         "anna_client_2": {
           "id": "anna_client_2",
           "text": "Хорошо, звоните. Если подтвердится — действуем по правилам.",
-          "voiceUrl": "/assets/aistudio/_________________......____._7c4856ca.mp3",
+          "voiceUrl": "/media/voices/darya_check.mp3",
           "choices": [
             {
               "id": "anna_client_2_ok",
