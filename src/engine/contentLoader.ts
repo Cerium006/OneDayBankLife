@@ -294,6 +294,7 @@ function validateDifficulty(raw: unknown): DifficultyConfig {
       id,
       title,
       description,
+      icon: typeof obj.icon === 'string' && obj.icon.trim().length > 0 ? obj.icon : undefined,
       params: {
         hintsMode: assertNonEmptyString(params.hintsMode, `${id}.params.hintsMode`),
         suspicionGrowthLabel: assertNonEmptyString(
@@ -516,6 +517,7 @@ function validateRoles(
       id,
       order: typeof obj.order === 'number' ? obj.order : 99,
       title,
+      icon: typeof obj.icon === 'string' && obj.icon.trim().length > 0 ? obj.icon : undefined,
       shortSummary,
       description,
       durationEstimate,

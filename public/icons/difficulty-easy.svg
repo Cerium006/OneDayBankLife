@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" fill="none">
+  <!-- Cute smiling baby character for Easy difficulty -->
+  <!-- Ears -->
+  <circle cx="24" cy="48" r="7" fill="#EBB692" stroke="#9C6B4C" stroke-width="1.5"/>
+  <circle cx="72" cy="48" r="7" fill="#EBB692" stroke="#9C6B4C" stroke-width="1.5"/>
+  <!-- Head -->
+  <circle cx="48" cy="46" r="23" fill="#F5C7A5" stroke="#9C6B4C" stroke-width="1.5"/>
+  <!-- Hair curl -->
+  <path d="M44 24C44 18 52 17 54 22C55 25 51 27 48 26" stroke="#6E472D" stroke-width="3.2" stroke-linecap="round"/>
+  <!-- Cheeks -->
+  <ellipse cx="34" cy="52" rx="4.5" ry="2.8" fill="#EB8C7D" opacity="0.55"/>
+  <ellipse cx="62" cy="52" rx="4.5" ry="2.8" fill="#EB8C7D" opacity="0.55"/>
+  <!-- Eyes -->
+  <circle cx="39" cy="44" r="3.6" fill="#2D231C"/>
+  <circle cx="57" cy="44" r="3.6" fill="#2D231C"/>
+  <circle cx="40.2" cy="42.6" r="1.2" fill="#FFFFFF"/>
+  <circle cx="58.2" cy="42.6" r="1.2" fill="#FFFFFF"/>
+  <!-- Happy smile -->
+  <path d="M39 54C42 60 54 60 57 54" stroke="#6E3B2C" stroke-width="2.8" stroke-linecap="round" fill="#D97365"/>
+  <!-- Diaper / seated body silhouette -->
+  <path d="M32 68C32 63 40 62 48 62C56 62 64 63 64 68L62 82C56 85 40 85 34 82L32 68Z" fill="#F7F4EE" stroke="#B7B2A8" stroke-width="1.5"/>
+  <path d="M26 76L36 69M70 76L60 69" stroke="#F5C7A5" stroke-width="5.5" stroke-linecap="round"/>
+</svg>

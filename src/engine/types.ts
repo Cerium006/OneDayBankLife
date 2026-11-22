@@ -9,6 +9,7 @@ export interface DifficultyProfile {
   id: string;
   title: string;
   description: string;
+  icon?: string;
   params: {
     hintsMode: string;
     suspicionGrowthLabel: string;
@@ -126,6 +127,7 @@ export interface RoleConfig {
   id: string;
   order: number;
   title: string;
+  icon?: string;
   shortSummary: string;
   description: string;
   durationEstimate: string;

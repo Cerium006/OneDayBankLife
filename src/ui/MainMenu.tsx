@@ -1,11 +1,10 @@
 /**
  * Главное меню игры «День из жизни банка».
- * Показывает продолжение сохранённой смены (если она есть в памяти браузера)
- * и форму запуска новой игры: ввод никнейма, выбор профессии и уровня сложности.
- * Все надписи берутся из content/ui.json, а списки — из других JSON-файлов.
+ * Карточки выбора профессии и уровня сложности оформлены в компактном стиле с иконками:
+ * тёмный фон #2A2A2A, нейтральные рамки #585858 и зелёное выделение активной карточки (#00B849).
  */
 
-import { HelpCircle } from 'lucide-react';
+import { HelpCircle, Shield, UserCheck } from 'lucide-react';
 import { useState, type FormEvent } from 'react';
 import { markTutorialCompleted } from '../engine/storage';
 import type {
@@ -43,7 +42,6 @@ export function MainMenu({
   onContinueGame,
   onResetProgress,
 }: MainMenuProps) {
-  // Подставляем сохранённый никнейм, если он уже был введён раньше, чтобы игроку не приходилось набирать заново
   const [nickname, setNickname] = useState<string>(savedState?.nickname ?? '');
   const [selectedRoleId, setSelectedRoleId] = useState<string>(
     savedState?.activeRoleId && roles.some((r) => r.id === savedState.activeRoleId)
@@ -59,8 +57,12 @@ export function MainMenu({
   const [nicknameError, setNicknameError] = useState<string | null>(null);
   const [isResetModalOpen, setIsResetModalOpen] = useState<boolean>(false);
   const [isTutorialOpen, setIsTutorialOpen] = useState<boolean>(false);
+  const [failedIcons, setFailedIcons] = useState<Record<string, boolean>>({});
 
-  // Находим человекочитаемые названия сохранённой роли и сложности для блока «Продолжить»
+  const selectedRole = roles.find((r) => r.id === selectedRoleId) ?? roles[0];
+  const selectedDifficulty =
+    difficulty.profiles.find((p) => p.id === selectedDifficultyId) ?? difficulty.profiles[0];
+
   const savedRoleTitle =
     roles.find((r) => r.id === savedState?.activeRoleId)?.title ?? savedState?.activeRoleId;
   const savedDifficultyTitle =
@@ -97,8 +99,8 @@ export function MainMenu({
   }
 
   return (
-    <div className="min-h-screen px-4 py-8 sm:px-6 lg:px-8">
-      <main className="mx-auto max-w-[1040px]">
+    <div className="min-h-screen px-4 py-8 sm:px-6 lg:px-8" style={{ backgroundColor: 'var(--bg-page)' }}>
+      <main className="mx-auto max-w-[960px]">
         {/* Шапка с названием игры, пояснением и кнопкой обучения */}
         <header
           className="mb-8 flex flex-col gap-4 border-b pb-6 sm:flex-row sm:items-start sm:justify-between"
@@ -111,7 +113,7 @@ export function MainMenu({
             >
               {ui.appTitle}
             </h1>
-            <p className="mt-2 max-w-2xl text-base" style={{ color: 'var(--text-secondary)' }}>
+            <p className="mt-2 max-w-2xl text-sm sm:text-base" style={{ color: 'var(--text-secondary)' }}>
               {ui.appSubtitle}
             </p>
           </div>
@@ -132,22 +134,22 @@ export function MainMenu({
           </button>
         </header>
 
-        {/* Блок продолжения игры (показывается только если в localStorage уже есть сохранение) */}
+        {/* Блок продолжения сохранённой смены */}
         {savedState && (
           <section
             aria-labelledby="continue-heading"
-            className="mb-8 border p-6"
+            className="mb-8 border p-5"
             style={{
               backgroundColor: 'var(--bg-surface)',
               borderColor: 'var(--border-default)',
-              borderRadius: 'var(--radius-card)',
+              borderRadius: '14px',
             }}
           >
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <h2
                   id="continue-heading"
-                  className="text-lg font-semibold"
+                  className="text-base font-semibold"
                   style={{ color: 'var(--text-primary)' }}
                 >
                   {ui.menu.continueSectionTitle}
@@ -191,30 +193,10 @@ export function MainMenu({
           </section>
         )}
 
-        {/* Форма новой игры: никнейм, профессия и уровень сложности */}
-        <form
-          onSubmit={handleSubmit}
-          noValidate
-          className="border p-6 sm:p-8"
-          style={{
-            backgroundColor: 'var(--bg-surface)',
-            borderColor: 'var(--border-default)',
-            borderRadius: 'var(--radius-card)',
-          }}
-        >
-          <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-baseline sm:justify-between">
-            <h2 className="text-xl font-semibold" style={{ color: 'var(--text-primary)' }}>
-              {ui.menu.newGameSectionTitle}
-            </h2>
-            {!savedState && (
-              <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
-                {ui.menu.sharedWorldNoteTitle}
-              </p>
-            )}
-          </div>
-
-          {/* 1. Поле ввода никнейма (без регистрации и паролей) */}
-          <div className="mb-8 max-w-md">
+        {/* Форма запуска новой смены (свободная вёрстка прямо на графитовом холсте как на макете) */}
+        <form onSubmit={handleSubmit} noValidate className="space-y-8">
+          {/* 1. Никнейм игрока */}
+          <div className="max-w-md">
             <label
               htmlFor="player-nickname"
               className="block text-sm font-semibold"
@@ -235,11 +217,11 @@ export function MainMenu({
               }}
               placeholder={ui.menu.nicknamePlaceholder}
               aria-invalid={nicknameError ? 'true' : 'false'}
-              className="mt-2 block w-full border px-3.5 py-2.5 text-base"
+              className="mt-2 block w-full border px-4 py-2.5 text-base"
               style={{
                 backgroundColor: 'var(--bg-surface)',
                 borderColor: nicknameError ? 'var(--danger-text)' : 'var(--border-default)',
-                borderRadius: 'var(--radius-control)',
+                borderRadius: '12px',
                 color: 'var(--text-primary)',
               }}
             />
@@ -250,18 +232,21 @@ export function MainMenu({
             )}
           </div>
 
-          {/* 2. Выбор профессии из файлов /content/roles/*.json */}
-          <fieldset className="mb-8">
+          {/* 2. Компактные горизонтальные карточки выбора роли с иконками справа */}
+          <fieldset>
             <legend
-              className="mb-3 text-sm font-semibold"
+              className="mb-3 text-base font-bold"
               style={{ color: 'var(--text-primary)' }}
             >
               {ui.menu.roleLabel}
             </legend>
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               {roles.map((role) => {
                 const isSelected = role.id === selectedRoleId;
                 const isCompleted = Boolean(savedState?.rolesProgress?.[role.id]?.completed);
+                const iconKey = `role:${role.id}`;
+                const showIcon = Boolean(role.icon && !failedIcons[iconKey]);
 
                 return (
                   <button
@@ -269,69 +254,74 @@ export function MainMenu({
                     type="button"
                     onClick={() => setSelectedRoleId(role.id)}
                     aria-pressed={isSelected}
-                    className="flex h-full flex-col justify-between border p-5 text-left transition-colors"
+                    className="flex min-h-[78px] cursor-pointer items-center justify-between gap-4 border-2 px-5 py-3 text-left transition-all hover:brightness-110"
                     style={{
-                      backgroundColor: isSelected
-                        ? 'var(--bg-surface-muted)'
-                        : 'var(--bg-surface)',
-                      borderColor: isSelected
-                        ? 'var(--accent-primary)'
-                        : 'var(--border-default)',
-                      borderRadius: 'var(--radius-control)',
-                      boxShadow: isSelected ? 'inset 0 0 0 1px var(--accent-primary)' : 'none',
+                      backgroundColor: isSelected ? 'rgba(0, 184, 73, 0.22)' : 'var(--bg-surface)',
+                      borderColor: isSelected ? 'var(--accent-primary)' : 'var(--border-default)',
+                      borderRadius: '14px',
                     }}
                   >
-                    <div>
-                      <div className="flex items-baseline justify-between gap-2">
-                        <span
-                          className="text-base font-semibold"
-                          style={{ color: 'var(--text-primary)' }}
-                        >
-                          {role.title}
-                        </span>
-                        <span
-                          className="text-xs font-medium whitespace-nowrap tabular-nums"
-                          style={{ color: 'var(--text-secondary)' }}
-                        >
-                          {role.durationEstimate}
-                        </span>
+                    <div className="min-w-0">
+                      <div
+                        className="text-base font-bold leading-snug sm:text-[17px]"
+                        style={{ color: 'var(--text-primary)' }}
+                      >
+                        {role.title}
                       </div>
-                      <p className="mt-2 text-sm" style={{ color: 'var(--text-secondary)' }}>
-                        {role.description}
-                      </p>
+                      {isCompleted && (
+                        <div className="mt-0.5 text-xs font-medium" style={{ color: 'var(--success-text)' }}>
+                          {ui.menu.roleCompletedLabel}
+                        </div>
+                      )}
                     </div>
 
-                    <div
-                      className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t pt-3 text-xs"
-                      style={{
-                        borderColor: 'var(--border-default)',
-                        color: 'var(--text-secondary)',
-                      }}
-                    >
-                      <span>{role.primaryMetricLabel}</span>
-                      {isCompleted && (
-                        <span className="font-semibold" style={{ color: 'var(--success-text)' }}>
-                          {ui.menu.roleCompletedLabel}
-                        </span>
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center">
+                      {showIcon ? (
+                        <img
+                          src={role.icon}
+                          alt=""
+                          referrerPolicy="no-referrer"
+                          onError={() =>
+                            setFailedIcons((prev) => ({ ...prev, [iconKey]: true }))
+                          }
+                          className="h-full w-full object-contain"
+                        />
+                      ) : role.id === 'pentester' ? (
+                        <Shield className="h-8 w-8" style={{ color: 'var(--accent-lime)' }} aria-hidden="true" />
+                      ) : (
+                        <UserCheck className="h-8 w-8" style={{ color: 'var(--text-secondary)' }} aria-hidden="true" />
                       )}
                     </div>
                   </button>
                 );
               })}
             </div>
+
+            {selectedRole && (
+              <p className="mt-3 text-sm leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+                <span style={{ color: 'var(--text-primary)' }}>{selectedRole.description}</span>
+                <span aria-hidden="true"> · </span>
+                <span className="tabular-nums">{selectedRole.durationEstimate}</span>
+                <span aria-hidden="true"> · </span>
+                <span>{selectedRole.primaryMetricLabel}</span>
+              </p>
+            )}
           </fieldset>
 
-          {/* 3. Выбор уровня сложности из content/difficulty.json */}
-          <fieldset className="mb-8">
+          {/* 3. Карточки уровней сложности как на фото: слева крупный заголовок, справа графика */}
+          <fieldset>
             <legend
-              className="mb-3 text-sm font-semibold"
+              className="mb-3 text-base font-bold"
               style={{ color: 'var(--text-primary)' }}
             >
               {ui.menu.difficultyLabel}
             </legend>
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
               {difficulty.profiles.map((profile) => {
                 const isSelected = profile.id === selectedDifficultyId;
+                const iconKey = `diff:${profile.id}`;
+                const showIcon = Boolean(profile.icon && !failedIcons[iconKey]);
 
                 return (
                   <button
@@ -339,82 +329,70 @@ export function MainMenu({
                     type="button"
                     onClick={() => setSelectedDifficultyId(profile.id)}
                     aria-pressed={isSelected}
-                    className="flex h-full flex-col justify-between border p-4 text-left transition-colors"
+                    className="flex min-h-[110px] cursor-pointer items-center justify-between gap-3 border-2 px-5 py-4 text-left transition-all hover:brightness-110"
                     style={{
-                      backgroundColor: isSelected
-                        ? 'var(--bg-surface-muted)'
-                        : 'var(--bg-surface)',
-                      borderColor: isSelected
-                        ? 'var(--accent-primary)'
-                        : 'var(--border-default)',
-                      borderRadius: 'var(--radius-control)',
-                      boxShadow: isSelected ? 'inset 0 0 0 1px var(--accent-primary)' : 'none',
+                      backgroundColor: isSelected ? 'rgba(0, 184, 73, 0.22)' : 'var(--bg-surface)',
+                      borderColor: isSelected ? 'var(--accent-primary)' : 'var(--border-default)',
+                      borderRadius: '16px',
                     }}
                   >
-                    <div>
-                      <div
-                        className="text-base font-semibold"
-                        style={{ color: 'var(--text-primary)' }}
-                      >
-                        {profile.title}
-                      </div>
-                      <p className="mt-1.5 text-sm" style={{ color: 'var(--text-secondary)' }}>
-                        {profile.description}
-                      </p>
-                    </div>
-
-                    <dl
-                      className="mt-4 space-y-1.5 border-t pt-3 text-xs"
-                      style={{ borderColor: 'var(--border-default)' }}
+                    <span
+                      className="text-lg font-bold whitespace-nowrap sm:text-xl"
+                      style={{ color: 'var(--text-primary)' }}
                     >
-                      <div className="flex justify-between gap-2">
-                        <dt style={{ color: 'var(--text-secondary)' }}>{ui.difficultyLabels.hints}</dt>
-                        <dd className="font-medium" style={{ color: 'var(--text-primary)' }}>
-                          {profile.params.hintsMode}
-                        </dd>
-                      </div>
-                      <div className="flex justify-between gap-2">
-                        <dt style={{ color: 'var(--text-secondary)' }}>
-                          {ui.difficultyLabels.suspicionRate}
-                        </dt>
-                        <dd className="font-medium" style={{ color: 'var(--text-primary)' }}>
-                          {profile.params.suspicionGrowthLabel}
-                        </dd>
-                      </div>
-                      <div className="flex justify-between gap-2">
-                        <dt style={{ color: 'var(--text-secondary)' }}>
-                          {ui.difficultyLabels.clientTimer}
-                        </dt>
-                        <dd className="font-medium tabular-nums" style={{ color: 'var(--text-primary)' }}>
-                          {profile.params.clientTimeSeconds > 0
-                            ? `${profile.params.clientTimeLabel} (${profile.params.clientTimeSeconds} с)`
-                            : profile.params.clientTimeLabel}
-                        </dd>
-                      </div>
-                      <div className="flex justify-between gap-2">
-                        <dt style={{ color: 'var(--text-secondary)' }}>
-                          {ui.difficultyLabels.objectHighlight}
-                        </dt>
-                        <dd className="font-medium" style={{ color: 'var(--text-primary)' }}>
-                          {profile.params.objectHighlight}
-                        </dd>
-                      </div>
-                      <div className="flex justify-between gap-2">
-                        <dt style={{ color: 'var(--text-secondary)' }}>
-                          {ui.difficultyLabels.miniGames}
-                        </dt>
-                        <dd className="font-medium" style={{ color: 'var(--text-primary)' }}>
-                          {profile.params.miniGamesDifficulty}
-                        </dd>
-                      </div>
-                    </dl>
+                      {profile.title}
+                    </span>
+
+                    <div className="flex h-16 w-16 shrink-0 items-center justify-center">
+                      {showIcon ? (
+                        <img
+                          src={profile.icon}
+                          alt=""
+                          referrerPolicy="no-referrer"
+                          onError={() =>
+                            setFailedIcons((prev) => ({ ...prev, [iconKey]: true }))
+                          }
+                          className="h-full w-full object-contain"
+                        />
+                      ) : (
+                        <span className="text-2xl font-bold" style={{ color: 'var(--accent-lime)' }}>
+                          {profile.title[0]}
+                        </span>
+                      )}
+                    </div>
                   </button>
                 );
               })}
             </div>
+
+            {selectedDifficulty && (
+              <div className="mt-3 space-y-1 text-sm" style={{ color: 'var(--text-secondary)' }}>
+                <p style={{ color: 'var(--text-primary)' }}>{selectedDifficulty.description}</p>
+                <p className="text-xs leading-relaxed tabular-nums">
+                  <span>{ui.difficultyLabels.hints}: {selectedDifficulty.params.hintsMode}</span>
+                  <span aria-hidden="true"> · </span>
+                  <span>
+                    {ui.difficultyLabels.suspicionRate}: {selectedDifficulty.params.suspicionGrowthLabel}
+                  </span>
+                  <span aria-hidden="true"> · </span>
+                  <span>
+                    {ui.difficultyLabels.clientTimer}:{' '}
+                    {selectedDifficulty.params.clientTimeSeconds > 0
+                      ? `${selectedDifficulty.params.clientTimeLabel} (${selectedDifficulty.params.clientTimeSeconds} с)`
+                      : selectedDifficulty.params.clientTimeLabel}
+                  </span>
+                  <span aria-hidden="true"> · </span>
+                  <span>
+                    {ui.difficultyLabels.objectHighlight}: {selectedDifficulty.params.objectHighlight}
+                  </span>
+                  <span aria-hidden="true"> · </span>
+                  <span>{ui.difficultyLabels.miniGames}: {selectedDifficulty.params.miniGamesDifficulty}</span>
+                </p>
+              </div>
+            )}
           </fieldset>
 
-          {/* Нижняя панель формы: пояснение про общий мир и главная кнопка запуска */}
+          {/* Нижняя панель с примечанием про общий мир и кнопкой запуска */}
           <div
             className="flex flex-col gap-4 border-t pt-6 sm:flex-row sm:items-center sm:justify-between"
             style={{ borderColor: 'var(--border-default)' }}
@@ -425,11 +403,11 @@ export function MainMenu({
             </p>
             <button
               type="submit"
-              className="min-h-[44px] shrink-0 px-6 py-2.5 text-base font-semibold whitespace-nowrap transition-all hover:brightness-110"
+              className="min-h-[44px] shrink-0 cursor-pointer px-7 py-2.5 text-base font-semibold whitespace-nowrap transition-all hover:brightness-110"
               style={{
                 backgroundColor: 'var(--accent-primary)',
                 color: 'var(--accent-text)',
-                borderRadius: 'var(--radius-control)',
+                borderRadius: '10px',
               }}
             >
               {ui.menu.startButton}
