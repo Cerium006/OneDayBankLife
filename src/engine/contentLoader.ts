@@ -161,6 +161,7 @@ function validateDialogs(
       nodes[nodeKey] = {
         id: assertNonEmptyString(n.id, `dialogs[${id}].nodes[${nodeKey}].id`),
         text: assertNonEmptyString(n.text, `dialogs[${id}].nodes[${nodeKey}].text`),
+        voiceUrl: typeof n.voiceUrl === 'string' && n.voiceUrl.trim().length > 0 ? n.voiceUrl : undefined,
         choices,
       };
     }
@@ -487,6 +488,10 @@ function validateRoles(
               return {
                 when: rule.when as ReportRule['when'],
                 text: assertNonEmptyString(rule.text, `${filePath} -> report.${label}[${idx}].text`),
+                voiceUrl:
+                  typeof rule.voiceUrl === 'string' && rule.voiceUrl.trim().length > 0
+                    ? rule.voiceUrl
+                    : undefined,
               };
             })
           : [];
@@ -505,6 +510,10 @@ function validateRoles(
           `${filePath} -> report.noMistakesText`,
         ),
         realWorld: assertNonEmptyString(r.realWorld, `${filePath} -> report.realWorld`),
+        realWorldVoiceUrl:
+          typeof r.realWorldVoiceUrl === 'string' && r.realWorldVoiceUrl.trim().length > 0
+            ? r.realWorldVoiceUrl
+            : undefined,
         takeaways: Array.isArray(r.takeaways)
           ? r.takeaways.map((t, idx) =>
               assertNonEmptyString(t, `${filePath} -> report.takeaways[${idx}]`),
@@ -576,6 +585,10 @@ function validateWorld(
     const title = assertNonEmptyString(p.title, `world.points[${id}].title`);
     const subtitle = assertNonEmptyString(p.subtitle, `world.points[${id}].subtitle`);
     const background = assertNonEmptyString(p.background, `world.points[${id}].background`);
+    const ambientAudio =
+      typeof p.ambientAudio === 'string' && p.ambientAudio.trim().length > 0
+        ? p.ambientAudio
+        : undefined;
 
     if (typeof p.mapCoords !== 'object' || p.mapCoords === null) {
       throw new Error(`Ошибка в content/world.json: у точки "${id}" отсутствуют координаты mapCoords.`);
@@ -680,6 +693,7 @@ function validateWorld(
                   targetPointId: typeof a.targetPointId === 'string' ? a.targetPointId : undefined,
                   dialogId: typeof a.dialogId === 'string' ? a.dialogId : undefined,
                   miniGameId: typeof a.miniGameId === 'string' ? a.miniGameId : undefined,
+                  sfx: typeof a.sfx === 'string' && a.sfx.trim().length > 0 ? a.sfx : undefined,
                 };
               })
             : undefined;
@@ -706,7 +720,7 @@ function validateWorld(
         })
       : [];
 
-    return { id, title, subtitle, background, mapCoords, exits, layers, hotspots };
+    return { id, title, subtitle, background, ambientAudio, mapCoords, exits, layers, hotspots };
   });
 
   const npcIds = new Set<string>();

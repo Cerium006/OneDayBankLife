@@ -81,6 +81,7 @@ export interface DayEventDef {
 export interface ReportRule {
   when?: Record<string, WorldFlagValue>;
   text: string;
+  voiceUrl?: string;
 }
 
 /** Структура итогового качественного отчёта профессии (без чисел, только выводы) */
@@ -92,6 +93,7 @@ export interface RoleReportConfig {
   mistakes: ReportRule[];
   noMistakesText: string;
   realWorld: string;
+  realWorldVoiceUrl?: string;
   takeaways: string[];
 }
 
@@ -178,6 +180,7 @@ export interface HotspotAction {
   targetPointId?: string;
   dialogId?: string;
   miniGameId?: string;
+  sfx?: string;
 }
 
 /** Кликабельная зона (интерактивный объект), заданная в процентах от размера картинки комнаты */
@@ -228,6 +231,7 @@ export interface WorldPoint {
   title: string;
   subtitle: string;
   background: string;
+  ambientAudio?: string;
   mapCoords: {
     x: number;
     y: number;
@@ -270,6 +274,7 @@ export interface DialogChoice {
 export interface DialogNode {
   id: string;
   text: string;
+  voiceUrl?: string;
   choices: DialogChoice[];
 }
 

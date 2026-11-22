@@ -39,7 +39,13 @@ import {
   restoreSaveFromCheckpoint,
   syncQuestsAndCheckpoint,
 } from '../engine/questEngine';
-import { loadSoundEnabled, playSoundEffect, saveSoundEnabled } from '../engine/soundEffects';
+import {
+  loadSoundEnabled,
+  playSoundEffect,
+  saveSoundEnabled,
+  setAmbientAudio,
+  stopVoiceover,
+} from '../engine/soundEffects';
 import { hasCompletedTutorial, markTutorialCompleted } from '../engine/storage';
 import { getFlag, setFlag } from '../engine/worldFlags';
 import {
@@ -252,6 +258,21 @@ export function RoomScreen({
     setSelectedHotspotId(null);
   }, [currentPoint.id]);
 
+  // Фоновый звук текущей комнаты (например, шум серверной) и очистка при выходе
+  useEffect(() => {
+    setAmbientAudio(
+      currentPoint.ambientAudio,
+      isSoundEnabled && !isReportOpen && !roleFailure.failed,
+    );
+  }, [currentPoint.ambientAudio, isSoundEnabled, isReportOpen, roleFailure.failed]);
+
+  useEffect(() => {
+    return () => {
+      setAmbientAudio(undefined, false);
+      stopVoiceover();
+    };
+  }, []);
+
   // Если у роли есть вступительный диалог (Кира / Дарья Лисичкина) и он ещё не пройден —
   // открываем его сразу после закрытия стартового обучения
   const introCheckedForRoleRef = useRef<string | null>(null);
@@ -289,6 +310,7 @@ export function RoomScreen({
     saveState,
     role,
     difficulty,
+    isSoundEnabled,
     isPaused: false,
     onSaveUpdate,
   });
@@ -296,6 +318,7 @@ export function RoomScreen({
     saveState,
     role,
     difficulty,
+    isSoundEnabled,
     isPaused:
       isTutorialOpen ||
       isMapOpen ||
@@ -330,6 +353,7 @@ export function RoomScreen({
 
       if (firedEvents.length > 0) {
         const ev = firedEvents[0];
+        playSoundEffect('sms', current.isSoundEnabled);
         const questParts: string[] = [];
         if (newlyCompleted.length > 0) {
           questParts.push(`Выполнена задача: ${newlyCompleted.map((q) => q.title).join(', ')}`);
@@ -603,7 +627,7 @@ export function RoomScreen({
     if (action.miniGameId) {
       const game = miniGames.find((m) => m.id === action.miniGameId);
       if (game) {
-        playSoundEffect('click', isSoundEnabled);
+        playSoundEffect(action.sfx ?? 'click', isSoundEnabled);
         setNotice(null);
         setActiveMiniGameId(game.id);
         return;
@@ -614,7 +638,7 @@ export function RoomScreen({
     if (action.dialogId) {
       const dialog = dialogs.find((d) => d.id === action.dialogId);
       if (dialog) {
-        playSoundEffect('click', isSoundEnabled);
+        playSoundEffect(action.sfx ?? 'click', isSoundEnabled);
         setNotice(null);
         setActiveDialogId(dialog.id);
         setActiveDialogNodeId(dialog.startNodeId);
@@ -637,6 +661,8 @@ export function RoomScreen({
 
     if (result.isLocked) {
       playSoundEffect('locked', isSoundEnabled);
+    } else if (action.sfx) {
+      playSoundEffect(action.sfx, isSoundEnabled);
     } else if (result.newlyCompletedQuests.length > 0) {
       playSoundEffect('success', isSoundEnabled);
     } else if (action.giveItemId) {
@@ -788,6 +814,8 @@ export function RoomScreen({
       saveSoundEnabled(next);
       if (next) {
         playSoundEffect('click', true);
+      } else {
+        stopVoiceover();
       }
       return next;
     });
@@ -1165,8 +1193,14 @@ export function RoomScreen({
                     {/* Подпись названия объекта или имени персонажа при наведении (если меню действий не открыто) */}
                     {isHovered && !isSelected && (
                       <span
-                        className={`pointer-events-none absolute left-1/2 z-30 -translate-x-1/2 px-2.5 py-1 text-xs font-semibold whitespace-nowrap shadow-lg backdrop-blur-sm ${
+                        className={`pointer-events-none absolute z-30 px-2.5 py-1 text-xs font-semibold whitespace-nowrap shadow-lg backdrop-blur-sm ${
                           hotspot.y < 14 ? '-bottom-9' : '-top-9'
+                        } ${
+                          hotspot.x + hotspot.width / 2 > 80
+                            ? 'right-0'
+                            : hotspot.x + hotspot.width / 2 < 18
+                              ? 'left-0'
+                              : 'left-1/2 -translate-x-1/2'
                         }`}
                         style={{
                           backgroundColor: 'var(--hud-overlay)',
@@ -1420,6 +1454,7 @@ export function RoomScreen({
         worldState={saveState.worldState}
         inventory={saveState.inventory}
         ui={ui}
+        isSoundEnabled={isSoundEnabled}
         clientTimerSeconds={role.id === 'manager' ? difficulty.params.clientTimeSeconds : 0}
         onClientTimeout={handleClientTimeout}
         onSelectChoice={handleSelectDialogChoice}
@@ -1453,6 +1488,7 @@ export function RoomScreen({
         nickname={saveState.nickname}
         worldState={saveState.worldState}
         ui={ui}
+        isSoundEnabled={isSoundEnabled}
         onSwitchRole={(nextRoleId) => {
           setIsReportOpen(false);
           setNotice(null);

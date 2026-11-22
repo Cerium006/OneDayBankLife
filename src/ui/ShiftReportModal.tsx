@@ -11,8 +11,12 @@ import {
   BriefcaseBusiness,
   CheckCircle2,
   LogOut,
+  Square,
+  Volume2,
 } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { buildShiftReport } from '../engine/reportEngine';
+import { playVoiceover, stopVoiceover } from '../engine/soundEffects';
 import type { RoleConfig, UiTexts, WorldState } from '../engine/types';
 
 interface ShiftReportModalProps {
@@ -22,6 +26,7 @@ interface ShiftReportModalProps {
   nickname: string;
   worldState: WorldState;
   ui: UiTexts;
+  isSoundEnabled?: boolean;
   onSwitchRole: (roleId: string) => void;
   onBackToMenu: () => void;
   onStayInRoom: () => void;
@@ -34,15 +39,51 @@ export function ShiftReportModal({
   nickname,
   worldState,
   ui,
+  isSoundEnabled = true,
   onSwitchRole,
   onBackToMenu,
   onStayInRoom,
 }: ShiftReportModalProps) {
+  const [playingUrl, setPlayingUrl] = useState<string | null>(null);
+
+  const report = buildShiftReport(role, worldState);
+  const autoVoiceUrl =
+    report.whatWorkedVoiceUrls.find(Boolean) ?? report.realWorldVoiceUrl;
+
+  useEffect(() => {
+    if (!isOpen) {
+      stopVoiceover();
+      setPlayingUrl(null);
+      return;
+    }
+
+    if (isSoundEnabled && autoVoiceUrl) {
+      const started = playVoiceover(autoVoiceUrl, true, () => setPlayingUrl(null));
+      setPlayingUrl(started ? autoVoiceUrl : null);
+    }
+
+    return () => {
+      stopVoiceover();
+      setPlayingUrl(null);
+    };
+  }, [isOpen, isSoundEnabled, autoVoiceUrl]);
+
   if (!isOpen) {
     return null;
   }
 
-  const report = buildShiftReport(role, worldState);
+  function handleToggleVoice(url: string | undefined) {
+    if (!url) {
+      return;
+    }
+    if (playingUrl === url) {
+      stopVoiceover();
+      setPlayingUrl(null);
+      return;
+    }
+    const started = playVoiceover(url, true, () => setPlayingUrl(null));
+    setPlayingUrl(started ? url : null);
+  }
 
   return (
     <div
@@ -103,11 +144,35 @@ export function ShiftReportModal({
               </h3>
             </div>
             <ul className="mt-2.5 space-y-2 text-sm" style={{ color: 'var(--text-primary)' }}>
-              {report.whatWorkedItems.map((item, idx) => (
-                <li key={idx} className="leading-relaxed">
-                  {item}
-                </li>
-              ))}
+              {report.whatWorkedItems.map((item, idx) => {
+                const voiceUrl = report.whatWorkedVoiceUrls[idx];
+                const isThisPlaying = Boolean(voiceUrl && playingUrl === voiceUrl);
+                return (
+                  <li key={idx} className="flex items-start justify-between gap-2 leading-relaxed">
+                    <span>{item}</span>
+                    {voiceUrl && (
+                      <button
+                        type="button"
+                        onClick={() => handleToggleVoice(voiceUrl)}
+                        aria-label={isThisPlaying ? 'Остановить озвучку' : 'Прослушать вывод'}
+                        className="inline-flex shrink-0 cursor-pointer items-center gap-1 border px-2 py-0.5 text-xs transition-colors hover:bg-white/10"
+                        style={{
+                          borderColor: isThisPlaying ? 'var(--accent-primary)' : 'var(--border-default)',
+                          borderRadius: 'var(--radius-control)',
+                          color: isThisPlaying ? 'var(--accent-lime)' : 'var(--text-secondary)',
+                        }}
+                      >
+                        {isThisPlaying ? (
+                          <Square className="h-3 w-3" aria-hidden="true" />
+                        ) : (
+                          <Volume2 className="h-3.5 w-3.5" aria-hidden="true" />
+                        )}
+                        <span>{isThisPlaying ? 'Стоп' : 'Слушать'}</span>
+                      </button>
+                    )}
+                  </li>
+                );
+              })}
             </ul>
           </section>
 
@@ -138,11 +203,37 @@ export function ShiftReportModal({
             </div>
             {report.hasMistakes ? (
               <ul className="mt-2.5 space-y-2 text-sm" style={{ color: 'var(--text-primary)' }}>
-                {report.mistakeItems.map((item, idx) => (
-                  <li key={idx} className="leading-relaxed">
-                    {item}
-                  </li>
-                ))}
+                {report.mistakeItems.map((item, idx) => {
+                  const voiceUrl = report.mistakeVoiceUrls[idx];
+                  const isThisPlaying = Boolean(voiceUrl && playingUrl === voiceUrl);
+                  return (
+                    <li key={idx} className="flex items-start justify-between gap-2 leading-relaxed">
+                      <span>{item}</span>
+                      {voiceUrl && (
+                        <button
+                          type="button"
+                          onClick={() => handleToggleVoice(voiceUrl)}
+                          aria-label={isThisPlaying ? 'Остановить озвучку' : 'Прослушать вывод'}
+                          className="inline-flex shrink-0 cursor-pointer items-center gap-1 border px-2 py-0.5 text-xs transition-colors hover:bg-white/10"
+                          style={{
+                            borderColor: isThisPlaying
+                              ? 'var(--accent-primary)'
+                              : 'var(--border-default)',
+                            borderRadius: 'var(--radius-control)',
+                            color: isThisPlaying ? 'var(--accent-lime)' : 'var(--text-secondary)',
+                          }}
+                        >
+                          {isThisPlaying ? (
+                            <Square className="h-3 w-3" aria-hidden="true" />
+                          ) : (
+                            <Volume2 className="h-3.5 w-3.5" aria-hidden="true" />
+                          )}
+                          <span>{isThisPlaying ? 'Стоп' : 'Слушать'}</span>
+                        </button>
+                      )}
+                    </li>
+                  );
+                })}
               </ul>
             ) : (
               <p className="mt-2.5 text-sm leading-relaxed" style={{ color: 'var(--text-primary)' }}>
@@ -160,15 +251,47 @@ export function ShiftReportModal({
               borderRadius: 'var(--radius-control)',
             }}
           >
-            <div className="flex items-center gap-2">
-              <BriefcaseBusiness
-                className="h-5 w-5 shrink-0"
-                style={{ color: 'var(--accent-lime)' }}
-                aria-hidden="true"
-              />
-              <h3 className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>
-                {ui.room.reportRealWorldTitle}
-              </h3>
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <BriefcaseBusiness
+                  className="h-5 w-5 shrink-0"
+                  style={{ color: 'var(--accent-lime)' }}
+                  aria-hidden="true"
+                />
+                <h3 className="text-base font-semibold" style={{ color: 'var(--text-primary)' }}>
+                  {ui.room.reportRealWorldTitle}
+                </h3>
+              </div>
+              {report.realWorldVoiceUrl && (
+                <button
+                  type="button"
+                  onClick={() => handleToggleVoice(report.realWorldVoiceUrl)}
+                  aria-label={
+                    playingUrl === report.realWorldVoiceUrl
+                      ? 'Остановить озвучку'
+                      : 'Прослушать итог'
+                  }
+                  className="inline-flex shrink-0 cursor-pointer items-center gap-1 border px-2 py-0.5 text-xs transition-colors hover:bg-white/10"
+                  style={{
+                    borderColor:
+                      playingUrl === report.realWorldVoiceUrl
+                        ? 'var(--accent-primary)'
+                        : 'var(--border-default)',
+                    borderRadius: 'var(--radius-control)',
+                    color:
+                      playingUrl === report.realWorldVoiceUrl
+                        ? 'var(--accent-lime)'
+                        : 'var(--text-secondary)',
+                  }}
+                >
+                  {playingUrl === report.realWorldVoiceUrl ? (
+                    <Square className="h-3 w-3" aria-hidden="true" />
+                  ) : (
+                    <Volume2 className="h-3.5 w-3.5" aria-hidden="true" />
+                  )}
+                  <span>{playingUrl === report.realWorldVoiceUrl ? 'Стоп' : 'Слушать'}</span>
+                </button>
+              )}
             </div>
             <p className="mt-2.5 text-sm leading-relaxed" style={{ color: 'var(--text-primary)' }}>
               {report.realWorld}

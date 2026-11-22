@@ -5,9 +5,10 @@
  * на нормальном и сложном уровне сложности.
  */
 
-import { Clock, MessageSquare, X } from 'lucide-react';
+import { Clock, MessageSquare, Square, Volume2, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { getAvailableDialogChoices, resolveDialogText } from '../engine/dialogEngine';
+import { playVoiceover, stopVoiceover } from '../engine/soundEffects';
 import type {
   DialogChoice,
   DialogDefinition,
@@ -23,6 +24,7 @@ interface DialogModalProps {
   worldState: WorldState;
   inventory: string[];
   ui: UiTexts;
+  isSoundEnabled?: boolean;
   clientTimerSeconds?: number;
   onClientTimeout?: () => void;
   onSelectChoice: (choice: DialogChoice) => void;
@@ -60,6 +62,7 @@ export function DialogModal({
   worldState,
   inventory,
   ui,
+  isSoundEnabled = true,
   clientTimerSeconds = 0,
   onClientTimeout,
   onSelectChoice,
@@ -71,12 +74,33 @@ export function DialogModal({
   );
   const [remainingSeconds, setRemainingSeconds] = useState<number>(clientTimerSeconds);
   const [timedOutOnce, setTimedOutOnce] = useState<boolean>(false);
+  const [isSpeaking, setIsSpeaking] = useState<boolean>(false);
+
+  const currentVoiceUrl =
+    dialog && currentNodeId ? dialog.nodes[currentNodeId]?.voiceUrl : undefined;
 
   useEffect(() => {
     setAvatarFailed(false);
     setRemainingSeconds(clientTimerSeconds);
     setTimedOutOnce(false);
   }, [dialog?.id, speakerAvatar, clientTimerSeconds]);
+
+  // Автоматическое воспроизведение озвучки текущей реплики с очисткой при переходе/закрытии
+  useEffect(() => {
+    if (!dialog || !currentNodeId || !currentVoiceUrl || !isSoundEnabled) {
+      stopVoiceover();
+      setIsSpeaking(false);
+      return;
+    }
+
+    const started = playVoiceover(currentVoiceUrl, true, () => setIsSpeaking(false));
+    setIsSpeaking(started);
+
+    return () => {
+      stopVoiceover();
+      setIsSpeaking(false);
+    };
+  }, [dialog?.id, currentNodeId, currentVoiceUrl, isSoundEnabled]);
 
   // Отсчёт таймера терпения клиента, если он задан профилем сложности
   useEffect(() => {
@@ -144,6 +168,19 @@ export function DialogModal({
       ? Math.round((remainingSeconds / clientTimerSeconds) * 100)
       : 100;
   const isTimerLow = isTimedClientDialog && remainingSeconds <= 20;
+
+  function handleToggleReplayVoice() {
+    if (!node.voiceUrl) {
+      return;
+    }
+    if (isSpeaking) {
+      stopVoiceover();
+      setIsSpeaking(false);
+    } else {
+      const started = playVoiceover(node.voiceUrl, true, () => setIsSpeaking(false));
+      setIsSpeaking(started);
+    }
+  }
 
   return (
     <div
@@ -275,12 +312,35 @@ export function DialogModal({
             color: 'var(--text-primary)',
           }}
         >
-          <div
-            className="mb-1.5 flex items-center gap-1.5 text-xs font-medium"
-            style={{ color: 'var(--text-secondary)' }}
-          >
-            <MessageSquare className="h-3.5 w-3.5" aria-hidden="true" />
-            <span>{dialog.speakerName}</span>
+          <div className="mb-1.5 flex items-center justify-between gap-2">
+            <div
+              className="flex items-center gap-1.5 text-xs font-medium"
+              style={{ color: 'var(--text-secondary)' }}
+            >
+              <MessageSquare className="h-3.5 w-3.5" aria-hidden="true" />
+              <span>{dialog.speakerName}</span>
+            </div>
+
+            {node.voiceUrl && (
+              <button
+                type="button"
+                onClick={handleToggleReplayVoice}
+                aria-label={isSpeaking ? 'Остановить озвучку' : 'Прослушать реплику'}
+                className="inline-flex cursor-pointer items-center gap-1 border px-2 py-0.5 text-xs font-medium whitespace-nowrap transition-colors hover:bg-white/10"
+                style={{
+                  borderColor: isSpeaking ? 'var(--accent-primary)' : 'var(--border-default)',
+                  borderRadius: 'var(--radius-control)',
+                  color: isSpeaking ? 'var(--accent-lime)' : 'var(--text-secondary)',
+                }}
+              >
+                {isSpeaking ? (
+                  <Square className="h-3 w-3" aria-hidden="true" />
+                ) : (
+                  <Volume2 className="h-3.5 w-3.5" aria-hidden="true" />
+                )}
+                <span>{isSpeaking ? 'Стоп' : 'Озвучка'}</span>
+              </button>
+            )}
           </div>
           <p>{replicaText}</p>
         </div>
