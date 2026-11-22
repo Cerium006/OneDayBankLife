@@ -1186,7 +1186,7 @@ export function RoomScreen({
                         onError={() =>
                           setFailedNpcImages((prev) => ({ ...prev, [npcSprite.id]: true }))
                         }
-                        className="pointer-events-none h-full w-full object-contain object-bottom drop-shadow-[0_6px_12px_rgba(0,0,0,0.45)]"
+                        className="pointer-events-none h-full w-full object-fill drop-shadow-[0_6px_12px_rgba(0,0,0,0.45)]"
                       />
                     )}
 
