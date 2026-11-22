@@ -221,7 +221,7 @@ export function DialogModal({
                   alt={dialog.speakerName}
                   referrerPolicy="no-referrer"
                   onError={() => setAvatarFailed(true)}
-                  className="h-full w-full object-cover object-top"
+                  className="h-full w-full object-cover object-[50%_22%]"
                 />
               ) : (
                 initials

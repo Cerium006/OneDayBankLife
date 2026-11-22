@@ -1176,18 +1176,41 @@ export function RoomScreen({
                           : 'transparent',
                     }}
                   >
-                    {/* Спрайт-плейсхолдер персонажа прямо внутри его зоны в комнате */}
+                    {/* Спрайт персонажа в естественных пропорциях (с обрезкой пустых полей по spriteFit, если задано) */}
                     {showNpcSprite && npcSprite && (
-                      <img
-                        src={npcSprite.avatar}
-                        alt=""
-                        draggable={false}
-                        referrerPolicy="no-referrer"
-                        onError={() =>
-                          setFailedNpcImages((prev) => ({ ...prev, [npcSprite.id]: true }))
-                        }
-                        className="pointer-events-none h-full w-full object-fill drop-shadow-[0_6px_12px_rgba(0,0,0,0.45)]"
-                      />
+                      hotspot.spriteFit ? (
+                        <div className="pointer-events-none relative h-full w-full overflow-hidden">
+                          <img
+                            src={npcSprite.avatar}
+                            alt=""
+                            draggable={false}
+                            referrerPolicy="no-referrer"
+                            onError={() =>
+                              setFailedNpcImages((prev) => ({ ...prev, [npcSprite.id]: true }))
+                            }
+                            style={{
+                              height: `${hotspot.spriteFit.heightPercent ?? 100}%`,
+                              width: 'auto',
+                              maxWidth: 'none',
+                              top: `${hotspot.spriteFit.topPercent ?? 0}%`,
+                              left: `${50 + (hotspot.spriteFit.leftOffsetPercent ?? 0)}%`,
+                              transform: 'translateX(-50%)',
+                            }}
+                            className="pointer-events-none absolute drop-shadow-[0_6px_12px_rgba(0,0,0,0.45)]"
+                          />
+                        </div>
+                      ) : (
+                        <img
+                          src={npcSprite.avatar}
+                          alt=""
+                          draggable={false}
+                          referrerPolicy="no-referrer"
+                          onError={() =>
+                            setFailedNpcImages((prev) => ({ ...prev, [npcSprite.id]: true }))
+                          }
+                          className="pointer-events-none h-full w-full object-contain object-bottom drop-shadow-[0_6px_12px_rgba(0,0,0,0.45)]"
+                        />
+                      )
                     )}
 
                     {/* Подпись названия объекта или имени персонажа при наведении (если меню действий не открыто) */}

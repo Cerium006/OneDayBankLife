@@ -196,6 +196,11 @@ export interface WorldHotspot {
   description?: string;
   npcId?: string;
   hideAvatarInRoom?: boolean;
+  spriteFit?: {
+    heightPercent?: number;
+    topPercent?: number;
+    leftOffsetPercent?: number;
+  };
   targetPointId?: string;
   visibleWhen?: Record<string, WorldFlagValue>;
   hideIfHasItem?: string;

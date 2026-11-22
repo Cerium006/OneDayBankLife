@@ -30,7 +30,7 @@
       "roleTitle": "Посетительница",
       "pointId": "hall",
       "description": "Держит телефон у уха и выглядит взволнованной.",
-      "avatar": "/npcs/client_elderly.svg"
+      "avatar": "/assets/aistudio/________9536b8b4.png"
     },
     {
       "id": "client_young",
@@ -38,7 +38,7 @@
       "roleTitle": "Клиент в очереди",
       "pointId": "hall",
       "description": "Оформляет карту и изучает памятку у терминала.",
-      "avatar": "/npcs/client_young.svg"
+      "avatar": "/assets/aistudio/_______________9bd6c355.png"
     },
     {
       "id": "client_suit",
@@ -46,7 +46,7 @@
       "roleTitle": "Подозрительный посетитель",
       "pointId": "hall",
       "description": "Осматривается по сторонам и наблюдает за дверью в служебный офис.",
-      "avatar": "/npcs/client_suit.svg"
+      "avatar": "/assets/aistudio/__________________c3d3fe19.png"
     },
     {
       "id": "cashier_oleg",
@@ -70,7 +70,7 @@
       "roleTitle": "Третий клиент",
       "pointId": "counter",
       "description": "Уверенный мужчина, представляющийся сотрудником надзорного органа.",
-      "avatar": "/npcs/client_orlov.svg"
+      "avatar": "/assets/aistudio/__________________c3d3fe19.png"
     },
     {
       "id": "client_lena",
@@ -86,7 +86,7 @@
       "roleTitle": "Директор отделения",
       "pointId": "office",
       "description": "Контролирует работу отделения и проверяет соблюдение регламентов безопасности.",
-      "avatar": "/npcs/director_anna.svg"
+      "avatar": "/assets/aistudio/__________7a265a76.png"
     },
     {
       "id": "sysadmin_igor",
@@ -206,10 +206,15 @@
           "kind": "npc",
           "interactType": "talk",
           "npcId": "guard_viktor",
-          "x": 59.8,
-          "y": 20.0,
-          "width": 17.4,
-          "height": 69.0,
+          "x": 60.2,
+          "y": 22.0,
+          "width": 16.0,
+          "height": 67.0,
+          "spriteFit": {
+            "heightPercent": 104.3,
+            "topPercent": -4.3,
+            "leftOffsetPercent": -6.5
+          },
           "actions": [
             {
               "type": "inspect",
@@ -229,7 +234,7 @@
           "interactType": "talk",
           "npcId": "kira",
           "hideAvatarInRoom": true,
-          "x": 77.6,
+          "x": 77.2,
           "y": 56.5,
           "width": 12.4,
           "height": 31.5,
@@ -277,10 +282,15 @@
           "kind": "npc",
           "interactType": "talk",
           "npcId": "admin_marina",
-          "x": 27.6,
-          "y": 26.0,
-          "width": 14.4,
-          "height": 58.0,
+          "x": 29.0,
+          "y": 24.0,
+          "width": 12.2,
+          "height": 60.0,
+          "spriteFit": {
+            "heightPercent": 103.2,
+            "topPercent": -2.3,
+            "leftOffsetPercent": -3.5
+          },
           "actions": [
             {
               "type": "inspect",
@@ -323,9 +333,14 @@
           "interactType": "talk",
           "npcId": "client_elderly",
           "x": 53.0,
-          "y": 34.0,
+          "y": 35.0,
           "width": 8.6,
-          "height": 31.0,
+          "height": 38.0,
+          "spriteFit": {
+            "heightPercent": 122.0,
+            "topPercent": -16.8,
+            "leftOffsetPercent": 10.0
+          },
           "actions": [
             {
               "type": "inspect",
@@ -349,10 +364,15 @@
           "kind": "npc",
           "interactType": "talk",
           "npcId": "client_young",
-          "x": 61.9,
-          "y": 38.0,
-          "width": 8.1,
-          "height": 27.0,
+          "x": 62.0,
+          "y": 37.0,
+          "width": 8.0,
+          "height": 33.0,
+          "spriteFit": {
+            "heightPercent": 107.2,
+            "topPercent": -3.7,
+            "leftOffsetPercent": 5.5
+          },
           "actions": [
             {
               "type": "inspect",
@@ -419,9 +439,14 @@
           "interactType": "talk",
           "npcId": "client_suit",
           "x": 87.5,
-          "y": 42.0,
+          "y": 36.0,
           "width": 12.0,
-          "height": 42.0,
+          "height": 55.0,
+          "spriteFit": {
+            "heightPercent": 102.5,
+            "topPercent": -1.2,
+            "leftOffsetPercent": 5.0
+          },
           "actions": [
             {
               "type": "inspect",
@@ -485,10 +510,10 @@
           "kind": "npc",
           "interactType": "talk",
           "npcId": "cashier_oleg",
-          "x": 1.0,
-          "y": 16.0,
-          "width": 17.4,
-          "height": 52.0,
+          "x": 0.5,
+          "y": 23.0,
+          "width": 18.0,
+          "height": 43.0,
           "actions": [
             {
               "type": "inspect",
@@ -508,9 +533,9 @@
           "interactType": "talk",
           "npcId": "client_danya",
           "x": 18.8,
-          "y": 14.0,
-          "width": 19.6,
-          "height": 48.0,
+          "y": 15.0,
+          "width": 19.8,
+          "height": 47.0,
           "visibleWhen": {
             "activeRole": "manager",
             "clientDanyaServed": false
@@ -530,9 +555,14 @@
           "interactType": "talk",
           "npcId": "client_elderly",
           "x": 18.8,
-          "y": 14.0,
-          "width": 19.6,
-          "height": 48.0,
+          "y": 12.0,
+          "width": 19.8,
+          "height": 50.0,
+          "spriteFit": {
+            "heightPercent": 185.0,
+            "topPercent": -25.5,
+            "leftOffsetPercent": 10.0
+          },
           "visibleWhen": {
             "activeRole": "manager",
             "clientDanyaServed": true,
@@ -553,9 +583,14 @@
           "interactType": "talk",
           "npcId": "client_orlov",
           "x": 18.8,
-          "y": 14.0,
-          "width": 19.6,
-          "height": 48.0,
+          "y": 12.0,
+          "width": 19.8,
+          "height": 50.0,
+          "spriteFit": {
+            "heightPercent": 192.0,
+            "topPercent": -2.3,
+            "leftOffsetPercent": 5.0
+          },
           "visibleWhen": {
             "activeRole": "manager",
             "clientNinaServed": true,
@@ -576,9 +611,9 @@
           "interactType": "talk",
           "npcId": "client_lena",
           "x": 18.8,
-          "y": 14.0,
-          "width": 19.6,
-          "height": 48.0,
+          "y": 15.0,
+          "width": 19.8,
+          "height": 47.0,
           "visibleWhen": {
             "activeRole": "manager",
             "clientOrlovServed": true,
@@ -599,9 +634,14 @@
           "interactType": "talk",
           "npcId": "director_anna",
           "x": 18.8,
-          "y": 14.0,
-          "width": 19.6,
-          "height": 48.0,
+          "y": 12.0,
+          "width": 19.8,
+          "height": 50.0,
+          "spriteFit": {
+            "heightPercent": 230.0,
+            "topPercent": -66.0,
+            "leftOffsetPercent": -9.0
+          },
           "visibleWhen": {
             "activeRole": "manager",
             "clientLenaServed": true,
@@ -922,10 +962,15 @@
           "kind": "npc",
           "interactType": "talk",
           "npcId": "director_anna",
-          "x": 40.5,
-          "y": 15.0,
-          "width": 17.5,
-          "height": 48.0,
+          "x": 41.0,
+          "y": 18.0,
+          "width": 15.2,
+          "height": 56.0,
+          "spriteFit": {
+            "heightPercent": 145.0,
+            "topPercent": -41.6,
+            "leftOffsetPercent": -7.5
+          },
           "actions": [
             {
               "type": "inspect",
@@ -944,10 +989,15 @@
           "kind": "npc",
           "interactType": "talk",
           "npcId": "sysadmin_igor",
-          "x": 60.0,
-          "y": 11.0,
-          "width": 18.0,
+          "x": 61.5,
+          "y": 12.0,
+          "width": 14.0,
           "height": 60.0,
+          "spriteFit": {
+            "heightPercent": 106.0,
+            "topPercent": -3.6,
+            "leftOffsetPercent": -3.5
+          },
           "actions": [
             {
               "type": "inspect",

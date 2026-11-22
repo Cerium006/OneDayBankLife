@@ -711,6 +711,23 @@ function validateWorld(
             npcId: typeof h.npcId === 'string' ? h.npcId : undefined,
             hideAvatarInRoom:
               typeof h.hideAvatarInRoom === 'boolean' ? h.hideAvatarInRoom : undefined,
+            spriteFit:
+              typeof h.spriteFit === 'object' && h.spriteFit !== null
+                ? {
+                    heightPercent:
+                      typeof (h.spriteFit as Record<string, unknown>).heightPercent === 'number'
+                        ? ((h.spriteFit as Record<string, unknown>).heightPercent as number)
+                        : undefined,
+                    topPercent:
+                      typeof (h.spriteFit as Record<string, unknown>).topPercent === 'number'
+                        ? ((h.spriteFit as Record<string, unknown>).topPercent as number)
+                        : undefined,
+                    leftOffsetPercent:
+                      typeof (h.spriteFit as Record<string, unknown>).leftOffsetPercent === 'number'
+                        ? ((h.spriteFit as Record<string, unknown>).leftOffsetPercent as number)
+                        : undefined,
+                  }
+                : undefined,
             targetPointId: typeof h.targetPointId === 'string' ? h.targetPointId : undefined,
             visibleWhen: h.visibleWhen as WorldHotspot['visibleWhen'],
             hideIfHasItem: typeof h.hideIfHasItem === 'string' ? h.hideIfHasItem : undefined,
