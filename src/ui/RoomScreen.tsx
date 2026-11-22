@@ -29,7 +29,16 @@ import {
   VolumeX,
   X,
 } from 'lucide-react';
-import { useCallback, useEffect, useMemo, useRef, useState, type MouseEvent } from 'react';
+import {
+  Suspense,
+  lazy,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type MouseEvent,
+} from 'react';
 import { executeDialogChoice } from '../engine/dialogEngine';
 import { evaluateMiniGameSubmission } from '../engine/miniGameEngine';
 import {
@@ -74,14 +83,30 @@ import type {
   WorldPoint,
 } from '../engine/types';
 import { theme } from '../theme';
-import { DialogModal } from './DialogModal';
 import { HudMetrics } from './HudMetrics';
-import { JournalModal, type JournalTab } from './JournalModal';
-import { MiniGameModal } from './MiniGameModal';
-import { PointMap } from './PointMap';
+import type { JournalTab } from './JournalModal';
 import { getPortraitObjectPosition } from './portraitFit';
-import { ShiftReportModal } from './ShiftReportModal';
-import { TutorialModal } from './TutorialModal';
+
+const DialogModal = lazy(() =>
+  import('./DialogModal').then((mod) => ({ default: mod.DialogModal })),
+);
+const JournalModal = lazy(() =>
+  import('./JournalModal').then((mod) => ({ default: mod.JournalModal })),
+);
+const MiniGameModal = lazy(() =>
+  import('./MiniGameModal').then((mod) => ({ default: mod.MiniGameModal })),
+);
+const PointMap = lazy(() =>
+  import('./PointMap').then((mod) => ({ default: mod.PointMap })),
+);
+const ShiftReportModal = lazy(() =>
+  import('./ShiftReportModal').then((mod) => ({ default: mod.ShiftReportModal })),
+);
+const TutorialModal = lazy(() =>
+  import('./TutorialModal').then((mod) => ({ default: mod.TutorialModal })),
+);
+
+const preloadedRoomUrls = new Set<string>();
 
 interface RoomScreenProps {
   ui: UiTexts;
@@ -159,6 +184,9 @@ export function RoomScreen({
 }: RoomScreenProps) {
   const stageWrapperRef = useRef<HTMLDivElement | null>(null);
   const stageRef = useRef<HTMLDivElement | null>(null);
+  const parallaxLayerRef = useRef<HTMLDivElement | null>(null);
+  const rafIdRef = useRef<number | null>(null);
+  const latestPointerRef = useRef<{ clientX: number; clientY: number } | null>(null);
 
   // Точный размер доступного контейнера под сцену, чтобы рамка комнаты подстраивалась под любой HUD
   const [wrapperSize, setWrapperSize] = useState<{ width: number; height: number }>({
@@ -167,10 +195,12 @@ export function RoomScreen({
   });
   // Соотношение сторон текущей картинки комнаты (подстраивается автоматически при загрузке фото)
   const [stageAspectRatio, setStageAspectRatio] = useState<number>(16 / 9);
-  // Смещение параллакса от положения курсора (от -1 до +1 по каждой оси)
-  const [parallaxOffset, setParallaxOffset] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
-  // Позиция курсора внутри сцены в процентах (нужна для подсветки на нормальной сложности)
-  const [cursorPercent, setCursorPercent] = useState<{ x: number; y: number } | null>(null);
+  // Список id хотспотов рядом с курсором (обновляется только при входе/выходе из радиуса на нормальной сложности)
+  const [nearbyHotspotKey, setNearbyHotspotKey] = useState<string>('');
+  const nearbyHotspotSet = useMemo(
+    () => (nearbyHotspotKey ? new Set(nearbyHotspotKey.split('|')) : new Set<string>()),
+    [nearbyHotspotKey],
+  );
   // Идентификатор зоны, на которую сейчас наведён курсор
   const [hoveredHotspotId, setHoveredHotspotId] = useState<string | null>(null);
   // Выбранный объект, для которого сейчас открыто маленькое меню действий
@@ -214,11 +244,13 @@ export function RoomScreen({
     [miniGames, activeMiniGameId],
   );
 
-  const prefersReducedMotion = useMemo(() => {
+  const supportsParallax = useMemo(() => {
     if (typeof window === 'undefined' || !window.matchMedia) {
       return false;
     }
-    return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const coarse = window.matchMedia('(pointer: coarse)').matches;
+    return !reduced && !coarse;
   }, []);
 
   // Проверяем, не провалена ли смена по какой-либо шкале метрики
@@ -254,11 +286,46 @@ export function RoomScreen({
     setNoticeImageFailed(false);
   }, [notice]);
 
-  // При переходе в другую комнату закрываем старое меню действий и сбрасываем наведение
+  // При переходе в другую комнату закрываем старое меню, сбрасываем наведение и мягко предзагружаем соседние фоны
   useEffect(() => {
     setHoveredHotspotId(null);
     setSelectedHotspotId(null);
-  }, [currentPoint.id]);
+    setNearbyHotspotKey('');
+
+    if (typeof window === 'undefined') {
+      return;
+    }
+    const urls = currentPoint.exits
+      .map((exit) => world.points.find((p) => p.id === exit.targetPointId)?.background)
+      .filter((u): u is string => typeof u === 'string' && u.length > 0)
+      .filter((u) => !preloadedRoomUrls.has(u));
+
+    if (urls.length === 0) {
+      return;
+    }
+
+    const timerId = window.setTimeout(() => {
+      for (const url of urls) {
+        if (!preloadedRoomUrls.has(url)) {
+          preloadedRoomUrls.add(url);
+          const img = new Image();
+          img.decoding = 'async';
+          img.src = url;
+        }
+      }
+    }, 300);
+
+    return () => window.clearTimeout(timerId);
+  }, [currentPoint.id, currentPoint.exits, world.points]);
+
+  // Отменяем отложенный кадр параллакса при размонтировании
+  useEffect(() => {
+    return () => {
+      if (rafIdRef.current !== null) {
+        window.cancelAnimationFrame(rafIdRef.current);
+      }
+    };
+  }, []);
 
   // Фоновый звук текущей комнаты (например, шум серверной) и очистка при выходе
   useEffect(() => {
@@ -336,7 +403,7 @@ export function RoomScreen({
   useEffect(() => {
     const intervalId = window.setInterval(() => {
       const current = timerStateRef.current;
-      if (current.isPaused) {
+      if (current.isPaused || (typeof document !== 'undefined' && document.hidden)) {
         return;
       }
 
@@ -512,32 +579,67 @@ export function RoomScreen({
   }, [role.quests, saveState.questStatuses]);
 
   function handleStageMouseMove(event: MouseEvent<HTMLDivElement>) {
-    const stageEl = stageRef.current;
-    if (!stageEl) {
-      return;
-    }
-    const rect = stageEl.getBoundingClientRect();
-    if (rect.width === 0 || rect.height === 0) {
+    const needsProximity = difficulty.id === 'normal';
+    if (!supportsParallax && !needsProximity) {
       return;
     }
 
-    const relX = ((event.clientX - rect.left) / rect.width) * 100;
-    const relY = ((event.clientY - rect.top) / rect.height) * 100;
-    setCursorPercent({
-      x: Math.max(0, Math.min(100, relX)),
-      y: Math.max(0, Math.min(100, relY)),
+    latestPointerRef.current = { clientX: event.clientX, clientY: event.clientY };
+    if (rafIdRef.current !== null) {
+      return;
+    }
+
+    rafIdRef.current = window.requestAnimationFrame(() => {
+      rafIdRef.current = null;
+      const pointer = latestPointerRef.current;
+      const stageEl = stageRef.current;
+      if (!pointer || !stageEl) {
+        return;
+      }
+      const rect = stageEl.getBoundingClientRect();
+      if (rect.width === 0 || rect.height === 0) {
+        return;
+      }
+
+      if (supportsParallax && parallaxLayerRef.current) {
+        const normX = ((pointer.clientX - rect.left) / rect.width - 0.5) * 2;
+        const normY = ((pointer.clientY - rect.top) / rect.height - 0.5) * 2;
+        parallaxLayerRef.current.style.transform = `scale(1.03) translate3d(${(-normX * 10).toFixed(2)}px, ${(-normY * 6).toFixed(2)}px, 0)`;
+      }
+
+      if (needsProximity) {
+        const relX = Math.max(0, Math.min(100, ((pointer.clientX - rect.left) / rect.width) * 100));
+        const relY = Math.max(0, Math.min(100, ((pointer.clientY - rect.top) / rect.height) * 100));
+        const cursor = { x: relX, y: relY };
+        const matchedIds: string[] = [];
+        for (const hs of visibleHotspots) {
+          if (
+            isHotspotHighlighted({
+              difficultyId: 'normal',
+              hotspot: hs,
+              isHovered: false,
+              cursorPercent: cursor,
+            })
+          ) {
+            matchedIds.push(hs.id);
+          }
+        }
+        const nextKey = matchedIds.join('|');
+        setNearbyHotspotKey((prev) => (prev === nextKey ? prev : nextKey));
+      }
     });
-
-    if (!prefersReducedMotion) {
-      const normX = ((event.clientX - rect.left) / rect.width - 0.5) * 2;
-      const normY = ((event.clientY - rect.top) / rect.height - 0.5) * 2;
-      setParallaxOffset({ x: normX, y: normY });
-    }
   }
 
   function handleStageMouseLeave() {
-    setParallaxOffset({ x: 0, y: 0 });
-    setCursorPercent(null);
+    latestPointerRef.current = null;
+    if (rafIdRef.current !== null) {
+      window.cancelAnimationFrame(rafIdRef.current);
+      rafIdRef.current = null;
+    }
+    if (supportsParallax && parallaxLayerRef.current) {
+      parallaxLayerRef.current.style.transform = 'scale(1.03) translate3d(0px, 0px, 0)';
+    }
+    setNearbyHotspotKey('');
     setHoveredHotspotId(null);
   }
 
@@ -828,9 +930,9 @@ export function RoomScreen({
 
   const roomBackdropColor = theme.roomColors[currentPoint.id] ?? theme.colors.surfaceMuted;
 
-  const parallaxTransform = prefersReducedMotion
-    ? 'none'
-    : `scale(1.03) translate3d(${(-parallaxOffset.x * 10).toFixed(2)}px, ${(-parallaxOffset.y * 6).toFixed(2)}px, 0)`;
+  const initialParallaxTransform = supportsParallax
+    ? 'scale(1.03) translate3d(0px, 0px, 0)'
+    : 'none';
 
   // Вычисляем точные размеры области сцены внутри доступного окна
   const computedStageStyle = useMemo(() => {
@@ -1099,13 +1201,15 @@ export function RoomScreen({
           >
             {/* Слой с фоном комнаты, дополнительными слоями и кликабельными зонами */}
             <div
+              ref={parallaxLayerRef}
               className="absolute inset-0 transition-transform duration-150 ease-out"
-              style={{ transform: parallaxTransform }}
+              style={{ transform: initialParallaxTransform }}
             >
               <img
                 src={currentPoint.background}
                 alt={currentPoint.title}
                 draggable={false}
+                decoding="async"
                 onLoad={(event) => {
                   const { naturalWidth, naturalHeight } = event.currentTarget;
                   if (naturalWidth > 0 && naturalHeight > 0) {
@@ -1121,6 +1225,7 @@ export function RoomScreen({
                   src={layer.image}
                   alt=""
                   draggable={false}
+                  decoding="async"
                   className="pointer-events-none absolute object-contain"
                   style={{
                     left: `${layer.x}%`,
@@ -1145,12 +1250,14 @@ export function RoomScreen({
               {visibleHotspots.map((hotspot) => {
                 const isHovered = hoveredHotspotId === hotspot.id;
                 const isSelected = selectedHotspotId === hotspot.id;
-                const isHighlighted = isHotspotHighlighted({
-                  difficultyId: difficulty.id,
-                  hotspot,
-                  isHovered: isHovered || isSelected,
-                  cursorPercent,
-                });
+                const isHighlighted =
+                  isHotspotHighlighted({
+                    difficultyId: difficulty.id,
+                    hotspot,
+                    isHovered: isHovered || isSelected,
+                    cursorPercent: null,
+                  }) ||
+                  (difficulty.id === 'normal' && nearbyHotspotSet.has(hotspot.id));
                 const accentColor = theme.hotspotColors[hotspot.kind];
                 const npcSprite =
                   hotspot.kind === 'npc' && !hotspot.hideAvatarInRoom && hotspot.npcId
@@ -1209,6 +1316,7 @@ export function RoomScreen({
                             src={npcSprite.avatar}
                             alt=""
                             draggable={false}
+                            decoding="async"
                             referrerPolicy="no-referrer"
                             onError={() =>
                               setFailedNpcImages((prev) => ({ ...prev, [npcSprite.id]: true }))
@@ -1221,7 +1329,7 @@ export function RoomScreen({
                               left: `${50 + (hotspot.spriteFit.leftOffsetPercent ?? 0)}%`,
                               transform: 'translateX(-50%)',
                             }}
-                            className="pointer-events-none absolute drop-shadow-[0_6px_12px_rgba(0,0,0,0.45)]"
+                            className="pointer-events-none absolute"
                           />
                         </div>
                       ) : (
@@ -1229,11 +1337,12 @@ export function RoomScreen({
                           src={npcSprite.avatar}
                           alt=""
                           draggable={false}
+                          decoding="async"
                           referrerPolicy="no-referrer"
                           onError={() =>
                             setFailedNpcImages((prev) => ({ ...prev, [npcSprite.id]: true }))
                           }
-                          className="pointer-events-none h-full w-full object-contain object-bottom drop-shadow-[0_6px_12px_rgba(0,0,0,0.45)]"
+                          className="pointer-events-none h-full w-full object-contain object-bottom"
                         />
                       )
                     )}
@@ -1241,7 +1350,7 @@ export function RoomScreen({
                     {/* Подпись названия объекта или имени персонажа при наведении (если меню действий не открыто) */}
                     {isHovered && !isSelected && (
                       <span
-                        className={`pointer-events-none absolute z-30 px-2.5 py-1 text-xs font-semibold whitespace-nowrap shadow-lg backdrop-blur-sm ${tooltipVerticalClass} ${
+                        className={`pointer-events-none absolute z-30 px-2.5 py-1 text-xs font-semibold whitespace-nowrap shadow-lg ${tooltipVerticalClass} ${
                           hotspot.x + hotspot.width / 2 > 80
                             ? 'right-0'
                             : hotspot.x + hotspot.width / 2 < 18
@@ -1272,7 +1381,7 @@ export function RoomScreen({
                 role="menu"
                 aria-label={selectedHotspot.label}
                 onClick={(event) => event.stopPropagation()}
-                className="ui-pop-in absolute z-30 min-w-[215px] max-w-[min(280px,calc(100%-24px))] -translate-x-1/2 border p-2 shadow-2xl backdrop-blur-md"
+                className="ui-pop-in absolute z-30 min-w-[215px] max-w-[min(280px,calc(100%-24px))] -translate-x-1/2 border p-2 shadow-2xl"
                 style={{
                   left: `${Math.max(18, Math.min(82, selectedHotspot.x + selectedHotspot.width / 2))}%`,
                   ...(selectedHotspot.y >= 32 && selectedHotspot.y + selectedHotspot.height > 58
@@ -1348,7 +1457,7 @@ export function RoomScreen({
                     setSelectedHotspotId(null);
                     tryMoveToPoint(exit.targetPointId, exit.condition);
                   }}
-                  className={`absolute z-20 inline-flex min-h-[40px] cursor-pointer items-center gap-2 border px-3.5 py-2 text-xs font-semibold whitespace-nowrap shadow-lg backdrop-blur-sm transition-transform hover:scale-[1.03] ${positionClass}`}
+                  className={`absolute z-20 inline-flex min-h-[40px] cursor-pointer items-center gap-2 border px-3.5 py-2 text-xs font-semibold whitespace-nowrap shadow-lg transition-transform hover:scale-[1.03] ${positionClass}`}
                   style={{
                     backgroundColor: 'var(--hud-overlay)',
                     borderColor: isLockedExit ? 'rgba(252, 165, 165, 0.45)' : 'var(--hud-border)',
@@ -1371,7 +1480,7 @@ export function RoomScreen({
               <div
                 role="status"
                 onClick={(event) => event.stopPropagation()}
-                className={`ui-pop-in absolute left-1/2 z-30 max-h-[46%] w-[min(92%,560px)] -translate-x-1/2 overflow-y-auto border p-4 shadow-2xl backdrop-blur-md ${
+                className={`ui-pop-in absolute left-1/2 z-30 max-h-[46%] w-[min(92%,560px)] -translate-x-1/2 overflow-y-auto border p-4 shadow-2xl ${
                   currentPoint.exits.some((e) => e.direction === 'down') ? 'bottom-16' : 'bottom-4'
                 }`}
                 style={{
@@ -1401,6 +1510,7 @@ export function RoomScreen({
                         <img
                           src={notice.image}
                           alt={notice.imageAlt ?? notice.title}
+                          decoding="async"
                           referrerPolicy="no-referrer"
                           onError={() => setNoticeImageFailed(true)}
                           style={
@@ -1464,90 +1574,99 @@ export function RoomScreen({
         </div>
       </div>
 
-      {/* Интерактивная карта точек здания из content/world.json */}
-      <PointMap
-        isOpen={isMapOpen}
-        ui={ui}
-        world={world}
-        currentPoint={currentPoint}
-        worldState={saveState.worldState}
-        inventory={saveState.inventory}
-        onNavigateToPoint={(targetId) => {
-          const matchingExit = currentPoint.exits.find((e) => e.targetPointId === targetId);
-          tryMoveToPoint(targetId, matchingExit?.condition);
-        }}
-        onClose={() => setIsMapOpen(false)}
-      />
+      {/* Ленивые модальные окна: загружаются в память только при открытии */}
+      <Suspense fallback={null}>
+        {isMapOpen && (
+          <PointMap
+            isOpen={isMapOpen}
+            ui={ui}
+            world={world}
+            currentPoint={currentPoint}
+            worldState={saveState.worldState}
+            inventory={saveState.inventory}
+            onNavigateToPoint={(targetId) => {
+              const matchingExit = currentPoint.exits.find((e) => e.targetPointId === targetId);
+              tryMoveToPoint(targetId, matchingExit?.condition);
+            }}
+            onClose={() => setIsMapOpen(false)}
+          />
+        )}
 
-      {/* Дневник смены: задачи и инвентарь (Tab) */}
-      <JournalModal
-        isOpen={isJournalOpen}
-        initialTab={journalTab}
-        ui={ui}
-        role={role}
-        difficulty={difficulty}
-        questStatuses={saveState.questStatuses}
-        allItems={items}
-        ownedItemIds={saveState.inventory}
-        onRestartCheckpoint={handleRestoreCheckpoint}
-        onClose={() => setIsJournalOpen(false)}
-      />
+        {isJournalOpen && (
+          <JournalModal
+            isOpen={isJournalOpen}
+            initialTab={journalTab}
+            ui={ui}
+            role={role}
+            difficulty={difficulty}
+            questStatuses={saveState.questStatuses}
+            allItems={items}
+            ownedItemIds={saveState.inventory}
+            onRestartCheckpoint={handleRestoreCheckpoint}
+            onClose={() => setIsJournalOpen(false)}
+          />
+        )}
 
-      {/* Окно ветвящегося диалога с персонажем */}
-      <DialogModal
-        dialog={activeDialog}
-        currentNodeId={activeDialogNodeId}
-        speakerAvatar={activeDialog?.npcId ? npcById.get(activeDialog.npcId)?.avatar : undefined}
-        nickname={saveState.nickname}
-        worldState={saveState.worldState}
-        inventory={saveState.inventory}
-        ui={ui}
-        isSoundEnabled={isSoundEnabled}
-        clientTimerSeconds={role.id === 'manager' ? difficulty.params.clientTimeSeconds : 0}
-        onClientTimeout={handleClientTimeout}
-        onSelectChoice={handleSelectDialogChoice}
-        onClose={() => {
-          setActiveDialogId(null);
-          setActiveDialogNodeId(null);
-        }}
-      />
+        {activeDialog && (
+          <DialogModal
+            dialog={activeDialog}
+            currentNodeId={activeDialogNodeId}
+            speakerAvatar={activeDialog?.npcId ? npcById.get(activeDialog.npcId)?.avatar : undefined}
+            nickname={saveState.nickname}
+            worldState={saveState.worldState}
+            inventory={saveState.inventory}
+            ui={ui}
+            isSoundEnabled={isSoundEnabled}
+            clientTimerSeconds={role.id === 'manager' ? difficulty.params.clientTimeSeconds : 0}
+            onClientTimeout={handleClientTimeout}
+            onSelectChoice={handleSelectDialogChoice}
+            onClose={() => {
+              setActiveDialogId(null);
+              setActiveDialogNodeId(null);
+            }}
+          />
+        )}
 
-      {/* Пошаговое окно обучения (показывается при первом входе и по кнопке «Обучение») */}
-      <TutorialModal
-        isOpen={isTutorialOpen}
-        tutorial={tutorial}
-        onClose={handleCloseTutorial}
-      />
+        {isTutorialOpen && (
+          <TutorialModal
+            isOpen={isTutorialOpen}
+            tutorial={tutorial}
+            onClose={handleCloseTutorial}
+          />
+        )}
 
-      {/* Интерактивная мини-проверка безопасности */}
-      <MiniGameModal
-        miniGame={activeMiniGame}
-        difficulty={difficulty}
-        ui={ui}
-        onSubmit={handleSubmitMiniGame}
-        onClose={() => setActiveMiniGameId(null)}
-      />
+        {activeMiniGame && (
+          <MiniGameModal
+            miniGame={activeMiniGame}
+            difficulty={difficulty}
+            ui={ui}
+            onSubmit={handleSubmitMiniGame}
+            onClose={() => setActiveMiniGameId(null)}
+          />
+        )}
 
-      {/* Итоговый отчёт в конце смены (без чисел — только выводы) */}
-      <ShiftReportModal
-        isOpen={isReportOpen}
-        role={role}
-        otherRole={otherRole}
-        nickname={saveState.nickname}
-        worldState={saveState.worldState}
-        ui={ui}
-        isSoundEnabled={isSoundEnabled}
-        onSwitchRole={(nextRoleId) => {
-          setIsReportOpen(false);
-          setNotice(null);
-          onSwitchRole(nextRoleId);
-        }}
-        onBackToMenu={() => {
-          setIsReportOpen(false);
-          onBackToMenu();
-        }}
-        onStayInRoom={() => setIsReportOpen(false)}
-      />
+        {isReportOpen && (
+          <ShiftReportModal
+            isOpen={isReportOpen}
+            role={role}
+            otherRole={otherRole}
+            nickname={saveState.nickname}
+            worldState={saveState.worldState}
+            ui={ui}
+            isSoundEnabled={isSoundEnabled}
+            onSwitchRole={(nextRoleId) => {
+              setIsReportOpen(false);
+              setNotice(null);
+              onSwitchRole(nextRoleId);
+            }}
+            onBackToMenu={() => {
+              setIsReportOpen(false);
+              onBackToMenu();
+            }}
+            onStayInRoom={() => setIsReportOpen(false)}
+          />
+        )}
+      </Suspense>
 
       {/* Экран провала смены при достижении критической отметки шкалы */}
       {roleFailure.failed && (
@@ -1555,7 +1674,7 @@ export function RoomScreen({
           role="alertdialog"
           aria-modal="true"
           aria-labelledby="fail-modal-title"
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-xs"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4"
         >
           <div
             className="w-full max-w-md border p-6 shadow-2xl"

@@ -649,7 +649,7 @@ export function TutorialModal({ isOpen, tutorial, onClose }: TutorialModalProps)
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-xs"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4"
       role="dialog"
       aria-modal="true"
       aria-labelledby="tutorial-modal-title"

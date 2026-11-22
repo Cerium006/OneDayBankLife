@@ -194,7 +194,7 @@ export function DialogModal({
 
   return (
     <div
-      className="fixed inset-0 z-40 flex items-end justify-center bg-black/70 p-4 backdrop-blur-xs sm:items-center"
+      className="fixed inset-0 z-40 flex items-end justify-center bg-black/75 p-4 sm:items-center"
       role="dialog"
       aria-modal="true"
       aria-labelledby="dialog-speaker-name"
@@ -229,6 +229,7 @@ export function DialogModal({
                 <img
                   src={speakerAvatar}
                   alt={dialog.speakerName}
+                  decoding="async"
                   referrerPolicy="no-referrer"
                   onError={() => setAvatarFailed(true)}
                   style={{ objectPosition: getPortraitObjectPosition(speakerAvatar) }}

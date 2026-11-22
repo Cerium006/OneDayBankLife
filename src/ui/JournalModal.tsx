@@ -116,7 +116,7 @@ export function JournalModal({
 
   return (
     <div
-      className="fixed inset-0 z-40 flex items-center justify-center bg-black/70 p-4 backdrop-blur-xs"
+      className="fixed inset-0 z-40 flex items-center justify-center bg-black/75 p-4"
       role="dialog"
       aria-modal="true"
       aria-labelledby="journal-modal-title"
@@ -325,6 +325,7 @@ export function JournalModal({
                         <img
                           src={item.image}
                           alt={item.name}
+                          decoding="async"
                           referrerPolicy="no-referrer"
                           onError={() =>
                             setFailedImages((prev) => ({ ...prev, [item.id]: true }))

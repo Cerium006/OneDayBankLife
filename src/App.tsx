@@ -4,7 +4,7 @@
  * читает сохранённый прогресс из localStorage и переключает экраны: «Меню» ↔ «Комната».
  */
 
-import { useEffect, useMemo, useState } from 'react';
+import { Suspense, lazy, useEffect, useMemo, useState } from 'react';
 import { loadAndValidateContent } from './engine/contentLoader';
 import {
   clearSaveState,
@@ -16,7 +16,10 @@ import type { GameSaveState } from './engine/types';
 import { resolveWorldPoint } from './engine/worldEngine';
 import { applyThemeCssVariables } from './theme';
 import { MainMenu } from './ui/MainMenu';
-import { RoomScreen } from './ui/RoomScreen';
+
+const RoomScreen = lazy(() =>
+  import('./ui/RoomScreen').then((mod) => ({ default: mod.RoomScreen })),
+);
 
 type ScreenMode = 'menu' | 'room';
 
@@ -140,29 +143,40 @@ export default function App() {
     const currentPoint = resolveWorldPoint(content.world, savedState.currentPointId);
 
     return (
-      <RoomScreen
-        ui={content.ui}
-        world={content.world}
-        items={content.items}
-        dialogs={content.dialogs.dialogs}
-        miniGames={content.miniGames.miniGames}
-        tutorial={content.tutorial}
-        currentPoint={currentPoint}
-        saveState={savedState}
-        role={activeRole}
-        otherRole={otherRole}
-        difficulty={activeDifficulty}
-        onSaveUpdate={handleSaveUpdate}
-        onRestartShift={handleRestartCurrentShift}
-        onSwitchRole={(nextRoleId) =>
-          handleStartNewGame({
-            nickname: savedState.nickname,
-            roleId: nextRoleId,
-            difficultyId: savedState.difficultyId,
-          })
+      <Suspense
+        fallback={
+          <div
+            className="flex h-screen w-screen items-center justify-center text-sm"
+            style={{ backgroundColor: 'var(--bg-page)', color: 'var(--text-secondary)' }}
+          >
+            Загрузка отделения банка…
+          </div>
         }
-        onBackToMenu={() => setScreen('menu')}
-      />
+      >
+        <RoomScreen
+          ui={content.ui}
+          world={content.world}
+          items={content.items}
+          dialogs={content.dialogs.dialogs}
+          miniGames={content.miniGames.miniGames}
+          tutorial={content.tutorial}
+          currentPoint={currentPoint}
+          saveState={savedState}
+          role={activeRole}
+          otherRole={otherRole}
+          difficulty={activeDifficulty}
+          onSaveUpdate={handleSaveUpdate}
+          onRestartShift={handleRestartCurrentShift}
+          onSwitchRole={(nextRoleId) =>
+            handleStartNewGame({
+              nickname: savedState.nickname,
+              roleId: nextRoleId,
+              difficultyId: savedState.difficultyId,
+            })
+          }
+          onBackToMenu={() => setScreen('menu')}
+        />
+      </Suspense>
     );
   }
 

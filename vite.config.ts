@@ -52,5 +52,20 @@ export default defineConfig(() => {
       host: true,
       allowedHosts: true as const,
     },
+    build: {
+      rollupOptions: {
+        output: {
+          manualChunks(id) {
+            if (id.includes('node_modules/react-dom') || id.includes('node_modules/react/')) {
+              return 'react';
+            }
+            if (id.includes('node_modules/lucide-react')) {
+              return 'icons';
+            }
+            return undefined;
+          },
+        },
+      },
+    },
   };
 });

@@ -5,7 +5,7 @@
  */
 
 import { HelpCircle, Shield, UserCheck } from 'lucide-react';
-import { useState, type FormEvent } from 'react';
+import { Suspense, lazy, useState, type FormEvent } from 'react';
 import { markTutorialCompleted } from '../engine/storage';
 import type {
   DifficultyConfig,
@@ -14,8 +14,13 @@ import type {
   TutorialConfig,
   UiTexts,
 } from '../engine/types';
-import { ConfirmModal } from './ConfirmModal';
-import { TutorialModal } from './TutorialModal';
+
+const ConfirmModal = lazy(() =>
+  import('./ConfirmModal').then((mod) => ({ default: mod.ConfirmModal })),
+);
+const TutorialModal = lazy(() =>
+  import('./TutorialModal').then((mod) => ({ default: mod.TutorialModal })),
+);
 
 interface MainMenuProps {
   ui: UiTexts;
@@ -280,6 +285,7 @@ export function MainMenu({
                         <img
                           src={role.icon}
                           alt=""
+                          decoding="async"
                           referrerPolicy="no-referrer"
                           onError={() =>
                             setFailedIcons((prev) => ({ ...prev, [iconKey]: true }))
@@ -348,6 +354,7 @@ export function MainMenu({
                         <img
                           src={profile.icon}
                           alt=""
+                          decoding="async"
                           referrerPolicy="no-referrer"
                           onError={() =>
                             setFailedIcons((prev) => ({ ...prev, [iconKey]: true }))
@@ -416,24 +423,32 @@ export function MainMenu({
         </form>
       </main>
 
-      <ConfirmModal
-        isOpen={isResetModalOpen}
-        title={ui.confirmReset.title}
-        message={ui.confirmReset.message}
-        confirmLabel={ui.confirmReset.confirmButton}
-        cancelLabel={ui.confirmReset.cancelButton}
-        onConfirm={handleConfirmReset}
-        onCancel={() => setIsResetModalOpen(false)}
-      />
+      {(isResetModalOpen || isTutorialOpen) && (
+        <Suspense fallback={null}>
+          {isResetModalOpen && (
+            <ConfirmModal
+              isOpen={isResetModalOpen}
+              title={ui.confirmReset.title}
+              message={ui.confirmReset.message}
+              confirmLabel={ui.confirmReset.confirmButton}
+              cancelLabel={ui.confirmReset.cancelButton}
+              onConfirm={handleConfirmReset}
+              onCancel={() => setIsResetModalOpen(false)}
+            />
+          )}
 
-      <TutorialModal
-        isOpen={isTutorialOpen}
-        tutorial={tutorial}
-        onClose={() => {
-          markTutorialCompleted();
-          setIsTutorialOpen(false);
-        }}
-      />
+          {isTutorialOpen && (
+            <TutorialModal
+              isOpen={isTutorialOpen}
+              tutorial={tutorial}
+              onClose={() => {
+                markTutorialCompleted();
+                setIsTutorialOpen(false);
+              }}
+            />
+          )}
+        </Suspense>
+      )}
     </div>
   );
 }

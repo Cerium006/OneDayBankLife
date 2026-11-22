@@ -192,6 +192,9 @@ function playSynthFallback(kind: SoundEffectKind): void {
   }
 }
 
+const activeSfxSet = new Set<HTMLAudioElement>();
+const MAX_CONCURRENT_SFX = 4;
+
 export function playSoundEffect(kind: SoundEffectKind | string, enabled: boolean): void {
   if (!enabled) {
     return;
@@ -202,24 +205,50 @@ export function playSoundEffect(kind: SoundEffectKind | string, enabled: boolean
 
   if (spec && typeof Audio !== 'undefined') {
     try {
+      if (activeSfxSet.size >= MAX_CONCURRENT_SFX) {
+        const oldest = activeSfxSet.values().next().value;
+        if (oldest) {
+          oldest.pause();
+          activeSfxSet.delete(oldest);
+        }
+      }
+
       const audio = new Audio(spec.url);
+      audio.preload = 'auto';
       audio.volume = spec.volume;
+      activeSfxSet.add(audio);
+
       let stopped = false;
+      let fadeTimerId: number | undefined;
+      let stopTimerId: number | undefined;
+
+      const cleanup = () => {
+        if (stopped) return;
+        stopped = true;
+        if (fadeTimerId !== undefined) window.clearTimeout(fadeTimerId);
+        if (stopTimerId !== undefined) window.clearTimeout(stopTimerId);
+        activeSfxSet.delete(audio);
+      };
+
+      audio.addEventListener('ended', cleanup, { once: true });
+      audio.addEventListener('error', cleanup, { once: true });
 
       if (spec.maxDurationMs && typeof window !== 'undefined') {
         const fadeStart = Math.max(150, spec.maxDurationMs - 260);
-        window.setTimeout(() => {
-          if (stopped) return;
-          audio.volume = spec.volume * 0.45;
+        fadeTimerId = window.setTimeout(() => {
+          if (!stopped) {
+            audio.volume = spec.volume * 0.45;
+          }
         }, fadeStart);
-        window.setTimeout(() => {
-          stopped = true;
+        stopTimerId = window.setTimeout(() => {
+          cleanup();
           audio.pause();
           audio.currentTime = 0;
         }, spec.maxDurationMs);
       }
 
       void audio.play().catch(() => {
+        cleanup();
         playSynthFallback(typedKind);
       });
       return;
